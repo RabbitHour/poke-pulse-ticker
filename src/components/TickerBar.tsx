@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CardData } from "@/data/marketData";
 import { getCardToken } from "@/lib/tokenSymbols";
+import { useEbayPrices, ebayPriceMap } from "@/hooks/useEbayPrices";
+import { ebayAffiliateLink } from "@/lib/ebay";
 
 interface TickerBarProps {
   cards?: CardData[];
