@@ -177,10 +177,12 @@ const EraIndexCards = ({ cards }: EraIndexCardsProps) => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 divide-border">
         {eras.map(({ era, cards: eraCards }, idx) => {
-          const avgPrice = eraCards.length > 0 ? eraCards.reduce((s, c) => s + c.market, 0) / eraCards.length : 0;
+          // Use eBay-sampled top 3 for the headline avg; fall back to all-cards .market avg
+          const sampled = eraCards.slice(0, 3);
+          const avgPrice = sampled.length > 0 ? sampled.reduce((s, c) => s + priceFor(c), 0) / sampled.length : 0;
           const avgChange = eraCards.length > 0 ? eraCards.reduce((s, c) => s + c.change, 0) / eraCards.length : 0;
           const isUp = avgChange >= 0;
-          const totalCap = eraCards.reduce((s, c) => s + c.market, 0);
+          const totalCap = eraCards.reduce((s, c) => s + priceFor(c), 0);
 
           return (
             <motion.button
