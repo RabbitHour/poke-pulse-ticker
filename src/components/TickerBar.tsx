@@ -75,19 +75,28 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
           className="ticker-scroll flex whitespace-nowrap py-1.5"
           style={{ animationDuration: `${Math.max(70, tickerCards.length * 5.5)}s` }}
         >
-          {tickerCards.map((card, i) => (
-            <span key={`${card.name}-${i}`} className="inline-flex items-center gap-2 px-4 font-mono text-xs">
-              <span className="text-primary font-bold text-[10px]">{getCardToken(card)}</span>
-              <span className="text-foreground/80 font-medium">{card.name}</span>
-              <span className="text-foreground font-semibold">
-                ${card.market.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </span>
-              <span className={card.change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
-                {card.change >= 0 ? "▲" : "▼"} {Math.abs(card.change).toFixed(2)}%
-              </span>
-              <span className="text-border/40">•</span>
-            </span>
-          ))}
+          {tickerCards.map((card, i) => {
+            const price = priceFor(card);
+            return (
+              <a
+                key={`${card.name}-${i}`}
+                href={ebayAffiliateLink(`${card.name} ${card.set}`)}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="inline-flex items-center gap-2 px-4 font-mono text-xs hover:bg-primary/5 transition-colors"
+              >
+                <span className="text-primary font-bold text-[10px]">{getCardToken(card)}</span>
+                <span className="text-foreground/80 font-medium">{card.name}</span>
+                <span className="text-foreground font-semibold">
+                  ${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className={card.change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
+                  {card.change >= 0 ? "▲" : "▼"} {Math.abs(card.change).toFixed(2)}%
+                </span>
+                <span className="text-border/40">•</span>
+              </a>
+            );
+          })}
         </div>
       </div>
     </div>
