@@ -144,6 +144,20 @@ const EraIndexCards = ({ cards }: EraIndexCardsProps) => {
   const eras = categorizeCards(cards);
   const [activeEra, setActiveEra] = useState<{ era: Era; cards: CardData[] } | null>(null);
 
+  // eBay Browse API: pull median prices for the top-3 cards in each era as the
+  // index price source. Avg is computed from eBay medians, falling back to
+  // the per-card .market value when eBay returns no listings.
+  const ebayQueries = useMemo(() => {
+    const qs: string[] = [];
+    for (const { cards: ec } of eras) {
+      for (const c of ec.slice(0, 3)) qs.push(`${c.name} ${c.set}`);
+    }
+    return Array.from(new Set(qs));
+  }, [eras]);
+  const { data: ebayData } = useEbayPrices(ebayQueries);
+  const priceMap = useMemo(() => ebayPriceMap(ebayData?.results), [ebayData]);
+  const priceFor = (c: CardData) => priceMap[`${c.name} ${c.set}`.toLowerCase()] || c.market;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
