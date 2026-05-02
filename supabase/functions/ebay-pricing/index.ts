@@ -124,6 +124,25 @@ serve(async (req) => {
       });
     }
 
+    // Daily quota guard — eBay Browse API free tier = 5,000 calls/day.
+    // Hard-stop at 4,000 to leave headroom and avoid rate-limit bans.
+    const today = new Date().toISOString().split("T")[0];
+    const quotaKey = `ebay_quota:${today}`;
+    const { data: quotaRow } = await supabase
+      .from("index_cache").select("data").eq("cache_key", quotaKey).maybeSingle();
+    const usedToday: number = (quotaRow?.data as any)?.calls ?? 0;
+    if (usedToday + queries.length > 4000) {
+      // Serve any expired cache rather than burn quota
+      if (cached) {
+        return new Response(JSON.stringify({ ...cached.data, cached: true, quotaCapped: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ results: [], quotaCapped: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const token = await getEbayToken();
     const results = await Promise.all(
       queries.map((q) => fetchPriceForQuery(token, q, conditionIds).catch(() => ({
@@ -131,11 +150,19 @@ serve(async (req) => {
       })))
     );
 
+    // Increment daily quota
+    await supabase.from("index_cache").upsert({
+      cache_key: quotaKey,
+      data: { calls: usedToday + queries.length },
+      expires_at: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
+    }, { onConflict: "cache_key" });
+
     const payload = { results, fetchedAt: new Date().toISOString() };
     await supabase.from("index_cache").upsert({
       cache_key: cacheKey,
       data: payload,
-      expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      // 30-min server cache → ~48 batches/day worst case = well under quota
+      expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     }, { onConflict: "cache_key" });
 
     return new Response(JSON.stringify(payload), {

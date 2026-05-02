@@ -42,9 +42,10 @@ export function useEbayPrices(queries: string[], conditionIds?: string) {
     queryKey: ["ebay-prices", sorted.join("|"), conditionIds || ""],
     queryFn: () => fetchEbayPrices(sorted, conditionIds),
     enabled: sorted.length > 0,
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    refetchInterval: 30 * 60 * 1000,
     retry: 1,
+    refetchOnWindowFocus: false,
   });
 }
 
