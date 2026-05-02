@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Layers, TrendingUp, TrendingDown, Calendar, Info } from "lucide-react";
 import type { CardData } from "@/data/marketData";
 import InfoDialog from "@/components/InfoDialog";
+import { useEbayPrices, ebayPriceMap } from "@/hooks/useEbayPrices";
 
 const ERA_DESCRIPTIONS: Record<string, { description: string; details: string[] }> = {
   "VINTAGE (WOTC)": {
