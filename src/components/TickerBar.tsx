@@ -30,6 +30,16 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
     return [...shuffled, ...shuffled];
   }, [cards, lastUpdated]);
 
+  // Primary price source: eBay Browse API (median active listing price).
+  // Falls back to TCGPlayer market price if eBay returns no result for a query.
+  const ebayQueries = useMemo(
+    () => Array.from(new Set(tickerCards.slice(0, 16).map((c) => `${c.name} ${c.set}`))),
+    [tickerCards]
+  );
+  const { data: ebayData } = useEbayPrices(ebayQueries);
+  const priceMap = useMemo(() => ebayPriceMap(ebayData?.results), [ebayData]);
+  const priceFor = (card: CardData) => priceMap[`${card.name} ${card.set}`.toLowerCase()] || card.market;
+
   useEffect(() => {
     if (!lastUpdated) return;
 
