@@ -9,6 +9,7 @@ export interface EbayPriceResult {
   low: number;
   high: number;
   count: number;
+  changePct?: number;
   sampleUrl: string;
 }
 
@@ -53,5 +54,12 @@ export function useEbayPrices(queries: string[], conditionIds?: string) {
 export function ebayPriceMap(results?: EbayPriceResult[]): Record<string, number> {
   const out: Record<string, number> = {};
   for (const r of results ?? []) if (r.median > 0) out[r.query.toLowerCase()] = r.median;
+  return out;
+}
+
+/** Build a {query: changePct} lookup for live ticker movement. */
+export function ebayChangeMap(results?: EbayPriceResult[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const r of results ?? []) if (typeof r.changePct === "number") out[r.query.toLowerCase()] = r.changePct;
   return out;
 }
