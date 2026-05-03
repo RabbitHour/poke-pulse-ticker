@@ -188,6 +188,8 @@ async function flushLeadsToDb(
   return { inserted, skipped };
 }
 
+const OWNER_EMAIL = "noyes.dave@gmail.com";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -199,6 +201,22 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Authorize: service-role bearer (cron) OR authenticated owner email.
+    const authHeader = req.headers.get("authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    let authorized = false;
+    if (token && token === serviceKey) {
+      authorized = true;
+    } else if (token) {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user?.email === OWNER_EMAIL) authorized = true;
+    }
+    if (!authorized) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { action, customQueries } = await req.json();
 
