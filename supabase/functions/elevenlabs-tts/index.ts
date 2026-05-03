@@ -1,14 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_TEXT_LENGTH = 1000;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Require authenticated user
+  const authHeader = req.headers.get('authorization') ?? '';
+  const jwt = authHeader.replace(/^Bearer\s+/i, '');
+  if (!jwt) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const authClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: `Bearer ${jwt}` } } }
+  );
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
@@ -21,6 +44,11 @@ serve(async (req) => {
   const { text, voiceId } = await req.json();
   if (!text || !voiceId) {
     return new Response(JSON.stringify({ error: "text and voiceId required" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  if (typeof text !== 'string' || text.length > MAX_TEXT_LENGTH) {
+    return new Response(JSON.stringify({ error: `text must be string under ${MAX_TEXT_LENGTH} chars` }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
