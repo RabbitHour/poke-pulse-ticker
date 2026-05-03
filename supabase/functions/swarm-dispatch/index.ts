@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
     const preset: string = (body.preset ?? "civilian").toString();
     if (!mission) return new Response(JSON.stringify({ error: "mission required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const isFederal = preset === "federal";
+    const isFederal = preset === "federal" || preset === "passive_federal";
     if (isFederal && u.user.email !== OWNER_EMAIL) {
       return new Response(JSON.stringify({ error: "classified" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
