@@ -83,6 +83,7 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
         >
           {tickerCards.map((card, i) => {
             const price = priceFor(card);
+            const change = changeFor(card);
             return (
               <a
                 key={`${card.name}-${i}`}
@@ -96,8 +97,8 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
                 <span className="text-foreground font-semibold">
                   ${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                <span className={card.change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
-                  {card.change >= 0 ? "▲" : "▼"} {Math.abs(card.change).toFixed(2)}%
+                <span className={change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
+                  {change >= 0 ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
                 </span>
                 <span className="text-border/40">•</span>
               </a>
