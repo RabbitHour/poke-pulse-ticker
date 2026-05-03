@@ -31,6 +31,20 @@ const PRESETS: Record<string, AgentSpec[]> = {
     { name: "RedTeam",       role: "Red-team adversary. Enumerate attack vectors a competitor would use to erode the moat." },
     { name: "Patent",        role: "Patent strategist. Suggest filings, claims, and trade-secret partitioning." },
   ],
+  passive_civilian: [
+    { name: "BootstrapStrategist", role: "Zero-to-passive-income strategist. Starting capital ~$40 + raw Pokémon inventory (thousands raw, 15 graded, 16-20 sealed Scarlet/Violet ETBs). Civilian side. Output: week-by-week 12-week plan with revenue targets, channels (eBay/TCGPlayer/Whatnot/affiliate), reinvestment ratios, and compounding milestones." },
+    { name: "InventoryLiquidator", role: "Sealed-product & graded-card flipper. Identify which ETBs/grades to sell now vs hold, target prices, listing channels, fees. Convert dormant inventory into seed cash." },
+    { name: "ContentMonetizer",    role: "YouTube/TikTok/Shorts + blog SEO around Poké-Pulse data. Affiliate stack (eBay Partner, TCGPlayer, Amazon). Revenue per 1k views. Tools that compound (evergreen ranked posts, autopost cron)." },
+    { name: "AutomationEngineer",  role: "Identify what in the existing repo can be turned into a paid autopilot service (alerts, watchlists, audit reports). Propose smallest paid tier we can ship this week." },
+    { name: "Accountant",          role: "Track unit economics, runway, breakeven. Flag tax/legal pitfalls for PGVA Ventures, LLC." },
+  ],
+  passive_federal: [
+    { name: "ContractScout",   role: "Federal/defense passive-income scout. SAM.gov, SBIR/STTR, GSA Schedule, Mentor-Protégé, set-asides for SDVOSB/8(a). Identify low-touch recurring contract vehicles a solo LLC can subcontract into. OWNER EYES ONLY." },
+    { name: "IPLicensing",     role: "License Empire Defense / Delta Pod IP (patents-pending, trade secrets) to primes (Lockheed, RTX, Anduril) for royalties. Draft term-sheet skeletons. OWNER EYES ONLY." },
+    { name: "DataResale",      role: "Identify de-classifiable data products (OSINT feeds, threat indicators) that can be sold by subscription to gov/contractor buyers. OWNER EYES ONLY." },
+    { name: "GrantHunter",     role: "Non-dilutive grants (DARPA, AFWERX, DIU, NSF) that pay for R&D we'd do anyway. List open solicitations matching our stack. OWNER EYES ONLY." },
+    { name: "ComplianceGate",  role: "Flag ITAR/EAR/CMMC requirements before any federal revenue stream is pursued. OWNER EYES ONLY." },
+  ],
 };
 
 async function callAgent(agent: AgentSpec, mission: string): Promise<{ name: string; output: string; error?: string }> {
