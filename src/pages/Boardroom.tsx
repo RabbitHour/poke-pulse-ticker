@@ -3,19 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import TerminalHeader from "@/components/TerminalHeader";
 import CopyrightBanner from "@/components/CopyrightBanner";
 import OwnerOnlyGate from "@/components/OwnerOnlyGate";
+import PassiveIncomePlaybook from "@/components/PassiveIncomePlaybook";
 import FinancialDisclaimer from "@/components/FinancialDisclaimer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Network, ShieldAlert, Sparkles, Building2, Crosshair, Lock } from "lucide-react";
 
-type Preset = "civilian" | "federal" | "pokepulse" | "moat";
+type Preset = "civilian" | "federal" | "pokepulse" | "moat" | "passive_civilian" | "passive_federal";
 type AgentResult = { name: string; output: string; error?: string };
 
 const PRESET_META: Record<Preset, { label: string; icon: any; tone: string; desc: string; classified?: boolean }> = {
-  civilian:  { label: "Civilian — Unicorn AI Builder", icon: Building2, tone: "text-primary",        desc: "Corporations · flagships · brands · Personal Pod (civilian) · Poke-Pulse · products" },
-  federal:   { label: "Federal — Empire Defense",      icon: ShieldAlert, tone: "text-destructive",  desc: "Empire Defense Dept · Delta Pod · TOP SECRET · Owner eyes only", classified: true },
-  pokepulse: { label: "Poke-Pulse Ops",                icon: Sparkles, tone: "text-terminal-amber",  desc: "Ticker accuracy · indexes · growth · affiliate ROI" },
-  moat:      { label: "Moat & Counter-Intel",          icon: Crosshair, tone: "text-primary",        desc: "Defensive strategy vs competitors / hostile actors" },
+  civilian:         { label: "Civilian — Unicorn AI Builder", icon: Building2, tone: "text-primary",        desc: "Corporations · flagships · brands · Personal Pod (civilian) · Poke-Pulse · products" },
+  federal:          { label: "Federal — Empire Defense",      icon: ShieldAlert, tone: "text-destructive",  desc: "Empire Defense Dept · Delta Pod · TOP SECRET · Owner eyes only", classified: true },
+  pokepulse:        { label: "Poke-Pulse Ops",                icon: Sparkles, tone: "text-terminal-amber",  desc: "Ticker accuracy · indexes · growth · affiliate ROI" },
+  moat:             { label: "Moat & Counter-Intel",          icon: Crosshair, tone: "text-primary",        desc: "Defensive strategy vs competitors / hostile actors" },
+  passive_civilian: { label: "Passive — Civilian",            icon: Sparkles, tone: "text-primary",         desc: "Bootstrap $40 + Poké inventory → compounding income (eBay/TCG/affiliate/content)" },
+  passive_federal:  { label: "Passive — Federal",             icon: ShieldAlert, tone: "text-destructive",  desc: "SBIR/STTR · IP licensing · OSINT resale · grants. Owner eyes only", classified: true },
 };
 
 const Swarm = () => {
@@ -37,7 +40,7 @@ const Swarm = () => {
   return (
     <div className="space-y-3">
       <Tabs value={preset} onValueChange={(v) => setPreset(v as Preset)}>
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 w-full h-auto">
           {(Object.keys(PRESET_META) as Preset[]).map((k) => {
             const M = PRESET_META[k]; const Icon = M.icon;
             return (
@@ -154,6 +157,8 @@ export default function Boardroom() {
             </div>
             <Swarm />
           </div>
+
+          <PassiveIncomePlaybook />
 
           <Moats />
           <FinancialDisclaimer />
