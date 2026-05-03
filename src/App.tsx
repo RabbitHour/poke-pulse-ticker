@@ -62,6 +62,7 @@ import DBZDemo from "./pages/demos/DBZDemo.tsx";
 import LorcanaDemo from "./pages/demos/LorcanaDemo.tsx";
 import StarWarsDemo from "./pages/demos/StarWarsDemo.tsx";
 import Welcome from "./pages/Welcome.tsx";
+import Boardroom from "./pages/Boardroom.tsx";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +119,7 @@ const AnimatedRoutes = () => {
           <Route path="/pulse-wallet" element={<PulseWallet />} />
           <Route path="/legal-protection" element={<LegalProtection />} />
           <Route path="/welcome" element={<Welcome />} />
+          <Route path="/boardroom" element={<Boardroom />} />
           <Route path="/demo/mlb" element={<MLBDemo />} />
           <Route path="/demo/nfl" element={<NFLDemo />} />
           <Route path="/demo/nba" element={<NBADemo />} />
