@@ -97,6 +97,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+
     const body = await req.json().catch(() => ({}));
     const queries: string[] = Array.isArray(body.queries) ? body.queries.slice(0, 30) : [];
     const conditionIds: string = typeof body.conditionIds === "string" ? body.conditionIds : "1000|3000|2750";
