@@ -18,13 +18,12 @@ const EPN_CAMPAIGN_ID = "5339151162";
 // eBay category 183454 = Collectible Card Games > Pokémon TCG > Individual Cards
 const POKEMON_SINGLES_CATEGORY = "183454";
 
-// Junk-listing keywords we exclude from the query so the median reflects the
-// actual card and not lots, proxies, sleeves, playmats, sealed product, etc.
+// Junk keywords excluded with -keyword syntax. Kept short — eBay Browse rejects
+// queries that are too long or end up with zero matches.
 const EXCLUDE_TERMS = [
-  "lot", "bundle", "proxy", "custom", "fake", "replica", "metal",
-  "sleeve", "playmat", "binder", "deck box", "japanese", "german",
-  "italian", "french", "spanish", "korean", "chinese", "booster",
-  "etb", "elite trainer", "pack", "box", "tin", "case", "display",
+  "lot", "proxy", "custom", "fake", "replica", "metal",
+  "sleeve", "playmat", "binder", "japanese",
+  "booster", "etb", "pack", "box", "tin", "case",
 ];
 
 interface CachedToken { token: string; expiresAt: number; }
@@ -88,8 +87,7 @@ async function fetchPriceForQuery(token: string, query: string, conditionIds = "
   url.searchParams.set("category_ids", POKEMON_SINGLES_CATEGORY);
   url.searchParams.set("limit", "50");
   url.searchParams.set("filter", `conditionIds:{${conditionIds}},buyingOptions:{FIXED_PRICE},priceCurrency:USD,price:[3..]`);
-  // Default sort = BestMatch (relevance). DO NOT sort by price asc — that drags
-  // the median toward the cheapest unrelated listings.
+  // Default sort = BestMatch (relevance). DO NOT sort by price asc.
 
   const res = await fetch(url.toString(), {
     headers: {
