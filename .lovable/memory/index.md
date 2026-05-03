@@ -13,8 +13,10 @@ Updated: today
 - **Assets:** Fallback missing card images to `/icon-192.png`. PWA icons <50KB.
 - **UI Constraints:** Base font 16px. Footer `text-[5px]` with `py-px`. No exit-intent or fomo popups on the landing page.
 - **Landing order:** Hero → SocialProof → Wallet → CertifiedDataPartner → eBayLiveDeals (moved up) → MarketPulse+Sales → Indexes.
+- **Federal/Empire/Delta Pod = TOP SECRET, owner-only (pokegarageva@gmail.com).** Always wrap with `OwnerOnlyGate` + `noindex,nofollow`. Federal swarm preset enforced server-side.
 
 ## Memories
+- [Boardroom & Swarm](mem://features/boardroom-and-swarm) — /boardroom org chart + multi-agent swarm-dispatch edge fn
 - [Stripe Payments](mem://integrations/stripe-payments) — 7-tier subs, 5k starting PC bank, checkout edge functions
 - [Backend Infra](mem://architecture/backend-infrastructure) — Supabase edge functions, multi-region database replica
 - [Portfolio Tracking](mem://features/portfolio-tracking) — CSV import, daily snapshots, tracking analytics
