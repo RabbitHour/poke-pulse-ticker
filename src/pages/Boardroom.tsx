@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import TerminalHeader from "@/components/TerminalHeader";
 import CopyrightBanner from "@/components/CopyrightBanner";
 import OwnerOnlyGate from "@/components/OwnerOnlyGate";
+import PassiveIncomePlaybook from "@/components/PassiveIncomePlaybook";
 import FinancialDisclaimer from "@/components/FinancialDisclaimer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
