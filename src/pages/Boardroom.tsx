@@ -39,7 +39,7 @@ const Swarm = () => {
   return (
     <div className="space-y-3">
       <Tabs value={preset} onValueChange={(v) => setPreset(v as Preset)}>
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full h-auto">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 w-full h-auto">
           {(Object.keys(PRESET_META) as Preset[]).map((k) => {
             const M = PRESET_META[k]; const Icon = M.icon;
             return (
