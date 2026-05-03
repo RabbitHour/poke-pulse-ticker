@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import TerminalHeader from "@/components/TerminalHeader";
 import CopyrightBanner from "@/components/CopyrightBanner";
@@ -124,12 +123,14 @@ const Moats = () => (
 );
 
 export default function Boardroom() {
+  useEffect(() => {
+    document.title = "Boardroom — PGVA Ventures";
+    let m = document.querySelector('meta[name="robots"]');
+    if (!m) { m = document.createElement("meta"); m.setAttribute("name", "robots"); document.head.appendChild(m); }
+    m.setAttribute("content", "noindex,nofollow");
+  }, []);
   return (
     <OwnerOnlyGate label="BOARDROOM · CLASSIFIED">
-      <Helmet>
-        <title>Boardroom — PGVA Ventures</title>
-        <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
       <div className="min-h-screen bg-background pb-16">
         <TerminalHeader />
         <main className="max-w-6xl mx-auto px-3 py-4 space-y-4">
