@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CardData } from "@/data/marketData";
 import { getCardToken } from "@/lib/tokenSymbols";
-import { useEbayPrices, ebayPriceMap } from "@/hooks/useEbayPrices";
+import { useEbayPrices, ebayPriceMap, ebayChangeMap } from "@/hooks/useEbayPrices";
 import { ebayAffiliateLink } from "@/lib/ebay";
 
 interface TickerBarProps {
@@ -38,7 +38,13 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
   );
   const { data: ebayData } = useEbayPrices(ebayQueries);
   const priceMap = useMemo(() => ebayPriceMap(ebayData?.results), [ebayData]);
-  const priceFor = (card: CardData) => priceMap[`${card.name} ${card.set}`.toLowerCase()] || card.market;
+  const changeMap = useMemo(() => ebayChangeMap(ebayData?.results), [ebayData]);
+  const keyFor = (card: CardData) => `${card.name} ${card.set}`.toLowerCase();
+  const priceFor = (card: CardData) => priceMap[keyFor(card)] || card.market;
+  const changeFor = (card: CardData) => {
+    const live = changeMap[keyFor(card)];
+    return typeof live === "number" && live !== 0 ? live : card.change;
+  };
 
   useEffect(() => {
     if (!lastUpdated) return;
@@ -77,6 +83,7 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
         >
           {tickerCards.map((card, i) => {
             const price = priceFor(card);
+            const change = changeFor(card);
             return (
               <a
                 key={`${card.name}-${i}`}
@@ -90,8 +97,8 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
                 <span className="text-foreground font-semibold">
                   ${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                <span className={card.change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
-                  {card.change >= 0 ? "▲" : "▼"} {Math.abs(card.change).toFixed(2)}%
+                <span className={change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
+                  {change >= 0 ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
                 </span>
                 <span className="text-border/40">•</span>
               </a>
