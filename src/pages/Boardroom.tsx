@@ -157,6 +157,8 @@ export default function Boardroom() {
             <Swarm />
           </div>
 
+          <PassiveIncomePlaybook />
+
           <Moats />
           <FinancialDisclaimer />
         </main>
