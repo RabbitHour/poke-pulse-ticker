@@ -196,15 +196,22 @@ serve(async (req) => {
       );
     }
 
-    // Try to verify user, use a fixed anonymous UUID if no auth
-    let userId = "00000000-0000-0000-0000-000000000000";
-    if (authHeader) {
-      const supabase = createClient(supabaseUrl, supabaseKey, {
-        global: { headers: { Authorization: authHeader } },
+    // Mandatory authentication
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) userId = user.id;
     }
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = user.id;
 
     const body = await req.json().catch(() => ({}));
     const triggerType = body.trigger_type || "manual";
