@@ -75,11 +75,11 @@ export function useCardSearch(query: string) {
     queryKey: ["card-search", query],
     queryFn: async () => {
       if (!query || query.length < 2) return [];
-      const apiCards = await searchCards(query, 30);
+      const apiCards = await searchCards(query, 150);
       return apiCards
         .map(toCardData)
-        .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null && c.market > 0)
-        .sort((a, b) => b.market - a.market);
+        .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null)
+        .sort((a, b) => (b.market || 0) - (a.market || 0));
     },
     enabled: query.length >= 2,
     staleTime: 60 * 1000,
