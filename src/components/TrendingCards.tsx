@@ -102,7 +102,7 @@ const TrendingCards = ({ cards, isLoading }: TrendingCardsProps) => {
               tabIndex={0}
               onClick={() => navigate(`/card/${slug}`)}
               onKeyDown={(e) => { if (e.key === "Enter") navigate(`/card/${slug}`); }}
-              className="flex flex-col p-3 border-b border-r border-border hover:bg-muted/50 transition-colors text-left group last:border-r-0 relative overflow-hidden cursor-pointer"
+              className="flex flex-col p-4 border-b border-r border-border hover:bg-muted/50 transition-colors text-left group last:border-r-0 relative overflow-hidden cursor-pointer"
             >
               {/* Shimmer overlay on hover */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
