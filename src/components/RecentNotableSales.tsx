@@ -188,33 +188,37 @@ const RecentNotableSales = ({ cards }: RecentNotableSalesProps) => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.06, duration: 0.25 }}
-            className="px-4 py-2.5 flex items-center justify-between hover:bg-muted/30 transition-colors group"
+            className="px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors group cursor-pointer"
+            onClick={() => window.open(`https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(sale.name + ' ' + sale.set)}&_sop=12`, '_blank', 'noopener')}
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-7 h-7 rounded bg-muted flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+              <div className="w-12 h-16 rounded bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20 group-hover:ring-primary/60 transition-all">
                 {activeTab === "avg" ? (
-                  <BarChart3 className="w-3.5 h-3.5 text-primary" />
+                  <BarChart3 className="w-5 h-5 text-primary" />
                 ) : (
-                  <DollarSign className="w-3.5 h-3.5 text-primary" />
+                  <DollarSign className="w-5 h-5 text-primary" />
                 )}
               </div>
               <div className="min-w-0">
-                <p className="font-mono text-xs text-foreground font-medium truncate">{sale.name}</p>
-                <p className="font-mono text-[9px] text-muted-foreground truncate">
+                <p className="font-mono text-sm text-foreground font-semibold truncate group-hover:text-primary transition-colors">{sale.name}</p>
+                <p className="font-mono text-[10px] text-muted-foreground truncate">
                   {sale.set} • {sale.venue}
+                </p>
+                <p className="font-mono text-[9px] text-primary/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Tap to view on eBay →
                 </p>
               </div>
             </div>
 
             <div className="text-right flex-shrink-0 ml-3">
-              <p className="font-mono text-xs font-bold text-foreground">
+              <p className="font-mono text-sm font-bold text-foreground">
                 $
                 {sale.price.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="font-mono text-[9px] text-muted-foreground flex items-center gap-1 justify-end">
+              <p className="font-mono text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
                 <Clock className="w-2.5 h-2.5" /> {sale.ageLabel}
               </p>
             </div>
