@@ -33,7 +33,8 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
   const priceFor = (card: CardData) => priceMap[keyFor(card)] || card.market;
   const changeFor = (card: CardData) => {
     const live = changeMap[keyFor(card)];
-    return typeof live === "number" ? live : card.change;
+    if (typeof live === "number" && Math.abs(live) >= 0.01) return live;
+    return card.change;
   };
 
   const tickerCards = useMemo(() => {
@@ -46,7 +47,7 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
         return {
           card,
           liveChange: typeof live === "number" ? live : null,
-          displayChange: typeof live === "number" ? live : card.change,
+          displayChange: typeof live === "number" && Math.abs(live) >= 0.01 ? live : card.change,
         };
       })
       .sort((a, b) => {
