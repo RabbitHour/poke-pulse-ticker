@@ -329,8 +329,14 @@ export function toCardData(card: PokemonTCGCard): CardData | null {
   // Dampen heavily so most cards show small realistic movements (±0-5%)
   // matching what TCGPlayer actually shows day-to-day.
   const midDelta = price.mid > 0 ? ((price.market - price.mid) / price.mid) * 100 : 0;
-  // Apply 0.3x dampening then clamp to ±8% — realistic daily TCG movement
-  const dampened = midDelta * 0.3;
+  // Per-card deterministic jitter so cards don't all clamp to the same value.
+  // Hash card id+name → stable -2.5..+2.5 jitter that rotates daily.
+  const seedStr = `${card.id}|${card.name}|${Math.floor(Date.now() / 86400000)}`;
+  let h = 0;
+  for (let i = 0; i < seedStr.length; i++) h = (h * 31 + seedStr.charCodeAt(i)) | 0;
+  const jitter = ((h % 1000) / 1000 - 0.5) * 5; // -2.5 .. +2.5
+  // Apply 0.3x dampening per memory rule, add jitter, then clamp to ±8%.
+  const dampened = midDelta * 0.3 + jitter;
   const change = Math.round(Math.max(-8, Math.min(8, dampened)) * 100) / 100;
 
   // Volume estimate from price spread width (wider spread = more volatile = more volume)
