@@ -145,9 +145,18 @@ export async function fetchCards(query: string, pageSize = 50, page = 1): Promis
 /**
  * Search cards by name
  */
-export async function searchCards(name: string, pageSize = 20): Promise<PokemonTCGCard[]> {
+export async function searchCards(name: string, pageSize = 100): Promise<PokemonTCGCard[]> {
+  // Sanitize: keep letters, digits, spaces, hyphens, apostrophes, periods
+  const clean = name.replace(/[^A-Za-z0-9 \-'.]/g, "").trim();
+  if (!clean) return [];
+  // Wildcard each whitespace-separated token so partial / multi-word queries match
+  // Also include set.name as a fallback so users can search by set ("151", "evolving skies")
+  const tokens = clean.split(/\s+/).filter(Boolean);
+  const nameQ = tokens.map(t => `name:*${t}*`).join(" ");
+  const setQ = tokens.map(t => `set.name:*${t}*`).join(" ");
+  const q = `(${nameQ}) OR (${setQ})`;
   const data: APIResponse = await proxyFetch("/cards", {
-    q: `name:"${name}"`,
+    q,
     pageSize: String(pageSize),
     orderBy: "-tcgplayer.prices.holofoil.market",
   });
