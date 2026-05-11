@@ -9,6 +9,7 @@ interface SealedBoxHeatmapProps {
 }
 
 interface EraPerf {
+  key: string;
   era: string;
   type: string;
   market: number;
@@ -41,6 +42,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
       const era = eraMatch ? eraMatch[1] : p.name;
       const spread = p.market > 0 ? ((p.market - p.low) / p.market) * 100 : 0;
       return {
+        key: `${p.name}-${p.type}-${p.market}`,
         era,
         type: p.type,
         market: p.market,
@@ -135,7 +137,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
               const isSel = selected?.era === p.era && selected?.type === p.type;
               return (
                 <button
-                  key={`${p.era}-${p.type}`}
+                  key={p.key}
                   onClick={() => setSelected(isSel ? null : p)}
                   aria-pressed={isSel}
                   aria-label={`${p.era} ${p.type}, ${fmt(p.market)}, ${p.change >= 0 ? "up" : "down"} ${Math.abs(p.change).toFixed(1)} percent`}
