@@ -47,7 +47,7 @@ const CardSearch = () => {
     }));
     const seen = new Set(live.map(l => `${l.name}|${l.set}`.toLowerCase()));
     const extras = localResults.filter(l => !seen.has(`${l.name}|${l.set}`.toLowerCase()));
-    return [...live, ...extras].slice(0, 20);
+    return [...live, ...extras].slice(0, 100);
   }, [liveResults, localResults]);
 
   return (
