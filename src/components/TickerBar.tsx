@@ -13,28 +13,18 @@ interface TickerBarProps {
 const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) => {
   const [countdown, setCountdown] = useState("");
 
-  const tickerCards = useMemo(() => {
-    // Pool: top 200 by abs(change), then time-seeded shuffle, take 16.
-    // Seed rotates every 10 minutes so the ticker varies refresh-to-refresh.
-    const pool = [...cards]
+  const candidateCards = useMemo(() => {
+    // Pull a broader candidate pool so the live eBay layer has enough cards
+    // to choose from even when many quotes are currently flat.
+    return [...cards]
       .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-      .slice(0, 200);
-
-    const seed = Math.floor(Date.now() / (10 * 60 * 1000));
-    const shuffled = [...pool]
-      .map((c, i) => ({ c, k: Math.sin((i + 1) * (seed + 1) * 9301) * 233280 }))
-      .sort((a, b) => a.k - b.k)
-      .map((x) => x.c)
-      .slice(0, 16);
-
-    return [...shuffled, ...shuffled];
   }, [cards, lastUpdated]);
 
   // Primary price source: eBay Browse API (median active listing price).
   // Falls back to TCGPlayer market price if eBay returns no result for a query.
   const ebayQueries = useMemo(
-    () => Array.from(new Set(tickerCards.slice(0, 16).map((c) => `${c.name} ${c.set}`))),
-    [tickerCards]
+    () => Array.from(new Set(candidateCards.slice(0, 30).map((c) => `${c.name} ${c.set}`))),
+    [candidateCards]
   );
   const { data: ebayData } = useEbayPrices(ebayQueries);
   const priceMap = useMemo(() => ebayPriceMap(ebayData?.results), [ebayData]);
@@ -45,6 +35,36 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
     const live = changeMap[keyFor(card)];
     return typeof live === "number" ? live : card.change;
   };
+
+  const tickerCards = useMemo(() => {
+    // Prefer cards with real live movement so the tape does not flatten at 0.0%.
+    // If live movement is sparse, gracefully fall back to the broader candidate pool.
+    const ranked = candidateCards
+      .slice(0, 30)
+      .map((card) => {
+        const live = changeMap[keyFor(card)];
+        return {
+          card,
+          liveChange: typeof live === "number" ? live : null,
+          displayChange: typeof live === "number" ? live : card.change,
+        };
+      })
+      .sort((a, b) => {
+        const aHasLiveMovement = a.liveChange !== null && Math.abs(a.liveChange) >= 0.01;
+        const bHasLiveMovement = b.liveChange !== null && Math.abs(b.liveChange) >= 0.01;
+        if (aHasLiveMovement !== bHasLiveMovement) return Number(bHasLiveMovement) - Number(aHasLiveMovement);
+        return Math.abs(b.displayChange) - Math.abs(a.displayChange);
+      });
+
+    const pool = ranked.slice(0, 16);
+    const seed = Math.floor(Date.now() / (10 * 60 * 1000));
+    const shuffled = [...pool]
+      .map((entry, i) => ({ entry, k: Math.sin((i + 1) * (seed + 1) * 9301) * 233280 }))
+      .sort((a, b) => a.k - b.k)
+      .map((x) => x.entry.card);
+
+    return [...shuffled, ...shuffled];
+  }, [candidateCards, changeMap]);
 
   useEffect(() => {
     if (!lastUpdated) return;
