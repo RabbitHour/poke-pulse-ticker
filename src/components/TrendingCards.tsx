@@ -14,7 +14,7 @@ interface TrendingCardsProps {
   isLoading?: boolean;
 }
 
-const TRENDING_DISPLAY = 6;
+const TRENDING_DISPLAY = 8;
 const ROTATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 const TrendingCards = ({ cards, isLoading }: TrendingCardsProps) => {
@@ -52,9 +52,9 @@ const TrendingCards = ({ cards, isLoading }: TrendingCardsProps) => {
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-3 w-20" />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col p-3 border-b border-r border-border space-y-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex flex-col p-4 border-b border-r border-border space-y-2">
               <Skeleton className="w-full aspect-[2.5/3.5] rounded-md" />
               <Skeleton className="h-2 w-16" />
               <Skeleton className="h-3 w-24" />
@@ -86,7 +86,7 @@ const TrendingCards = ({ cards, isLoading }: TrendingCardsProps) => {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
         {trending.map((card, i) => {
           const isUp = card.change >= 0;
           const slug = `${card.name}-${card.set}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -102,7 +102,7 @@ const TrendingCards = ({ cards, isLoading }: TrendingCardsProps) => {
               tabIndex={0}
               onClick={() => navigate(`/card/${slug}`)}
               onKeyDown={(e) => { if (e.key === "Enter") navigate(`/card/${slug}`); }}
-              className="flex flex-col p-3 border-b border-r border-border hover:bg-muted/50 transition-colors text-left group last:border-r-0 relative overflow-hidden cursor-pointer"
+              className="flex flex-col p-4 border-b border-r border-border hover:bg-muted/50 transition-colors text-left group last:border-r-0 relative overflow-hidden cursor-pointer"
             >
               {/* Shimmer overlay on hover */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
