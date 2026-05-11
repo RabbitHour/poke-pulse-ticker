@@ -170,19 +170,19 @@ const DealRow = ({ deal, rank }: { deal: AuctionDeal; rank: number }) => {
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.04, duration: 0.2 }}
-      className="grid grid-cols-[14px_minmax(0,1fr)_88px] gap-2 items-center py-1.5 border-b border-border/10 last:border-0 hover:bg-primary/5 transition-colors cursor-pointer group"
+      className="grid grid-cols-[36px_minmax(0,1fr)_96px] gap-2.5 items-center py-2.5 px-1.5 border-b border-border/10 last:border-0 hover:bg-primary/10 hover:scale-[1.01] transition-all cursor-pointer group rounded"
     >
-      {/* Rank */}
-      <span className="font-mono text-[10px] font-bold text-primary text-center">
-        {rank}
-      </span>
+      {/* Card-shaped thumb (bigger tap target, signals "this is a card") */}
+      <div className="relative w-9 h-12 rounded bg-gradient-to-br from-primary/30 via-primary/10 to-primary/5 flex items-center justify-center ring-1 ring-primary/30 group-hover:ring-primary transition-all flex-shrink-0">
+        <span className="font-mono text-[9px] font-black text-primary">#{rank}</span>
+      </div>
 
       {/* Title + meta — single column, no overlap */}
       <div className="min-w-0">
-        <p className="font-mono text-[11px] font-semibold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
+        <p className="font-mono text-[13px] font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
           {deal.grader ? `${deal.title} ${deal.grader} ${deal.grade}` : deal.title}
         </p>
-        <div className="flex items-center gap-1 mt-0.5 text-[9px] text-muted-foreground font-mono min-w-0">
+        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground font-mono min-w-0">
           <span className="truncate">{deal.seller}</span>
           <span className="text-border/50 shrink-0">·</span>
           <span className="whitespace-nowrap shrink-0">{deal.bids}b</span>
@@ -191,22 +191,22 @@ const DealRow = ({ deal, rank }: { deal: AuctionDeal; rank: number }) => {
         </div>
       </div>
 
-      {/* Price block — fixed 88px width, right-aligned, no overlap with title */}
-      <div className="text-right flex items-center gap-1 justify-end">
-        <div>
-          <p className="font-mono text-[12px] font-bold text-primary leading-none tabular-nums">
-            ${deal.currentBid}
-          </p>
-          <div className="flex items-center gap-1 justify-end mt-0.5">
-            <span className="font-mono text-[9px] text-muted-foreground line-through tabular-nums">
-              ${deal.marketValue}
-            </span>
-            <span className="font-mono text-[9px] font-bold text-terminal-green">
-              -{deal.savingsPct}%
-            </span>
-          </div>
+      {/* Price + BID button — bigger, clearer affiliate CTA */}
+      <div className="text-right flex flex-col items-end gap-0.5">
+        <p className="font-mono text-[14px] font-black text-primary leading-none tabular-nums">
+          ${deal.currentBid}
+        </p>
+        <div className="flex items-center gap-1 justify-end">
+          <span className="font-mono text-[9px] text-muted-foreground line-through tabular-nums">
+            ${deal.marketValue}
+          </span>
+          <span className="font-mono text-[9px] font-bold text-terminal-green">
+            -{deal.savingsPct}%
+          </span>
         </div>
-        <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+        <span className="mt-0.5 inline-flex items-center gap-0.5 font-mono text-[9px] font-bold text-primary-foreground bg-primary px-1.5 py-0.5 rounded group-hover:bg-primary/90 transition-colors">
+          BID <ExternalLink className="w-2.5 h-2.5" />
+        </span>
       </div>
     </motion.a>
   );
