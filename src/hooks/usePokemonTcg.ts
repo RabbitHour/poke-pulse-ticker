@@ -3,7 +3,7 @@ import { fetchHighValueCards, searchCards, fetchCardById, toCardData, getBestPri
 import type { PokemonTCGCard } from "@/lib/pokemonTcgApi";
 import type { CardData } from "@/data/marketData";
 
-const CACHE_KEY = "ppt-live-cards-cache";
+const CACHE_KEY = "ppt-live-cards-cache-v2";
 
 function getCachedCards(): CardData[] | null {
   try {
