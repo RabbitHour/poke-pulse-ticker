@@ -43,7 +43,7 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
   const priceFor = (card: CardData) => priceMap[keyFor(card)] || card.market;
   const changeFor = (card: CardData) => {
     const live = changeMap[keyFor(card)];
-    return typeof live === "number" && live !== 0 ? live : card.change;
+    return typeof live === "number" ? live : card.change;
   };
 
   useEffect(() => {
