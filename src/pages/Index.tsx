@@ -183,6 +183,8 @@ const Index = () => {
           onSearchFocus={handleSearchFocus}
           topMoverName={topMover?.name}
           topMoverChange={topMover?.change}
+          isLive={isLive}
+          cardCount={displayCards.length}
         />
 
         <SocialProofBar
