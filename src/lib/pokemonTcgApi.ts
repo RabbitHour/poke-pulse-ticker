@@ -175,7 +175,7 @@ export async function fetchCardById(id: string): Promise<PokemonTCGCard> {
  * Fetch high-value cards with pricing data.
  * Uses minimal API calls to stay within pokemontcg.io rate limits (no API key = ~20 req/min).
  */
-export async function fetchHighValueCards(total = 500): Promise<PokemonTCGCard[]> {
+export async function fetchHighValueCards(total = 5000): Promise<PokemonTCGCard[]> {
   const PAGE_SIZE = 250;
 
   // Small delay between requests to respect rate limits
