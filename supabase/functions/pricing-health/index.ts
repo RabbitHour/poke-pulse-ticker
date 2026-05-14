@@ -16,9 +16,30 @@ interface SourceProbe {
   timeoutMs?: number;
 }
 
+async function getEbayOAuthToken(): Promise<string> {
+  const clientId = Deno.env.get("EBAY_CLIENT_ID");
+  const clientSecret = Deno.env.get("EBAY_CLIENT_SECRET");
+  if (!clientId || !clientSecret) throw new Error("missing EBAY_CLIENT_ID/SECRET");
+
+  const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope",
+    signal: AbortSignal.timeout(6000),
+  });
+
+  if (!res.ok) throw new Error(`oauth ${res.status}`);
+  const json = await res.json();
+  if (!json.access_token) throw new Error("oauth missing access_token");
+  return json.access_token as string;
+}
+
 const PROBES: SourceProbe[] = [
   { name: "tcgplayer", url: "https://api.pokemontcg.io/v2/cards?pageSize=1", timeoutMs: 4000 },
-  { name: "ebay",      url: "https://api.ebay.com/buy/browse/v1/item_summary/search?q=pokemon&limit=1", requiresKey: "EBAY_API_KEY", timeoutMs: 4000 },
+  { name: "ebay",      url: "https://api.ebay.com/buy/browse/v1/item_summary/search?q=pokemon&limit=1", timeoutMs: 4000 },
   { name: "pricecharting", url: "https://www.pricecharting.com/api/products?q=charizard&type=pokemon-cards", requiresKey: "PRICECHARTING_API_KEY", timeoutMs: 4000 },
   { name: "cardladder", url: "https://api.cardladder.com/v1/health", requiresKey: "CARDLADDER_API_KEY", timeoutMs: 4000 },
   { name: "probstein",  url: "https://probsteinauctions.com/rss/sold?category=pokemon", timeoutMs: 5000 },
@@ -30,11 +51,30 @@ const PROBES: SourceProbe[] = [
 ];
 
 async function probe(p: SourceProbe): Promise<{ name: string; isLive: boolean; latencyMs: number; reason?: string }> {
+  if (p.name === "ebay") {
+    const t0 = Date.now();
+    try {
+      const token = await getEbayOAuthToken();
+      const res = await fetch(p.url, {
+        method: p.method || "GET",
+        headers: {
+          "User-Agent": "PokePulseTicker/1.0",
+          Authorization: `Bearer ${token}`,
+          ...(p.headers || {}),
+        },
+        signal: AbortSignal.timeout(p.timeoutMs ?? 5000),
+      });
+      const ms = Date.now() - t0;
+      return { name: p.name, isLive: res.ok, latencyMs: ms, reason: res.ok ? undefined : `HTTP ${res.status}` };
+    } catch (e) {
+      return { name: p.name, isLive: false, latencyMs: Date.now() - t0, reason: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
   if (p.requiresKey && !Deno.env.get(p.requiresKey)) {
     return { name: p.name, isLive: false, latencyMs: 0, reason: `missing ${p.requiresKey}` };
   }
   const headers: Record<string, string> = { "User-Agent": "PokePulseTicker/1.0", ...(p.headers || {}) };
-  if (p.requiresKey === "EBAY_API_KEY") headers["Authorization"] = `Bearer ${Deno.env.get("EBAY_API_KEY")}`;
   if (p.requiresKey === "FIRECRAWL_API_KEY") headers["Authorization"] = `Bearer ${Deno.env.get("FIRECRAWL_API_KEY")}`;
 
   const t0 = Date.now();
