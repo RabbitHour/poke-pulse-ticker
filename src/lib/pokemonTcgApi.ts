@@ -52,6 +52,27 @@ export interface PokemonTCGCard {
       "1stEditionNormal"?: { low: number; mid: number; high: number; market: number; directLow?: number };
     };
   };
+  cardmarket?: {
+    url: string;
+    updatedAt: string;
+    prices: {
+      averageSellPrice?: number;
+      lowPrice?: number;
+      trendPrice?: number;
+      germanProLow?: number;
+      suggestedPrice?: number;
+      reverseHoloSell?: number;
+      reverseHoloLow?: number;
+      reverseHoloTrend?: number;
+      lowPriceExPlus?: number;
+      avg1?: number;
+      avg7?: number;
+      avg30?: number;
+      reverseHoloAvg1?: number;
+      reverseHoloAvg7?: number;
+      reverseHoloAvg30?: number;
+    };
+  };
   rarity?: string;
   supertype: string;
 }
@@ -327,19 +348,19 @@ export function toCardData(card: PokemonTCGCard): CardData | null {
   const price = getBestPrice(card);
   if (!price) return null;
 
-  // Derive a realistic "change" from the spread between mid and market price.
-  // Dampen heavily so most cards show small realistic movements (±0-5%)
-  // matching what TCGPlayer actually shows day-to-day.
-  const midDelta = price.mid > 0 ? ((price.market - price.mid) / price.mid) * 100 : 0;
-  // Per-card deterministic jitter so cards don't all clamp to the same value.
-  // Hash card id+name → stable -2.5..+2.5 jitter that rotates daily.
-  const seedStr = `${card.id}|${card.name}|${Math.floor(Date.now() / 86400000)}`;
-  let h = 0;
-  for (let i = 0; i < seedStr.length; i++) h = (h * 31 + seedStr.charCodeAt(i)) | 0;
-  const jitter = ((h % 1000) / 1000 - 0.5) * 5; // -2.5 .. +2.5
-  // Apply 0.3x dampening per memory rule, add jitter, then clamp to ±8%.
-  const dampened = midDelta * 0.3 + jitter;
-  const change = Math.round(Math.max(-8, Math.min(8, dampened)) * 100) / 100;
+  // Honesty policy: never fabricate % change with jitter or clamps.
+  // Prefer source-backed momentum from Cardmarket averages when present;
+  // otherwise fall back to 0 until a real time-series source is available.
+  const cm = card.cardmarket?.prices;
+  const dayRef = cm?.avg1 && cm?.avg7 ? ((cm.avg1 - cm.avg7) / cm.avg7) * 100 : null;
+  const weekRef = cm?.avg7 && cm?.avg30 ? ((cm.avg7 - cm.avg30) / cm.avg30) * 100 : null;
+  const trendRef = cm?.trendPrice && cm?.averageSellPrice
+    ? ((cm.trendPrice - cm.averageSellPrice) / cm.averageSellPrice) * 100
+    : null;
+  const sourceBackedChange = [dayRef, weekRef, trendRef].find(
+    (value): value is number => typeof value === "number" && Number.isFinite(value)
+  );
+  const change = Math.round((sourceBackedChange ?? 0) * 100) / 100;
 
   // Volume estimate from price spread width (wider spread = more volatile = more volume)
   const spreadPct = price.high > 0 ? ((price.high - price.low) / price.high) * 100 : 0;
