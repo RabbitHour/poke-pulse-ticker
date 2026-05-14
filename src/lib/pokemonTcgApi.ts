@@ -175,7 +175,7 @@ export async function fetchCardById(id: string): Promise<PokemonTCGCard> {
  * Fetch high-value cards with pricing data.
  * Uses minimal API calls to stay within pokemontcg.io rate limits (no API key = ~20 req/min).
  */
-export async function fetchHighValueCards(total = 500): Promise<PokemonTCGCard[]> {
+export async function fetchHighValueCards(total = 5000): Promise<PokemonTCGCard[]> {
   const PAGE_SIZE = 250;
 
   // Small delay between requests to respect rate limits
@@ -201,29 +201,29 @@ export async function fetchHighValueCards(total = 500): Promise<PokemonTCGCard[]
     return results;
   };
 
-  // Query 1: Holofoil cards (deeper pull → 4 pages = up to 1000)
+  // Query 1: Holofoil cards (deep pull → 10 pages = up to 2500)
   const holoCards = await fetchPages(
     "tcgplayer.prices.holofoil.market:[1 TO *]",
     "-tcgplayer.prices.holofoil.market",
-    4
+    10
   );
 
   await delay(1500);
 
-  // Query 2: Normal-priced cards worth $2+ (broader floor)
+  // Query 2: Normal-priced cards worth $1+ (broader floor)
   const normalCards = await fetchPages(
-    "tcgplayer.prices.normal.market:[2 TO *]",
+    "tcgplayer.prices.normal.market:[1 TO *]",
     "-tcgplayer.prices.normal.market",
-    2
+    6
   );
 
   await delay(1500);
 
-  // Query 3: Reverse holos worth $3+ (often missed)
+  // Query 3: Reverse holos worth $1+
   const reverseCards = await fetchPages(
-    "tcgplayer.prices.reverseHolofoil.market:[3 TO *]",
+    "tcgplayer.prices.reverseHolofoil.market:[1 TO *]",
     "-tcgplayer.prices.reverseHolofoil.market",
-    1
+    4
   );
 
   await delay(1500);
@@ -233,11 +233,13 @@ export async function fetchHighValueCards(total = 500): Promise<PokemonTCGCard[]
     "Illustration Rare", "Special Art Rare", "Hyper Rare",
     "Rare Ultra", "Rare Secret", "Rare Rainbow", "Ultra Rare",
     "Special Illustration Rare", "Trainer Gallery Rare Holo",
+    "Rare Holo VMAX", "Rare Holo VSTAR", "Rare Holo EX", "Rare Holo GX",
+    "Amazing Rare", "Radiant Rare", "Shiny Rare", "Shiny Ultra Rare",
   ].map(r => `rarity:"${r}"`).join(" OR ");
   const rarityCards = await fetchPages(
     `(${rarityQuery})`,
     "-tcgplayer.prices.holofoil.market",
-    2
+    6
   );
 
   // Deduplicate by card id
