@@ -38,7 +38,7 @@ export function useLiveCards() {
       const timeout = setTimeout(() => controller.abort(), 15000); // 15s circuit breaker
 
       try {
-        const apiCards = await fetchHighValueCards(1500);
+        const apiCards = await fetchHighValueCards(5000);
         clearTimeout(timeout);
         const mapped = apiCards
           .map(toCardData)
