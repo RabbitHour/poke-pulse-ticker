@@ -357,9 +357,12 @@ export function toCardData(card: PokemonTCGCard): CardData | null {
   const trendRef = cm?.trendPrice && cm?.averageSellPrice
     ? ((cm.trendPrice - cm.averageSellPrice) / cm.averageSellPrice) * 100
     : null;
-  const sourceBackedChange = [dayRef, weekRef, trendRef].find(
+  const candidates = [dayRef, weekRef, trendRef].filter(
     (value): value is number => typeof value === "number" && Number.isFinite(value)
   );
+  const sourceBackedChange = candidates.length > 0
+    ? candidates.reduce((sum, value) => sum + value, 0) / candidates.length
+    : null;
   const change = Math.round((sourceBackedChange ?? 0) * 100) / 100;
 
   // Volume estimate from price spread width (wider spread = more volatile = more volume)
