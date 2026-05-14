@@ -19,6 +19,7 @@ import ProGate from "@/components/ProGate";
 import { useAlphaSignals } from "@/hooks/useAlphaSignals";
 import { useTotalMarketValue } from "@/hooks/useIndexCache";
 import { usePrefetchCards } from "@/hooks/usePrefetch";
+import { usePricingHealth } from "@/hooks/usePricingHealth";
 import { SkeletonIndexCard } from "@/components/SkeletonCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
@@ -80,6 +81,7 @@ import MacroCorrelation from "@/components/MacroCorrelation";
 
 const Index = () => {
   const { data: liveCards, isLoading, dataUpdatedAt } = useLiveCards();
+  const { health } = usePricingHealth();
   const marketOpen = useMarketStatus();
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -87,6 +89,10 @@ const Index = () => {
   const { checkSubscription } = useAuth();
 
   const [chartRefreshKey, setChartRefreshKey] = useState(0);
+
+  const fallbackRawCards = useMemo(() => rawCards.map((card) => ({ ...card, change: 0 })), []);
+  const fallbackGradedCards = useMemo(() => gradedCards.map((card) => ({ ...card, change: 0 })), []);
+  const fallbackSealedProducts = useMemo(() => sealedProducts.map((product) => ({ ...product, change: 0 })), []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -114,12 +120,13 @@ const Index = () => {
     }
   }, [searchParams, checkSubscription, setSearchParams, toast]);
 
-  const displayCards = liveCards && liveCards.length > 0 ? liveCards : rawCards;
+  const displayCards = liveCards && liveCards.length > 0 ? liveCards : fallbackRawCards;
   const liveGradedCards = useGradedCards(liveCards);
-  const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : gradedCards;
+  const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : fallbackGradedCards;
   const liveSealedProducts = useSealedProducts(liveCards);
-  const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : sealedProducts;
-  const isLive = !!liveCards && liveCards.length > 0;
+  const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : fallbackSealedProducts;
+  const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
+  const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
   const rawIndex = getIndexValue(displayCards);
   const rawChange = getIndexChange(displayCards);
@@ -183,6 +190,8 @@ const Index = () => {
           onSearchFocus={handleSearchFocus}
           topMoverName={topMover?.name}
           topMoverChange={topMover?.change}
+          isLive={isLive}
+          cardCount={displayCards.length}
         />
 
         <SocialProofBar

@@ -35,9 +35,11 @@ interface HeroSectionProps {
   onSearchFocus?: () => void;
   topMoverName?: string;
   topMoverChange?: number;
+  isLive?: boolean;
+  cardCount?: number;
 }
 
-const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange }: HeroSectionProps) => {
+const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = false, cardCount = 0 }: HeroSectionProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
@@ -48,9 +50,9 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange }: HeroSectio
   const particleCount = isMobile ? 0 : 10;
 
   const hookLine =
-    topMoverName && topMoverChange !== undefined
+    isLive && topMoverName && topMoverChange !== undefined
       ? `${topMoverName} just moved ${topMoverChange >= 0 ? "+" : ""}${topMoverChange.toFixed(1)}% — the market is live right now.`
-      : "Your cards are moving right now — track the market before it moves again.";
+      : "Live pricing is degraded right now — showing fallback catalog data while sources refresh.";
 
   return (
     <motion.div
@@ -167,10 +169,19 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange }: HeroSectio
                 transition={{ delay: 0.38, duration: 0.45 }}
                 className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed"
               >
-                The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> aggregates
-                TCGPlayer, eBay, and PriceCharting into one consensus price — accurate within{" "}
-                <span className="text-foreground font-semibold">99% of TCGPlayer market</span>. Track
-                holdings, spot arbitrage, and time the market with AI signals.
+                {isLive ? (
+                  <>
+                    The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> tracks
+                    available market sources in real time and shows live movement when source coverage is healthy.
+                    Track holdings, spot arbitrage, and time the market with AI signals.
+                  </>
+                ) : (
+                  <>
+                    The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> is currently in
+                    fallback mode because live source coverage is degraded. Prices on this screen may be cached or
+                    catalog-based until the upstream feeds recover.
+                  </>
+                )}
               </motion.p>
 
               <motion.div
@@ -205,7 +216,9 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange }: HeroSectio
                 transition={{ delay: 0.54 }}
                 className="font-mono text-[10px] text-primary/70 tracking-wide"
               >
-                ✓ 99% TCGPlayer accuracy &nbsp;·&nbsp; ✓ No credit card &nbsp;·&nbsp; ✓ Cancel anytime &nbsp;·&nbsp; ✓ 3,000+ live cards
+                {isLive
+                  ? `✓ No credit card · ✓ Cancel anytime · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`
+                  : "⚠ Fallback catalog active · live source coverage degraded"}
               </motion.p>
             </div>
           </div>
