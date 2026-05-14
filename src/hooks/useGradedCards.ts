@@ -69,8 +69,8 @@ export function useGradedCards(rawCards: CardData[] | undefined) {
         const gradedLow = Math.round(card.low * multiplier * 0.85 * 100) / 100;
         const gradedMid = Math.round(card.mid * multiplier * 100) / 100;
 
-        const changeSeed = ((variantHash >> 16) % 200 - 100) / 100;
-        const gradedChange = Math.round((card.change + changeSeed * 1.5) * 100) / 100;
+        // Preserve only source-backed raw movement; do not add synthetic graded deltas.
+        const gradedChange = card.change;
 
         gradedCards.push({
           name: card.name,
