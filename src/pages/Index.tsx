@@ -90,6 +90,10 @@ const Index = () => {
 
   const [chartRefreshKey, setChartRefreshKey] = useState(0);
 
+  const fallbackRawCards = useMemo(() => rawCards.map((card) => ({ ...card, change: 0 })), []);
+  const fallbackGradedCards = useMemo(() => gradedCards.map((card) => ({ ...card, change: 0 })), []);
+  const fallbackSealedProducts = useMemo(() => sealedProducts.map((product) => ({ ...product, change: 0 })), []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setChartRefreshKey((k) => k + 1);
@@ -116,11 +120,11 @@ const Index = () => {
     }
   }, [searchParams, checkSubscription, setSearchParams, toast]);
 
-  const displayCards = liveCards && liveCards.length > 0 ? liveCards : rawCards;
+  const displayCards = liveCards && liveCards.length > 0 ? liveCards : fallbackRawCards;
   const liveGradedCards = useGradedCards(liveCards);
-  const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : gradedCards;
+  const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : fallbackGradedCards;
   const liveSealedProducts = useSealedProducts(liveCards);
-  const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : sealedProducts;
+  const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : fallbackSealedProducts;
   const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
   const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
