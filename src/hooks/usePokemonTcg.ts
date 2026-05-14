@@ -35,7 +35,7 @@ export function useLiveCards() {
     queryKey: ["live-cards"],
     queryFn: async () => {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000); // 15s circuit breaker
+      const timeout = setTimeout(() => controller.abort(), 60000); // 60s circuit breaker for deeper pull
 
       try {
         const apiCards = await fetchHighValueCards(5000);
