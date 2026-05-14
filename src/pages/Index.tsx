@@ -19,6 +19,7 @@ import ProGate from "@/components/ProGate";
 import { useAlphaSignals } from "@/hooks/useAlphaSignals";
 import { useTotalMarketValue } from "@/hooks/useIndexCache";
 import { usePrefetchCards } from "@/hooks/usePrefetch";
+import { usePricingHealth } from "@/hooks/usePricingHealth";
 import { SkeletonIndexCard } from "@/components/SkeletonCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
@@ -80,6 +81,7 @@ import MacroCorrelation from "@/components/MacroCorrelation";
 
 const Index = () => {
   const { data: liveCards, isLoading, dataUpdatedAt } = useLiveCards();
+  const { health } = usePricingHealth();
   const marketOpen = useMarketStatus();
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -119,7 +121,8 @@ const Index = () => {
   const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : gradedCards;
   const liveSealedProducts = useSealedProducts(liveCards);
   const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : sealedProducts;
-  const isLive = !!liveCards && liveCards.length > 0;
+  const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
+  const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
   const rawIndex = getIndexValue(displayCards);
   const rawChange = getIndexChange(displayCards);
