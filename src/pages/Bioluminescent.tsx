@@ -10,6 +10,7 @@ import { Plus, Send, Trash2, Sparkles, FileDown, ArrowRight, Lock } from "lucide
 type Thread = { id: string; title: string; updated_at: string };
 type Msg = { id?: string; role: "user" | "assistant"; content: string };
 
+const MASTER_KIT_PDF = "/PGVA_Gov_Contracting_MASTER_KIT_v7.pdf";
 const KIT_PDF = "/PGVA_Gov_Contracting_Kit_v6.pdf";
 const FILLABLE_PDF = "/PGVA_Gov_Contracting_Fillable_v5.pdf";
 
@@ -322,19 +323,22 @@ const Bioluminescent = () => {
         <div className="max-w-6xl mx-auto rounded-3xl bg-gradient-to-br from-white via-emerald-50/60 to-cyan-50/60 border border-emerald-100/70 p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">Government Contracting Master Kit · v6</h2>
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">Government Contracting Master Kit · v7 (Combined)</h2>
               <p className="mt-1 text-slate-600 text-sm max-w-xl">
-                7 tiers · procurement flow · DMV outreach roster (agencies, primes, 8(a) peers within 25 mi of Dulles) · cold-email templates. Compresses 120-day onboarding to 45–60.
+                One PDF: procurement flow + 7 tiers + DMV outreach roster + fillable forms with highlighted blanks and source links. Compresses 120-day onboarding to 45–60.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               {kitUnlocked ? (
                 <>
-                  <a href={KIT_PDF} download className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 shadow-sm">
-                    <FileDown className="h-4 w-4" /> Master Kit v6
+                  <a href={MASTER_KIT_PDF} download className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 shadow-sm">
+                    <FileDown className="h-4 w-4" /> Combined Master Kit v7
                   </a>
-                  <a href={FILLABLE_PDF} download className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-50">
-                    <FileDown className="h-4 w-4" /> Fillable v5
+                  <a href={KIT_PDF} download className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-xs font-medium hover:bg-emerald-50">
+                    Kit only
+                  </a>
+                  <a href={FILLABLE_PDF} download className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-xs font-medium hover:bg-emerald-50">
+                    Fillable only
                   </a>
                 </>
               ) : (
