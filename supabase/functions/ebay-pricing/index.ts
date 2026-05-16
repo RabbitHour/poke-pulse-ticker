@@ -3,7 +3,7 @@
 // relevance filtering so we don't end up medianing sleeves/proxies/lots.
 // Also computes a live %change vs the previous cached median per query.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
