@@ -1,6 +1,6 @@
 // Unicorn AI Builder — streaming chat via Lovable AI Gateway.
 // Auth-required. Persists user + assistant messages to public.unicorn_messages.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
