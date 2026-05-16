@@ -3,7 +3,7 @@
 // pricing-health sources, asks Claude (with Gemini fallback) to diagnose, and emails
 // contact@poke-pulse-ticker.com via Brevo if anything is offline or drifting.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
