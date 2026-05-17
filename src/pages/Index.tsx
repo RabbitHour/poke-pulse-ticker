@@ -13,7 +13,7 @@ import TrendingCards from "@/components/TrendingCards";
 import InlineUpgradeNudge from "@/components/InlineUpgradeNudge";
 import StickyUpgradeBanner from "@/components/StickyUpgradeBanner";
 import IndexDayChart from "@/components/IndexDayChart";
-import MarketClosedOverlay, { useMarketStatus } from "@/components/MarketClosedOverlay";
+import { useMarketStatus } from "@/components/MarketClosedOverlay";
 import LazySection from "@/components/LazySection";
 import ProGate from "@/components/ProGate";
 import { useAlphaSignals } from "@/hooks/useAlphaSignals";
@@ -38,7 +38,6 @@ import EraIndexCards from "@/components/EraIndexCards";
 import MarketTrendSummary from "@/components/MarketTrendSummary";
 import MarketIntelWidget from "@/components/MarketIntelWidget";
 import TrustSignals from "@/components/TrustSignals";
-import SystemStatusIndicator from "@/components/SystemStatusIndicator";
 import AlphaSignals from "@/components/AlphaSignals";
 import GradingArbitrage from "@/components/GradingArbitrage";
 import GradeRatioArbitrageBot from "@/components/GradeRatioArbitrageBot";
@@ -56,7 +55,6 @@ import InstitutionalGate from "@/components/InstitutionalGate";
 import SetHeatmap from "@/components/SetHeatmap";
 import SealedBoxHeatmap from "@/components/SealedBoxHeatmap";
 import JPtoENTracker from "@/components/JPtoENTracker";
-import DataHealthDashboard from "@/components/DataHealthDashboard";
 import ImportFromTCGPlayer from "@/components/ImportFromTCGPlayer";
 import SubscriptionTiers from "@/components/SubscriptionTiers";
 import TeamPlanCTA from "@/components/TeamPlanCTA";
@@ -73,9 +71,7 @@ import PokeRaceSection from "@/components/PokeRaceSection";
 import GradingROICalculator from "@/components/GradingROICalculator";
 import AIMarketInsights from "@/components/AIMarketInsights";
 import EbayLiveDeals from "@/components/EbayLiveDeals";
-import LiveFreshnessIndicator from "@/components/LiveFreshnessIndicator";
 import PulseWalletWidget from "@/components/PulseWalletWidget";
-import CertifiedDataPartner from "@/components/CertifiedDataPartner";
 import MacroCorrelation from "@/components/MacroCorrelation";
 
 
@@ -212,9 +208,6 @@ const Index = () => {
         {/* === PULSE ENGINE WALLET — PRO USERS ONLY === */}
         <PulseWalletWidget />
 
-        {/* === CERTIFIED DATA PARTNER BANNER === */}
-        <CertifiedDataPartner />
-
         {/* === EBAY LIVE DEALS — MOVED UP for buy intent === */}
         <LazySection minHeight="200px">
           <EbayLiveDeals />
@@ -262,18 +255,10 @@ const Index = () => {
           </div>
         )}
 
-        <LazySection minHeight="70px">
-          <LiveFreshnessIndicator
-            isLive={isLive}
-            lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
-          />
-        </LazySection>
-
         {(() => {
           const isNYSE = marketOpen;
           return (
             <div className="relative">
-              {!isNYSE && <MarketClosedOverlay />}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                 <IndexDayChart
                   title="RAW 1000 INDEX"
@@ -405,14 +390,6 @@ const Index = () => {
 
         <LazySection minHeight="70px">
           <TrustSignals />
-        </LazySection>
-
-        <LazySection minHeight="50px">
-          <SystemStatusIndicator />
-        </LazySection>
-
-        <LazySection minHeight="150px">
-          <DataHealthDashboard />
         </LazySection>
 
         <div className="relative">
