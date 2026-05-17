@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Briefcase, Layers, TrendingUp, Zap, ArrowRight, Activity } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import heroCardFan from "@/assets/hero-card-fan.jpg";
+import HeroTopMovers from "@/components/HeroTopMovers";
 
 const actions = [
   {
@@ -176,19 +176,12 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.42, duration: 0.45 }}
-                className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/20 lg:hidden"
+                className="lg:hidden"
               >
-                <img
-                  src={heroCardFan}
-                  alt="A bright spread of collectible cards glowing on a tabletop"
-                  className="h-full w-full object-cover"
-                  width={1024}
-                  height={1280}
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
-                  <p className="font-display text-lg font-extrabold text-foreground">Big cards. Bold moves.</p>
-                  <p className="text-xs text-muted-foreground">From grails to daily movers, the market feels alive again.</p>
-                </div>
+                <p className="font-mono text-[10px] font-bold tracking-wider text-primary uppercase mb-2">
+                  Top 24h Movers
+                </p>
+                <HeroTopMovers />
               </motion.div>
 
               <motion.div
@@ -245,19 +238,12 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
               initial={{ scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.32, duration: 0.45 }}
-              className="relative hidden w-full overflow-hidden rounded-lg border border-primary/20 bg-muted/20 lg:block"
+              className="hidden w-full lg:block"
             >
-              <img
-                src={heroCardFan}
-                alt="A bright spread of collectible cards glowing on a tabletop"
-                className="h-full w-full object-cover"
-                width={1024}
-                height={1280}
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
-                <p className="font-display text-2xl font-extrabold text-foreground">Big cards. Bold moves.</p>
-                <p className="mt-1 text-sm text-muted-foreground">A brighter first look for collectors, flippers, and Poké market watchers.</p>
-              </div>
+              <p className="font-mono text-[10px] font-bold tracking-wider text-primary uppercase mb-2">
+                Top 24h Movers
+              </p>
+              <HeroTopMovers />
             </motion.div>
           </div>
         </div>
