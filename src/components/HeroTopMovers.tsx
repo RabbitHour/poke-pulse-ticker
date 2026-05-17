@@ -27,8 +27,8 @@ function pickTop<T extends { change?: number; _image?: string; image?: string; n
 
 const HeroTopMovers = () => {
   const { data: rawCards } = useLiveCards();
-  const { data: gradedCards } = useGradedCards();
-  const { data: sealedProducts } = useSealedProducts();
+  const gradedCards = useGradedCards(rawCards);
+  const sealedProducts = useSealedProducts(rawCards);
 
   const movers = useMemo<Mover[]>(() => {
     const top = (label: string, c: any): Mover | null =>
