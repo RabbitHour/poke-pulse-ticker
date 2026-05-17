@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Briefcase, Layers, TrendingUp, Zap, ArrowRight, Activity } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import heroCardFan from "@/assets/hero-card-fan.jpg";
 
 const actions = [
   {
@@ -51,8 +52,8 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
 
   const hookLine =
     isLive && topMoverName && topMoverChange !== undefined
-      ? `${topMoverName} just moved ${topMoverChange >= 0 ? "+" : ""}${topMoverChange.toFixed(1)}% — the market is live right now.`
-      : "Live pricing is degraded right now — showing fallback catalog data while sources refresh.";
+      ? `${topMoverName} just moved ${topMoverChange >= 0 ? "+" : ""}${topMoverChange.toFixed(1)}% — the market is moving right now.`
+      : "Search standout cards, watch fresh prices, and enjoy a brighter Poké market view.";
 
   return (
     <motion.div
@@ -109,8 +110,8 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
       </div>
 
       <div className="relative px-5 py-7 sm:px-8 sm:py-9 border-b border-border/60">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-4 flex-1 min-w-0">
             <motion.div
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -139,9 +140,7 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1"
               >
                 <Activity className="w-3.5 h-3.5 text-primary" />
-                <span className="font-mono text-[10px] font-bold tracking-wider text-primary uppercase">
-                  Live Pokémon Market Terminal
-                </span>
+                <span className="font-mono text-[10px] font-bold tracking-wider text-primary uppercase">Live Poké Market Terminal</span>
               </motion.div>
 
               <motion.h1
@@ -169,20 +168,28 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 transition={{ delay: 0.38, duration: 0.45 }}
                 className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed"
               >
-                {isLive ? (
-                  <>
-                    The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> tracks
-                    available market sources in real time and shows live movement when source coverage is healthy.
-                    Track holdings, spot arbitrage, and time the market with AI signals.
-                  </>
-                ) : (
-                  <>
-                    The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> is currently in
-                    fallback mode because live source coverage is degraded. Prices on this screen may be cached or
-                    catalog-based until the upstream feeds recover.
-                  </>
-                )}
+                The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> helps collectors scan
+                standout cards, follow momentum, and move from discovery to action with a cleaner market view.
               </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.42, duration: 0.45 }}
+                className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/20 lg:hidden"
+              >
+                <img
+                  src={heroCardFan}
+                  alt="A bright spread of collectible cards glowing on a tabletop"
+                  className="h-full w-full object-cover"
+                  width={1024}
+                  height={1280}
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
+                  <p className="font-display text-lg font-extrabold text-foreground">Big cards. Bold moves.</p>
+                  <p className="text-xs text-muted-foreground">From grails to daily movers, the market feels alive again.</p>
+                </div>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -218,22 +225,41 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
               >
                 {isLive
                   ? `✓ No credit card · ✓ Cancel anytime · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`
-                  : "⚠ Fallback catalog active · live source coverage degraded"}
+                  : `✓ Search free · ✓ Explore standout cards · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`}
               </motion.p>
             </div>
           </div>
 
-          <motion.div
-            initial={{ scale: 0.82, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.28, type: "spring", stiffness: 190 }}
-            className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-lg border border-primary/20 bg-primary/5"
-          >
-            <div className="h-2.5 w-2.5 rounded-full bg-primary pulse-live" />
-            <span className="font-mono text-xs text-primary font-semibold uppercase tracking-wider">
-              Live
-            </span>
-          </motion.div>
+          <div className="flex items-start justify-between gap-3 lg:flex-col lg:w-full lg:max-w-[320px]">
+            <motion.div
+              initial={{ scale: 0.82, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.28, type: "spring", stiffness: 190 }}
+              className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-lg border border-primary/20 bg-primary/5"
+            >
+              <div className="h-2.5 w-2.5 rounded-full bg-primary pulse-live" />
+              <span className="font-mono text-xs text-primary font-semibold uppercase tracking-wider">Live</span>
+            </motion.div>
+
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.32, duration: 0.45 }}
+              className="relative hidden w-full overflow-hidden rounded-lg border border-primary/20 bg-muted/20 lg:block"
+            >
+              <img
+                src={heroCardFan}
+                alt="A bright spread of collectible cards glowing on a tabletop"
+                className="h-full w-full object-cover"
+                width={1024}
+                height={1280}
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
+                <p className="font-display text-2xl font-extrabold text-foreground">Big cards. Bold moves.</p>
+                <p className="mt-1 text-sm text-muted-foreground">A brighter first look for collectors, flippers, and Poké market watchers.</p>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
