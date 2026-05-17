@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Briefcase, Layers, TrendingUp, Zap, ArrowRight, Activity } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import heroCardFan from "@/assets/hero-card-fan.jpg";
 
 const actions = [
   {
@@ -51,8 +52,8 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
 
   const hookLine =
     isLive && topMoverName && topMoverChange !== undefined
-      ? `${topMoverName} just moved ${topMoverChange >= 0 ? "+" : ""}${topMoverChange.toFixed(1)}% — the market is live right now.`
-      : "Live pricing is degraded right now — showing fallback catalog data while sources refresh.";
+      ? `${topMoverName} just moved ${topMoverChange >= 0 ? "+" : ""}${topMoverChange.toFixed(1)}% — the market is moving right now.`
+      : "Search standout cards, watch fresh prices, and enjoy a brighter Poké market view.";
 
   return (
     <motion.div
