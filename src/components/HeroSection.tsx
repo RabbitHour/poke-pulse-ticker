@@ -162,35 +162,34 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 {hookLine}
               </motion.p>
 
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.38, duration: 0.45 }}
-                  className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed"
-                >
-                  The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> helps collectors scan
-                  standout cards, follow momentum, and move from discovery to action with a cleaner market view.
-                </motion.p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.38, duration: 0.45 }}
+                className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed"
+              >
+                The <span className="text-foreground font-medium">Poke-Pulse-Engine™</span> helps collectors scan
+                standout cards, follow momentum, and move from discovery to action with a cleaner market view.
+              </motion.p>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.42, duration: 0.45 }}
-                  className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/20 lg:hidden"
-                >
-                  <img
-                    src={heroCardFan}
-                    alt="A bright spread of collectible cards glowing on a tabletop"
-                    className="h-full w-full object-cover"
-                    width={1024}
-                    height={1280}
-                    fetchPriority="high"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
-                    <p className="font-display text-lg font-extrabold text-foreground">Big cards. Bold moves.</p>
-                    <p className="text-xs text-muted-foreground">From grails to daily movers, the market feels alive again.</p>
-                  </div>
-                </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.42, duration: 0.45 }}
+                className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/20 lg:hidden"
+              >
+                <img
+                  src={heroCardFan}
+                  alt="A bright spread of collectible cards glowing on a tabletop"
+                  className="h-full w-full object-cover"
+                  width={1024}
+                  height={1280}
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
+                  <p className="font-display text-lg font-extrabold text-foreground">Big cards. Bold moves.</p>
+                  <p className="text-xs text-muted-foreground">From grails to daily movers, the market feels alive again.</p>
+                </div>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -224,9 +223,9 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 transition={{ delay: 0.54 }}
                 className="font-mono text-[10px] text-primary/70 tracking-wide"
               >
-                  {isLive
-                    ? `✓ No credit card · ✓ Cancel anytime · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`
-                    : `✓ Search free · ✓ Explore standout cards · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`}
+                {isLive
+                  ? `✓ No credit card · ✓ Cancel anytime · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`
+                  : `✓ Search free · ✓ Explore standout cards · ✓ ${cardCount.toLocaleString("en-US")} cards loaded`}
               </motion.p>
             </div>
           </div>
@@ -254,7 +253,6 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 className="h-full w-full object-cover"
                 width={1024}
                 height={1280}
-                fetchPriority="high"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/35 to-transparent p-4">
                 <p className="font-display text-2xl font-extrabold text-foreground">Big cards. Bold moves.</p>
