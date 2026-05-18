@@ -43,10 +43,14 @@ const HeroTopMovers = () => {
   const isMobile = useIsMobile();
 
   const { hero, ring } = useMemo(() => {
+    const rawList = (rawCards && rawCards.length > 0 ? rawCards : fallbackRaw) as any[];
+    const gradedList = (gradedCards && gradedCards.length > 0 ? gradedCards : fallbackGraded) as any[];
+    const sealedList = (sealedProducts && sealedProducts.length > 0 ? sealedProducts : fallbackSealed) as any[];
+
     const pool: Mover[] = [
-      ...topN(rawCards as any, 3).map((c) => toMover("RAW", c)!),
-      ...topN(gradedCards as any, 2).map((c) => toMover("GRADED", c)!),
-      ...topN(sealedProducts as any, 2).map((c) => toMover("SEALED", c)!),
+      ...topN(rawList, 3).map((c) => toMover("RAW", c)!),
+      ...topN(gradedList, 2).map((c) => toMover("GRADED", c)!),
+      ...topN(sealedList, 2).map((c) => toMover("SEALED", c)!),
     ].filter(Boolean) as Mover[];
 
     const sorted = pool.sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
