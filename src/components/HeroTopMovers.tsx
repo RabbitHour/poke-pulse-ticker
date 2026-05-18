@@ -4,6 +4,7 @@ import { useLiveCards } from "@/hooks/usePokemonTcg";
 import { useGradedCards } from "@/hooks/useGradedCards";
 import { useSealedProducts } from "@/hooks/useSealedProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { rawCards as fallbackRaw, gradedCards as fallbackGraded, sealedProducts as fallbackSealed } from "@/data/marketData";
 
 const FALLBACK_IMG = "/icon-192.png";
 
