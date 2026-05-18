@@ -113,16 +113,17 @@ const HeroTopMovers = () => {
   // Desktop: fanned card collage
   const heroUp = hero.change >= 0;
 
-  // 4 ring positions (matching v1 prototype geometry)
+  // 4 ring positions — kept within container bounds
   const ringSlots = [
-    "absolute top-1/2 left-0 -translate-y-1/2 -rotate-12 w-28 z-10",       // far-left back
-    "absolute top-1/2 right-0 -translate-y-1/2 rotate-12 w-28 z-10",       // far-right back
-    "absolute -top-2 left-1/2 -translate-x-1/2 -rotate-3 w-32 z-20",       // top slanted
-    "absolute -bottom-4 left-[18%] -rotate-6 w-24 z-30",                   // bottom floating
+    "absolute top-6 left-0 -rotate-12 w-24 z-10",                           // far-left back
+    "absolute top-6 right-0 rotate-12 w-24 z-10",                           // far-right back
+    "absolute top-0 left-1/2 -translate-x-1/2 -rotate-3 w-28 z-20",         // top slanted
+    "absolute bottom-0 left-[14%] -rotate-6 w-20 z-30",                     // bottom floating
   ];
 
   return (
-    <div className="relative w-full h-[290px] mx-auto">
+    <div className="relative w-full h-[260px] mx-auto overflow-hidden">
+
       {/* ring cards */}
       {ring.map((m, i) => {
         const up = m.change >= 0;
