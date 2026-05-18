@@ -17,22 +17,26 @@ type Mover = {
   image: string;
 };
 
-function topN<T extends { change?: number }>(list: T[] | undefined, n: number): T[] {
+function topN<T extends { change?: number; _image?: string; image?: string }>(
+  list: T[] | undefined,
+  n: number
+): T[] {
   if (!list || list.length === 0) return [];
   return [...list]
+    .filter((c) => Boolean(c._image || c.image))
     .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
     .slice(0, n);
 }
 
 const toMover = (label: string, c: any): Mover | null =>
-  c
+  c && (c._image || c.image)
     ? {
         label,
         name: c.name,
         set: c.set,
         market: Number(c.market) || 0,
         change: Number(c.change) || 0,
-        image: c._image || c.image || FALLBACK_IMG,
+        image: c._image || c.image,
       }
     : null;
 
