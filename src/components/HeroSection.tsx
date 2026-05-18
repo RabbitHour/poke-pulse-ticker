@@ -61,7 +61,7 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
       initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}
       animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={isMobile ? { duration: 0 } : { duration: 0.55, ease: "easeOut" }}
-      className="terminal-card hero-glow-border overflow-hidden relative"
+      className="terminal-card hero-glow-border overflow-hidden relative border-2 border-primary/70"
     >
       <motion.div
         className="absolute inset-0 pointer-events-none overflow-hidden"
