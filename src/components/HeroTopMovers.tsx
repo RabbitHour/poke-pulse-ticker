@@ -165,7 +165,7 @@ const HeroTopMovers = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.15, duration: 0.5 }}
         whileHover={{ scale: 1.06 }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-1 w-40 z-40"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-1 w-36 z-40"
       >
         <div className="relative group">
           <div className="absolute inset-0 -z-10 bg-primary/40 blur-3xl opacity-60 group-hover:opacity-100 transition-opacity" />
