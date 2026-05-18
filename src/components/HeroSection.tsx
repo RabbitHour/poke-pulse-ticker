@@ -223,26 +223,22 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
             </div>
           </div>
 
-          <div className="flex items-start justify-between gap-3 lg:flex-col lg:w-full lg:max-w-[320px]">
-            <motion.div
-              initial={{ scale: 0.82, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.28, type: "spring", stiffness: 190 }}
-              className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-lg border border-primary/20 bg-primary/5"
-            >
-              <div className="h-2.5 w-2.5 rounded-full bg-primary pulse-live" />
-              <span className="font-mono text-xs text-primary font-semibold uppercase tracking-wider">Live</span>
-            </motion.div>
-
+          <div className="flex items-start justify-between gap-3 lg:flex-col lg:w-full lg:max-w-[380px] lg:shrink-0">
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.32, duration: 0.45 }}
               className="hidden w-full lg:block"
             >
-              <p className="font-mono text-[10px] font-bold tracking-wider text-primary uppercase mb-2">
-                Top 24h Movers
-              </p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                  <div className="h-2 w-2 rounded-full bg-primary pulse-live" />
+                  <span className="font-mono text-[10px] font-bold tracking-wider text-primary uppercase">Live</span>
+                </div>
+                <p className="font-mono text-[10px] font-bold tracking-[0.18em] text-primary uppercase">
+                  Top 24h Movers
+                </p>
+              </div>
               <HeroTopMovers />
             </motion.div>
           </div>
