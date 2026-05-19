@@ -1,14 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useLiveCards } from "@/hooks/usePokemonTcg";
 import { useGradedCards } from "@/hooks/useGradedCards";
-import { useSealedProducts } from "@/hooks/useSealedProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { rawCards as fallbackRaw, gradedCards as fallbackGraded, sealedProducts as fallbackSealed } from "@/data/marketData";
-
-const FALLBACK_IMG = "/icon-192.png";
+import { rawCards as fallbackRaw, gradedCards as fallbackGraded } from "@/data/marketData";
 
 type Mover = {
+  key: string;
   label: string;
   name: string;
   set?: string;
@@ -17,62 +15,103 @@ type Mover = {
   image: string;
 };
 
-function topN<T extends { change?: number; _image?: string; image?: string }>(
-  list: T[] | undefined,
-  n: number
-): T[] {
-  if (!list || list.length === 0) return [];
-  return [...list]
-    .filter((c) => Boolean(c._image || c.image))
-    .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
-    .slice(0, n);
+const ROTATE_MS = 30 * 60 * 1000; // rotate the visible 3 every 30 minutes
+
+// Block placeholder / card-back / generic images so we never show "no image" tiles.
+function isBadImageUrl(url?: string): boolean {
+  if (!url) return true;
+  const u = url.toLowerCase();
+  return (
+    u.includes("icon-192") ||
+    u.includes("cardback") ||
+    u.includes("placeholder") ||
+    u.includes("/back.") ||
+    u.endsWith("/back.png") ||
+    u.endsWith("/back.jpg")
+  );
 }
 
-const toMover = (label: string, c: any): Mover | null =>
-  c && (c._image || c.image)
-    ? {
-        label,
-        name: c.name,
-        set: c.set,
-        market: Number(c.market) || 0,
-        change: Number(c.change) || 0,
-        image: c._image || c.image,
-      }
-    : null;
+function buildPool(rawCards: any[], gradedCards: any[], badImages: Set<string>): Mover[] {
+  const seen = new Set<string>();
+  const pool: Mover[] = [];
+
+  const pushIfGood = (label: string, c: any, displayName: string) => {
+    const image: string | undefined = c?._image || c?.image;
+    if (!image || isBadImageUrl(image) || badImages.has(image)) return;
+    const market = Number(c?.market) || 0;
+    const change = Number(c?.change) || 0;
+    if (market <= 0 || change === 0) return;
+    const key = `${displayName}|${c?.set || ""}|${image}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    pool.push({ key, label, name: displayName, set: c?.set, market, change, image });
+  };
+
+  [...rawCards]
+    .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
+    .slice(0, 25)
+    .forEach((c) => pushIfGood("RAW", c, c.name));
+
+  // Graded: include grade in the name so price ↔ card always matches
+  [...gradedCards]
+    .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
+    .slice(0, 25)
+    .forEach((c) => pushIfGood("GRADED", c, c.grade ? `${c.name} · ${c.grade}` : c.name));
+
+  return pool
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+    .slice(0, 15);
+}
 
 const HeroTopMovers = () => {
   const { data: rawCards } = useLiveCards();
   const gradedCards = useGradedCards(rawCards);
-  const sealedProducts = useSealedProducts(rawCards);
   const isMobile = useIsMobile();
 
-  const { hero, ring } = useMemo(() => {
+  const [rotationIndex, setRotationIndex] = useState(0);
+  const [badImages, setBadImages] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const id = setInterval(() => setRotationIndex((i) => i + 1), ROTATE_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  const pool = useMemo(() => {
     const rawList = (rawCards && rawCards.length > 0 ? rawCards : fallbackRaw) as any[];
     const gradedList = (gradedCards && gradedCards.length > 0 ? gradedCards : fallbackGraded) as any[];
-    const sealedList = (sealedProducts && sealedProducts.length > 0 ? sealedProducts : fallbackSealed) as any[];
+    return buildPool(rawList, gradedList, badImages);
+  }, [rawCards, gradedCards, badImages]);
 
-    const pool: Mover[] = [
-      ...topN(rawList, 3).map((c) => toMover("RAW", c)!),
-      ...topN(gradedList, 2).map((c) => toMover("GRADED", c)!),
-      ...topN(sealedList, 2).map((c) => toMover("SEALED", c)!),
-    ].filter(Boolean) as Mover[];
+  const visible = useMemo(() => {
+    if (pool.length === 0) return [] as Mover[];
+    const need = isMobile ? 3 : 5;
+    const start = (rotationIndex * need) % pool.length;
+    const out: Mover[] = [];
+    for (let i = 0; i < need && i < pool.length; i++) {
+      out.push(pool[(start + i) % pool.length]);
+    }
+    return out;
+  }, [pool, rotationIndex, isMobile]);
 
-    const sorted = pool.sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
-    return { hero: sorted[0] || null, ring: sorted.slice(1, 5) };
-  }, [rawCards, gradedCards, sealedProducts]);
+  const markBad = (url: string) =>
+    setBadImages((prev) => {
+      if (prev.has(url)) return prev;
+      const next = new Set(prev);
+      next.add(url);
+      return next;
+    });
 
-  if (!hero) return null;
+  if (visible.length === 0) return null;
 
-  // Mobile: compact 3-up grid with hero featured
+  // Mobile: clean 3-up grid
   if (isMobile) {
-    const compact = [hero, ...ring].slice(0, 3);
     return (
       <div className="grid grid-cols-3 gap-2">
-        {compact.map((m, i) => {
+        {visible.map((m) => {
           const up = m.change >= 0;
           return (
             <div
-              key={`${m.label}-${i}`}
+              key={m.key}
               className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/30"
             >
               <div className="absolute top-1 left-1 z-10 px-1.5 py-0.5 rounded bg-background/80 backdrop-blur-sm font-mono text-[8px] font-bold tracking-wider text-primary">
@@ -92,13 +131,16 @@ const HeroTopMovers = () => {
                   alt={`${m.name} — top ${m.label.toLowerCase()} mover`}
                   loading="lazy"
                   className="w-full h-full object-contain"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG;
-                  }}
+                  onError={() => markBad(m.image)}
                 />
               </div>
               <div className="p-1.5 bg-background/60">
-                <p className="text-[10px] font-semibold text-foreground truncate">{m.name}</p>
+                <p className="text-[10px] font-semibold text-foreground truncate" title={m.name}>
+                  {m.name}
+                </p>
+                {m.set && (
+                  <p className="text-[8px] text-muted-foreground/80 truncate">{m.set}</p>
+                )}
                 <p className="text-[9px] text-muted-foreground truncate">
                   ${m.market.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </p>
@@ -110,26 +152,23 @@ const HeroTopMovers = () => {
     );
   }
 
-  // Desktop: fanned card collage
+  // Desktop: fanned collage
+  const [hero, ...ring] = visible;
   const heroUp = hero.change >= 0;
-
-  // 4 ring positions — kept within container bounds
   const ringSlots = [
-    "absolute top-6 left-0 -rotate-12 w-24 z-10",                           // far-left back
-    "absolute top-6 right-0 rotate-12 w-24 z-10",                           // far-right back
-    "absolute top-0 left-1/2 -translate-x-1/2 -rotate-3 w-28 z-20",         // top slanted
-    "absolute bottom-0 left-[14%] -rotate-6 w-20 z-30",                     // bottom floating
+    "absolute top-6 left-0 -rotate-12 w-24 z-10",
+    "absolute top-6 right-0 rotate-12 w-24 z-10",
+    "absolute top-0 left-1/2 -translate-x-1/2 -rotate-3 w-28 z-20",
+    "absolute bottom-0 left-[14%] -rotate-6 w-20 z-30",
   ];
 
   return (
     <div className="relative w-full h-[260px] mx-auto overflow-hidden">
-
-      {/* ring cards */}
       {ring.map((m, i) => {
         const up = m.change >= 0;
         return (
           <motion.div
-            key={`ring-${i}`}
+            key={m.key}
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 + i * 0.08, duration: 0.45 }}
@@ -142,9 +181,7 @@ const HeroTopMovers = () => {
                 alt={`${m.name} — ${m.label.toLowerCase()} mover`}
                 loading="lazy"
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG;
-                }}
+                onError={() => markBad(m.image)}
               />
               <div
                 className={`absolute top-1 right-1 px-1 py-0.5 rounded font-mono text-[8px] font-bold ${
@@ -159,8 +196,8 @@ const HeroTopMovers = () => {
         );
       })}
 
-      {/* hero centerpiece */}
       <motion.div
+        key={hero.key}
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.15, duration: 0.5 }}
@@ -178,9 +215,7 @@ const HeroTopMovers = () => {
               alt={`${hero.name} — top mover`}
               loading="eager"
               className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG;
-              }}
+              onError={() => markBad(hero.image)}
             />
             <div className="absolute bottom-0 inset-x-0 p-2 bg-black/85 backdrop-blur-md border-t border-white/15">
               <div className="flex justify-between items-center mb-0.5">
