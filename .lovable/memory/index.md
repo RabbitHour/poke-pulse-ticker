@@ -49,3 +49,4 @@ Updated: today
 - [SimTrader Ecosystem](mem://features/simulated-trading-ecosystem) — $100k start, AI bots, limit orders
 - [Compliance](mem://legal/compliance) — Obfuscation mode, ToS anti-scraping
 - [Dead Mans Switch](mem://features/dead-mans-switch) — `dead-mans-switch` edge fn alerts dev if index_cache stale >10min
+- [GitHub Watchdog](mem://features/github-watchdog) — `github-watchdog` edge fn every 5min, Claude diagnosis + Brevo email if repo API down or commits stale >2h
