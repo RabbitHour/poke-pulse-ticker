@@ -592,8 +592,7 @@ const Index = () => {
         </footer>
       </main>
 
-      <InstallPrompt />
-      {/* OnboardingWalkthrough removed — only InstallPrompt popup allowed */}
+      {/* All popups removed per user request */}
       <ShareButton />
     </div>
   );
