@@ -124,7 +124,7 @@ const TerminalHeader = () => {
     <>
       <header
         data-demo-hide
-        className="sticky top-0 z-50 border-b border-border/5 bg-terminal-header/98 backdrop-blur-xl"
+        className="sticky top-0 z-50 border-b border-border bg-terminal-header"
         style={{ boxShadow: "var(--shadow-header)" }}
       >
         <div className="flex items-center justify-between px-3 py-2 sm:px-5 sm:py-2.5 lg:px-5 xl:px-8 max-w-7xl mx-auto">
