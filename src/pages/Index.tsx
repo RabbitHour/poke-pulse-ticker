@@ -220,6 +220,9 @@ const Index = () => {
           <RecentNotableSales cards={displayCards} />
         </div>
 
+        {/* === SELL ON EBAY (affiliate, live TCG pricing) === */}
+        <SellOnEbaySection />
+
         {/* === MARKET INDEXES === */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
