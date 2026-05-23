@@ -90,6 +90,16 @@ async function probe(p: SourceProbe): Promise<{ name: string; isLive: boolean; l
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Service-role only — frontend should read cached `pricing_health` row from index_cache instead
+  const authToken = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!authToken || authToken !== Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+
+
   try {
     const results = await Promise.all(PROBES.map(probe));
     const liveCount = results.filter(r => r.isLive).length;

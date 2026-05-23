@@ -15,6 +15,16 @@ const ALERT_EMAIL = "contact@poke-pulse-ticker.com";
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Service-role only (cron-invoked)
+  const authToken = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!authToken || authToken !== Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+
+
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

@@ -80,6 +80,11 @@ Deno.serve(async (req) => {
     const { data: u } = await supa.auth.getUser();
     if (!u.user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+    // Owner-only — this is an internal AI tool with significant cost per call
+    if (u.user.email !== OWNER_EMAIL) {
+      return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const body = await req.json().catch(() => ({}));
     const mission: string = (body.mission ?? "").toString().slice(0, 4000);
     const preset: string = (body.preset ?? "civilian").toString();
