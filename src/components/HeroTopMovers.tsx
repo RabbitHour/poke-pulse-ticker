@@ -43,21 +43,23 @@ function buildPool(rawCards: any[], badImages: Set<string>): Mover[] {
     if (!c?._apiId) return;
     const market = Number(c?.market) || 0;
     const change = Number(c?.change) || 0;
-    if (market <= 0 || change === 0) return;
+    if (market <= 0) return;
     const key = `${c._apiId}|${image}`;
     if (seen.has(key)) return;
     seen.add(key);
     pool.push({ key, label: "RAW", name: c.name, set: c?.set, market, change, image });
   };
 
+  // Sort by |change| first so true movers float up, but DO NOT exclude
+  // change===0 — many TCGplayer-only cards have no Cardmarket momentum
+  // and would otherwise empty the hero entirely.
   [...rawCards]
     .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
-    .slice(0, 40)
+    .slice(0, 80)
     .forEach(pushIfGood);
 
-  return pool
-    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-    .slice(0, 15);
+  return pool.slice(0, 15);
+
 }
 
 const HeroTopMovers = () => {
