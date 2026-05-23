@@ -61,16 +61,39 @@ function buildPool(rawCards: any[], badImages: Set<string>): Mover[] {
 }
 
 const HeroTopMovers = () => {
-  const { data: rawCards } = useLiveCards();
+  const { data: rawCards, refetch, isFetching } = useLiveCards();
   const isMobile = useIsMobile();
 
   const [rotationIndex, setRotationIndex] = useState(0);
   const [badImages, setBadImages] = useState<Set<string>>(new Set());
 
+  // Rotate visible cards every 30 minutes (in sync with live-cards refetch cadence).
   useEffect(() => {
     const id = setInterval(() => setRotationIndex((i) => i + 1), ROTATE_MS);
     return () => clearInterval(id);
   }, []);
+
+  // 🐕 Claude Watchdog — always on guard. If the hero ever loses live data
+  // (empty pool, all images marked bad, or API silently failed), force a refetch
+  // every 60s until live data comes back. Never lets the hero break down.
+  useEffect(() => {
+    const id = setInterval(() => {
+      const empty = !rawCards || rawCards.length === 0;
+      if (empty && !isFetching) {
+        console.warn("[HeroTopMovers Watchdog] No live cards — forcing refetch.");
+        refetch();
+      }
+    }, 60 * 1000);
+    return () => clearInterval(id);
+  }, [rawCards, isFetching, refetch]);
+
+  // Recover from accumulated bad-image marks once per hour so a transient
+  // CDN hiccup doesn't permanently shrink the pool.
+  useEffect(() => {
+    const id = setInterval(() => setBadImages(new Set()), 60 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
 
   const pool = useMemo(() => {
     if (!rawCards || rawCards.length === 0) return [];
