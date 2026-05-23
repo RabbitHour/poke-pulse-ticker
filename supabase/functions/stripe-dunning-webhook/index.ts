@@ -12,7 +12,9 @@ serve(async (req) => {
 
   try {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const webhookSecret = Deno.env.get("STRIPE_DUNNING_WEBHOOK_SECRET");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
+    if (!webhookSecret) throw new Error("STRIPE_DUNNING_WEBHOOK_SECRET not configured");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const supabase = createClient(
@@ -20,20 +22,36 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const body = await req.text();
-    const event = JSON.parse(body);
+    // Verify Stripe signature on raw body
+    const rawBody = await req.text();
+    const sig = req.headers.get("stripe-signature");
+    if (!sig) {
+      return new Response(JSON.stringify({ error: "Missing stripe-signature" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let event;
+    try {
+      event = await stripe.webhooks.constructEventAsync(rawBody, sig, webhookSecret);
+    } catch (err) {
+      console.error("[DUNNING] Signature verification failed:", err);
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     console.log("[DUNNING] Event received:", event.type);
 
     // Handle failed payment events for win-back
     if (event.type === "invoice.payment_failed" || event.type === "customer.subscription.deleted") {
-      const obj = event.data.object;
+      const obj: any = event.data.object;
       const customerId = obj.customer;
       const attemptCount = obj.attempt_count || 1;
 
       // Get customer email
       const customer = await stripe.customers.retrieve(customerId);
-      if (customer.deleted) throw new Error("Customer deleted");
+      if ((customer as any).deleted) throw new Error("Customer deleted");
 
       const email = (customer as Stripe.Customer).email;
       const name = (customer as Stripe.Customer).name || email?.split("@")[0] || "there";
@@ -45,7 +63,7 @@ serve(async (req) => {
         });
       }
 
-      const templateName = event.type === "customer.subscription.deleted" ? "dunning-recovery" : "dunning-recovery";
+      const templateName = "dunning-recovery";
       const idempotencyKey = `dunning-${event.id}`;
 
       const { error } = await supabase.functions.invoke("send-transactional-email", {
