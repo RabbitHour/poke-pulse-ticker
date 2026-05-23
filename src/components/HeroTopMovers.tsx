@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useLiveCards } from "@/hooks/usePokemonTcg";
-import { useGradedCards } from "@/hooks/useGradedCards";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { rawCards as fallbackRaw, gradedCards as fallbackGraded } from "@/data/marketData";
 
 type Mover = {
   key: string;
@@ -31,32 +29,31 @@ function isBadImageUrl(url?: string): boolean {
   );
 }
 
-function buildPool(rawCards: any[], gradedCards: any[], badImages: Set<string>): Mover[] {
+// RELIABILITY RULE: only show cards whose image, name, set, and market price
+// all come from the SAME live TCGplayer record. No synthetic/graded multipliers,
+// no static fallback data — if we can't be reliable on price, we don't render.
+function buildPool(rawCards: any[], badImages: Set<string>): Mover[] {
   const seen = new Set<string>();
   const pool: Mover[] = [];
 
-  const pushIfGood = (label: string, c: any, displayName: string) => {
+  const pushIfGood = (c: any) => {
     const image: string | undefined = c?._image || c?.image;
     if (!image || isBadImageUrl(image) || badImages.has(image)) return;
+    // Require a live API id so we know image + price came from the same record.
+    if (!c?._apiId) return;
     const market = Number(c?.market) || 0;
     const change = Number(c?.change) || 0;
     if (market <= 0 || change === 0) return;
-    const key = `${displayName}|${c?.set || ""}|${image}`;
+    const key = `${c._apiId}|${image}`;
     if (seen.has(key)) return;
     seen.add(key);
-    pool.push({ key, label, name: displayName, set: c?.set, market, change, image });
+    pool.push({ key, label: "RAW", name: c.name, set: c?.set, market, change, image });
   };
 
   [...rawCards]
     .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
-    .slice(0, 25)
-    .forEach((c) => pushIfGood("RAW", c, c.name));
-
-  // Graded: include grade in the name so price ↔ card always matches
-  [...gradedCards]
-    .sort((a, b) => Math.abs((b.change ?? 0)) - Math.abs((a.change ?? 0)))
-    .slice(0, 25)
-    .forEach((c) => pushIfGood("GRADED", c, c.grade ? `${c.name} · ${c.grade}` : c.name));
+    .slice(0, 40)
+    .forEach(pushIfGood);
 
   return pool
     .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
@@ -65,7 +62,6 @@ function buildPool(rawCards: any[], gradedCards: any[], badImages: Set<string>):
 
 const HeroTopMovers = () => {
   const { data: rawCards } = useLiveCards();
-  const gradedCards = useGradedCards(rawCards);
   const isMobile = useIsMobile();
 
   const [rotationIndex, setRotationIndex] = useState(0);
@@ -77,10 +73,9 @@ const HeroTopMovers = () => {
   }, []);
 
   const pool = useMemo(() => {
-    const rawList = (rawCards && rawCards.length > 0 ? rawCards : fallbackRaw) as any[];
-    const gradedList = (gradedCards && gradedCards.length > 0 ? gradedCards : fallbackGraded) as any[];
-    return buildPool(rawList, gradedList, badImages);
-  }, [rawCards, gradedCards, badImages]);
+    if (!rawCards || rawCards.length === 0) return [];
+    return buildPool(rawCards as any[], badImages);
+  }, [rawCards, badImages]);
 
   const visible = useMemo(() => {
     if (pool.length === 0) return [] as Mover[];
