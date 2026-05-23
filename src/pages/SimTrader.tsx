@@ -11,8 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { CardData } from "@/data/marketData";
 import { getContestLeaderboard, type LeaderboardEntry, type BotDifficulty } from "@/data/tradingBots";
 import BotActivityFeed from "@/components/BotActivityFeed";
-import TournamentFomoBanner from "@/components/campaign/TournamentFomoBanner";
-import CampaignProBanner from "@/components/campaign/CampaignProBanner";
+// TournamentFomoBanner + CampaignProBanner removed — popups/FOMO banners disabled
 
 const FREE_DAILY_TRADES = 3;
 
