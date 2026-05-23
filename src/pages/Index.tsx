@@ -43,6 +43,7 @@ import GradingArbitrage from "@/components/GradingArbitrage";
 import GradeRatioArbitrageBot from "@/components/GradeRatioArbitrageBot";
 import AlphaAccuracy from "@/components/AlphaAccuracy";
 import RecentNotableSales from "@/components/RecentNotableSales";
+import SellOnEbaySection from "@/components/SellOnEbaySection";
 import CardSearch from "@/components/CardSearch";
 import PriceChart from "@/components/PriceChart";
 import SignalSummary from "@/components/SignalSummary";
