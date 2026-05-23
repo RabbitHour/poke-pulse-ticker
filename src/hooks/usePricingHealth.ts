@@ -26,29 +26,22 @@ export function usePricingHealth(refreshMs = 5 * 60 * 1000) {
     let cancelled = false;
 
     const loadFromCache = async () => {
-      const { data } = await supabase
-        .from("index_cache")
-        .select("data, expires_at")
-        .eq("cache_key", CACHE_KEY)
-        .maybeSingle();
-      if (!cancelled && data?.data) {
-        setHealth(data.data as unknown as PricingHealth);
-      }
-    };
-
-    const refresh = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("pricing-health", { body: {} });
-        if (!cancelled && !error && data) setHealth(data as PricingHealth);
-      } catch {
-        // fall back silently to cached value
+        const { data } = await supabase
+          .from("index_cache")
+          .select("data, expires_at")
+          .eq("cache_key", CACHE_KEY)
+          .maybeSingle();
+        if (!cancelled && data?.data) {
+          setHealth(data.data as unknown as PricingHealth);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
 
-    loadFromCache().then(refresh);
-    const interval = setInterval(refresh, refreshMs);
+    loadFromCache();
+    const interval = setInterval(loadFromCache, refreshMs);
     return () => { cancelled = true; clearInterval(interval); };
   }, [refreshMs]);
 
