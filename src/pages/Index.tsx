@@ -74,6 +74,7 @@ import AIMarketInsights from "@/components/AIMarketInsights";
 import EbayLiveDeals from "@/components/EbayLiveDeals";
 import PulseWalletWidget from "@/components/PulseWalletWidget";
 import MacroCorrelation from "@/components/MacroCorrelation";
+import LiveCardStrip from "@/components/LiveCardStrip";
 
 
 const Index = () => {
@@ -206,6 +207,14 @@ const Index = () => {
           cardCount={displayCards.length}
         />
 
+        {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
+        <LiveCardStrip
+          title="🔥 TOP LIVE CARDS — REAL-TIME TCGPLAYER"
+          subtitle="18 highest-value Poké cards trading right now"
+          count={18}
+          mode="value"
+        />
+
         {/* === PULSE ENGINE WALLET — PRO USERS ONLY === */}
         <PulseWalletWidget />
 
@@ -296,6 +305,20 @@ const Index = () => {
             <TopMoversTable cards={displayGraded} title="Top Movers — Graded Cards" isLoading={isLoading} />
           </div>
         </LazySection>
+
+        {/* === LIVE CARD STRIP — MIDDLE: interleaved value + momentum, offset so it shows different cards === */}
+        <LazySection minHeight="260px">
+          <LiveCardStrip
+            title="📈 MOST ACTIVE CARDS — NAMES + PRICES"
+            subtitle="Live names, live prices, live momentum — sourced from TCGPlayer"
+            count={18}
+            mode="mix"
+            offset={6}
+          />
+        </LazySection>
+
+
+
 
 
         <LazySection minHeight="200px">
