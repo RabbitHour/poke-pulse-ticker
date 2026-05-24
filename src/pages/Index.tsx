@@ -207,6 +207,14 @@ const Index = () => {
           cardCount={displayCards.length}
         />
 
+        {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
+        <LiveCardStrip
+          title="🔥 TOP LIVE CARDS — REAL-TIME TCGPLAYER"
+          subtitle="18 highest-value Poké cards trading right now"
+          count={18}
+          mode="value"
+        />
+
         {/* === PULSE ENGINE WALLET — PRO USERS ONLY === */}
         <PulseWalletWidget />
 
