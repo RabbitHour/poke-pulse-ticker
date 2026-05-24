@@ -74,6 +74,7 @@ import AIMarketInsights from "@/components/AIMarketInsights";
 import EbayLiveDeals from "@/components/EbayLiveDeals";
 import PulseWalletWidget from "@/components/PulseWalletWidget";
 import MacroCorrelation from "@/components/MacroCorrelation";
+import LiveCardStrip from "@/components/LiveCardStrip";
 
 
 const Index = () => {
