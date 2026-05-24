@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { Link } from "react-router-dom";
 import type { CardData } from "@/data/marketData";
