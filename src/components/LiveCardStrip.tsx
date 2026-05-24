@@ -37,6 +37,14 @@ const LiveCardStrip = ({
   const { data: quickCards } = useLiveCardsQuick();
   const rawCards = (fullCards && fullCards.length > 0) ? fullCards : quickCards;
 
+  // Rotate the visible window every 30 minutes to the NEXT batch of
+  // top movers/value cards, wrapping around the ordered pool.
+  const [rotation, setRotation] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setRotation((r) => r + 1), 30 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const cards = useMemo(() => {
     if (!rawCards || rawCards.length === 0) return [] as (CardData & { _apiId?: string; _image?: string })[];
     const pool = (rawCards as any[]).filter(
@@ -66,8 +74,14 @@ const LiveCardStrip = ({
       }
     }
 
-    return ordered.slice(offset, offset + count);
-  }, [rawCards, count, mode, offset]);
+    if (ordered.length === 0) return [];
+    const start = (offset + rotation * count) % ordered.length;
+    const out: any[] = [];
+    for (let i = 0; i < count && i < ordered.length; i++) {
+      out.push(ordered[(start + i) % ordered.length]);
+    }
+    return out;
+  }, [rawCards, count, mode, offset, rotation]);
 
   if (isLoading && cards.length === 0) {
     return (
