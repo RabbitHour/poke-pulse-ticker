@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchHighValueCards, searchCards, fetchCardById, toCardData, getBestPrice } from "@/lib/pokemonTcgApi";
+import { fetchHighValueCards, searchCards, fetchCardById, toCardData, getBestPrice, fetchTopHoloCardsQuick } from "@/lib/pokemonTcgApi";
 import type { PokemonTCGCard } from "@/lib/pokemonTcgApi";
 import type { CardData } from "@/data/marketData";
 
