@@ -68,6 +68,27 @@ export function useLiveCards() {
 }
 
 /**
+ * Fast first-paint hook: a single 250-card holofoil page so the hero
+ * has live cards to render within ~1-2s on cold loads, while the full
+ * useLiveCards pull continues in the background.
+ */
+export function useLiveCardsQuick() {
+  return useQuery({
+    queryKey: ["live-cards-quick"],
+    queryFn: async () => {
+      const apiCards = await fetchTopHoloCardsQuick(250);
+      return apiCards
+        .map(toCardData)
+        .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null && c.market > 0)
+        .sort((a, b) => b.market - a.market);
+    },
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
+  });
+}
+
+/**
  * Search cards by name via the API
  */
 export function useCardSearch(query: string) {
