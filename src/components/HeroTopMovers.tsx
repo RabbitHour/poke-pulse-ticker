@@ -121,7 +121,41 @@ const HeroTopMovers = () => {
       return next;
     });
 
-  if (visible.length === 0) return null;
+  // While live data is loading (or temporarily empty), show skeleton tiles
+  // instead of returning null — so the hero never goes blank during the
+  // initial multi-page TCGplayer pull (can take 30-60s on a fresh visit).
+  if (visible.length === 0) {
+    const count = isMobile ? 3 : 5;
+    if (isMobile) {
+      return (
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: count }).map((_, i) => (
+            <div
+              key={i}
+              className="aspect-[3/4] rounded-lg border border-primary/20 bg-muted/30 animate-pulse"
+            />
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className="relative w-full h-[260px] mx-auto">
+        {Array.from({ length: count }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-lg bg-muted/30 animate-pulse border border-primary/20"
+            style={{
+              width: 96,
+              height: 134,
+              top: `${10 + (i % 2) * 35}%`,
+              left: `${8 + i * 16}%`,
+              transform: `rotate(${i % 2 === 0 ? -6 : 6}deg)`,
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
 
   // Mobile: clean 3-up grid
   if (isMobile) {
