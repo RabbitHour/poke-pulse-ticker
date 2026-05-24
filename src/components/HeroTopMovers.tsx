@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useLiveCards } from "@/hooks/usePokemonTcg";
+import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type Mover = {
