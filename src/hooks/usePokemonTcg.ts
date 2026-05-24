@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchHighValueCards, searchCards, fetchCardById, toCardData, getBestPrice } from "@/lib/pokemonTcgApi";
+import { fetchHighValueCards, searchCards, fetchCardById, toCardData, getBestPrice, fetchTopHoloCardsQuick } from "@/lib/pokemonTcgApi";
 import type { PokemonTCGCard } from "@/lib/pokemonTcgApi";
 import type { CardData } from "@/data/marketData";
 
@@ -64,6 +64,27 @@ export function useLiveCards() {
     retry: 1, // Only retry once before falling back to cache
     // Initialize from cache while fetching
     placeholderData: () => getCachedCards() ?? undefined,
+  });
+}
+
+/**
+ * Fast first-paint hook: a single 250-card holofoil page so the hero
+ * has live cards to render within ~1-2s on cold loads, while the full
+ * useLiveCards pull continues in the background.
+ */
+export function useLiveCardsQuick() {
+  return useQuery({
+    queryKey: ["live-cards-quick"],
+    queryFn: async () => {
+      const apiCards = await fetchTopHoloCardsQuick(250);
+      return apiCards
+        .map(toCardData)
+        .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null && c.market > 0)
+        .sort((a, b) => b.market - a.market);
+    },
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
   });
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useLiveCards } from "@/hooks/usePokemonTcg";
+import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type Mover = {
@@ -63,7 +63,11 @@ function buildPool(rawCards: any[], badImages: Set<string>): Mover[] {
 }
 
 const HeroTopMovers = () => {
-  const { data: rawCards, refetch, isFetching } = useLiveCards();
+  const { data: fullCards, refetch, isFetching } = useLiveCards();
+  const { data: quickCards } = useLiveCardsQuick();
+  // Prefer the full pull once available; fall back to the fast first-page
+  // fetch so the hero renders live cards within ~1-2s on cold visits.
+  const rawCards = (fullCards && fullCards.length > 0) ? fullCards : quickCards;
   const isMobile = useIsMobile();
 
   const [rotationIndex, setRotationIndex] = useState(0);

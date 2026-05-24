@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useLiveCards } from "@/hooks/usePokemonTcg";
+import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { Link } from "react-router-dom";
 import type { CardData } from "@/data/marketData";
 
@@ -33,7 +33,9 @@ const LiveCardStrip = ({
   mode = "mix",
   offset = 0,
 }: Props) => {
-  const { data: rawCards, isLoading } = useLiveCards();
+  const { data: fullCards, isLoading } = useLiveCards();
+  const { data: quickCards } = useLiveCardsQuick();
+  const rawCards = (fullCards && fullCards.length > 0) ? fullCards : quickCards;
 
   const cards = useMemo(() => {
     if (!rawCards || rawCards.length === 0) return [] as (CardData & { _apiId?: string; _image?: string })[];

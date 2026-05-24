@@ -193,6 +193,25 @@ export async function fetchCardById(id: string): Promise<PokemonTCGCard> {
 }
 
 /**
+ * Fast first-paint fetch: a single 250-card holofoil page (~1-2s).
+ * Used to render the hero strip immediately on cold loads while the
+ * full multi-query high-value pull continues in the background.
+ */
+export async function fetchTopHoloCardsQuick(pageSize = 250): Promise<PokemonTCGCard[]> {
+  try {
+    const data: APIResponse = await proxyFetch("/cards", {
+      q: "tcgplayer.prices.holofoil.market:[1 TO *]",
+      pageSize: String(pageSize),
+      page: "1",
+      orderBy: "-tcgplayer.prices.holofoil.market",
+    });
+    return data.data;
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Fetch high-value cards with pricing data.
  * Uses minimal API calls to stay within pokemontcg.io rate limits (no API key = ~20 req/min).
  */
