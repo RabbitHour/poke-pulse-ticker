@@ -306,6 +306,20 @@ const Index = () => {
           </div>
         </LazySection>
 
+        {/* === LIVE CARD STRIP — MIDDLE: interleaved value + momentum, offset so it shows different cards === */}
+        <LazySection minHeight="260px">
+          <LiveCardStrip
+            title="📈 MOST ACTIVE CARDS — NAMES + PRICES"
+            subtitle="Live names, live prices, live momentum — sourced from TCGPlayer"
+            count={18}
+            mode="mix"
+            offset={6}
+          />
+        </LazySection>
+
+
+
+
 
         <LazySection minHeight="200px">
           <AIMarketInsights cards={displayCards} />
