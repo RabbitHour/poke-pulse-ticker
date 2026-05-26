@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
+import { useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { Link } from "react-router-dom";
 import type { CardData } from "@/data/marketData";
 
@@ -33,9 +33,7 @@ const LiveCardStrip = ({
   mode = "mix",
   offset = 0,
 }: Props) => {
-  const { data: fullCards, isLoading } = useLiveCards();
-  const { data: quickCards } = useLiveCardsQuick();
-  const rawCards = (fullCards && fullCards.length > 0) ? fullCards : quickCards;
+  const { data: rawCards, isLoading } = useLiveCardsQuick();
 
   // Rotate the visible window every 30 minutes to the NEXT batch of
   // top movers/value cards, wrapping around the ordered pool.
