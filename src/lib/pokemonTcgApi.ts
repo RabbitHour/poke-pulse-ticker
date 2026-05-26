@@ -199,12 +199,22 @@ export async function fetchCardById(id: string): Promise<PokemonTCGCard> {
  */
 export async function fetchTopHoloCardsQuick(pageSize = 250): Promise<PokemonTCGCard[]> {
   try {
-    const data: APIResponse = await proxyFetch("/cards", {
+    const params = new URLSearchParams({
       q: "tcgplayer.prices.holofoil.market:[1 TO *]",
       pageSize: String(pageSize),
       page: "1",
       orderBy: "-tcgplayer.prices.holofoil.market",
     });
+
+    // Fast lane: use the public Poké TCG endpoint directly for the first-paint
+    // card pool so the landing page doesn't depend on backend proxy warmup.
+    const directRes = await fetch(`https://api.pokemontcg.io/v2/cards?${params.toString()}`);
+    if (directRes.ok) {
+      const data: APIResponse = await directRes.json();
+      return data.data;
+    }
+
+    const data: APIResponse = await proxyFetch("/cards", Object.fromEntries(params.entries()));
     return data.data;
   } catch {
     return [];
