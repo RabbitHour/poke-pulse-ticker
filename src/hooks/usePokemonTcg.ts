@@ -1,14 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchHighValueCards, searchCards, fetchCardById, toCardData, fetchTopHoloCardsQuick } from "@/lib/pokemonTcgApi";
 import type { PokemonTCGCard } from "@/lib/pokemonTcgApi";
-import { rawCards, type CardData } from "@/data/marketData";
+import type { CardData } from "@/data/marketData";
 
 const CACHE_KEY = "ppt-live-cards-cache-v3";
 const QUICK_CACHE_KEY = "ppt-live-cards-quick-cache-v1";
-
-function getSeedCards(): CardData[] {
-  return rawCards.filter((card) => card._apiId && card._image && card.market > 0);
-}
 
 function getCachedCards(): CardData[] | null {
   try {
@@ -101,7 +97,7 @@ export function useLiveCardsQuick() {
   return useQuery({
     queryKey: ["live-cards-quick"],
     queryFn: async () => {
-      const apiCards = await fetchTopHoloCardsQuick(250);
+      const apiCards = await fetchTopHoloCardsQuick(60);
       const mapped = apiCards
         .map(toCardData)
         .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null && c.market > 0)
@@ -112,12 +108,12 @@ export function useLiveCardsQuick() {
         return mapped;
       }
 
-      return getQuickCachedCards() ?? getCachedCards() ?? getSeedCards();
+      return getQuickCachedCards() ?? getCachedCards() ?? [];
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 1,
-    placeholderData: () => getQuickCachedCards() ?? getCachedCards() ?? getSeedCards(),
+    placeholderData: () => getQuickCachedCards() ?? getCachedCards() ?? undefined,
   });
 }
 
