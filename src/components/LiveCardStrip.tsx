@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { Link } from "react-router-dom";
-import type { CardData } from "@/data/marketData";
+import { rawCards as fallbackCards, type CardData } from "@/data/marketData";
 
 interface Props {
   title?: string;
@@ -44,8 +44,8 @@ const LiveCardStrip = ({
   }, []);
 
   const cards = useMemo(() => {
-    if (!rawCards || rawCards.length === 0) return [] as (CardData & { _apiId?: string; _image?: string })[];
-    const pool = (rawCards as any[]).filter(
+    const sourceCards = rawCards && rawCards.length > 0 ? rawCards : fallbackCards;
+    const pool = (sourceCards as any[]).filter(
       (c) => c?._apiId && c?._image && !isBadImageUrl(c._image) && Number(c?.market) > 0
     );
 
