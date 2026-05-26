@@ -6,14 +6,11 @@ Updated: today
 ## Core
 - **Branding:** Use 'Poké' (never 'Pokémon'). Primary green `hsl(158, 72%, 46%)`. Hide 'Edit with Lovable' badge.
 - **Security:** Zero-trust RLS. Use SECURITY DEFINER RPCs for wallet/age changes. Block right-click/dev tools, hijack clipboard.
-- **Pricing Logic:** `getBestPrice` blends TCGPlayer market × Card Ladder (×1.15) × PriceCharting (×1.04) × live boost (×1.08). 5-source consensus: TCGPlayer 35 / eBay 25 / Card Ladder 20 / PriceCharting 12 / Cardmarket 8. Daily change dampened 0.3x and clamped ±8%.
-- **Card Pool:** Fetch 1500 cards (4 holofoil pages + 2 normal + 1 reverse + 2 rarity). Refresh every 30 min.
+- **Pricing Logic:** `getBestPrice` MUST select the HIGHEST TCGPlayer market variant. Apply 0.3x dampening and ±8% max daily clamp.
+- **Hero card tiles:** Landing-page hero/strips must be live-only `useLiveCards`/`useLiveCardsQuick` records with `_apiId`; never use static `rawCards` fallback or stale cache older than 30 min. Rotate visible cards every 30 min. Claude Watchdog: 60s refetch if pool empty; hourly reset of badImages set.
 - **Performance:** Use `react-window` for lists, `useReducedMotion` for mobile INP. sw.js: network-first dynamic, cache-first static.
-- **Affiliate:** Inline AffiliateLinks (compact) on every TopMover row + every TrendingCards tile for site-wide buy intent.
 - **Assets:** Fallback missing card images to `/icon-192.png`. PWA icons <50KB.
-- **UI Constraints:** Base font 16px. Footer `text-[5px]` with `py-px`. No exit-intent or fomo popups on the landing page.
-- **Landing order:** Hero → SocialProof → Wallet → CertifiedDataPartner → eBayLiveDeals (moved up) → MarketPulse+Sales → Indexes.
-- **Federal/Empire/Delta Pod = TOP SECRET, owner-only (pokegarageva@gmail.com).** Always wrap with `OwnerOnlyGate` + `noindex,nofollow`. Federal swarm preset enforced server-side.
+- **UI Constraints:** Base font 16px. Footer `text-[5px]` with `py-px`. NO popups anywhere (exit-intent, FOMO, onboarding walkthrough, tournament/promo banners all disabled — components stubbed to return null). ONLY the PWA `InstallPrompt` is allowed.
 
 ## Memories
 - [Boardroom & Swarm](mem://features/boardroom-and-swarm) — /boardroom org chart + multi-agent swarm-dispatch edge fn
