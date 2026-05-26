@@ -11,8 +11,8 @@ function getCachedCards(): CardData[] | null {
     const cached = localStorage.getItem(CACHE_KEY);
     if (!cached) return null;
     const { data, timestamp } = JSON.parse(cached);
-    // Cache valid for 24 hours as fallback
-    if (Date.now() - timestamp > 24 * 60 * 60 * 1000) return null;
+    // Landing-page market data must stay fresh; never treat old values as live.
+    if (Date.now() - timestamp > 30 * 60 * 1000) return null;
     return data;
   } catch {
     return null;
@@ -32,7 +32,7 @@ function getQuickCachedCards(): CardData[] | null {
     const cached = localStorage.getItem(QUICK_CACHE_KEY);
     if (!cached) return null;
     const { data, timestamp } = JSON.parse(cached);
-    if (Date.now() - timestamp > 6 * 60 * 60 * 1000) return null;
+    if (Date.now() - timestamp > 30 * 60 * 1000) return null;
     return data;
   } catch {
     return null;
@@ -108,12 +108,12 @@ export function useLiveCardsQuick() {
         return mapped;
       }
 
-      return getQuickCachedCards() ?? getCachedCards() ?? [];
+      return getQuickCachedCards() ?? [];
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 1,
-    placeholderData: () => getQuickCachedCards() ?? getCachedCards() ?? undefined,
+    placeholderData: () => getQuickCachedCards() ?? undefined,
   });
 }
 
