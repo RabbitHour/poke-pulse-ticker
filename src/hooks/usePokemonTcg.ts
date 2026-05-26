@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchHighValueCards, searchCards, fetchCardById, toCardData, getBestPrice, fetchTopHoloCardsQuick } from "@/lib/pokemonTcgApi";
+import { fetchHighValueCards, searchCards, fetchCardById, toCardData, fetchTopHoloCardsQuick } from "@/lib/pokemonTcgApi";
 import type { PokemonTCGCard } from "@/lib/pokemonTcgApi";
 import type { CardData } from "@/data/marketData";
 
 const CACHE_KEY = "ppt-live-cards-cache-v3";
+const QUICK_CACHE_KEY = "ppt-live-cards-quick-cache-v1";
 
 function getCachedCards(): CardData[] | null {
   try {
@@ -21,6 +22,26 @@ function getCachedCards(): CardData[] | null {
 function setCachedCards(cards: CardData[]) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: cards, timestamp: Date.now() }));
+  } catch {
+    // Storage full — ignore
+  }
+}
+
+function getQuickCachedCards(): CardData[] | null {
+  try {
+    const cached = localStorage.getItem(QUICK_CACHE_KEY);
+    if (!cached) return null;
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp > 6 * 60 * 60 * 1000) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function setQuickCachedCards(cards: CardData[]) {
+  try {
+    localStorage.setItem(QUICK_CACHE_KEY, JSON.stringify({ data: cards, timestamp: Date.now() }));
   } catch {
     // Storage full — ignore
   }
@@ -76,15 +97,23 @@ export function useLiveCardsQuick() {
   return useQuery({
     queryKey: ["live-cards-quick"],
     queryFn: async () => {
-      const apiCards = await fetchTopHoloCardsQuick(250);
-      return apiCards
+      const apiCards = await fetchTopHoloCardsQuick(36);
+      const mapped = apiCards
         .map(toCardData)
         .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null && c.market > 0)
         .sort((a, b) => b.market - a.market);
+
+      if (mapped.length > 0) {
+        setQuickCachedCards(mapped);
+        return mapped;
+      }
+
+      return getQuickCachedCards() ?? getCachedCards() ?? [];
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 1,
+    placeholderData: () => getQuickCachedCards() ?? getCachedCards() ?? undefined,
   });
 }
 

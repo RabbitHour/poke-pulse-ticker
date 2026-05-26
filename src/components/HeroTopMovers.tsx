@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
+import { useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { rawCards as fallbackCards } from "@/data/marketData";
 
 type Mover = {
   key: string;
@@ -63,11 +64,7 @@ function buildPool(rawCards: any[], badImages: Set<string>): Mover[] {
 }
 
 const HeroTopMovers = () => {
-  const { data: fullCards, refetch, isFetching } = useLiveCards();
-  const { data: quickCards } = useLiveCardsQuick();
-  // Prefer the full pull once available; fall back to the fast first-page
-  // fetch so the hero renders live cards within ~1-2s on cold visits.
-  const rawCards = (fullCards && fullCards.length > 0) ? fullCards : quickCards;
+  const { data: rawCards, refetch, isFetching } = useLiveCardsQuick();
   const isMobile = useIsMobile();
 
   const [rotationIndex, setRotationIndex] = useState(0);
@@ -102,8 +99,8 @@ const HeroTopMovers = () => {
 
 
   const pool = useMemo(() => {
-    if (!rawCards || rawCards.length === 0) return [];
-    return buildPool(rawCards as any[], badImages);
+    const sourceCards = rawCards && rawCards.length > 0 ? rawCards : fallbackCards;
+    return buildPool(sourceCards as any[], badImages);
   }, [rawCards, badImages]);
 
   const visible = useMemo(() => {
