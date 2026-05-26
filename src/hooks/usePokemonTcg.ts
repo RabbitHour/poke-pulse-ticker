@@ -97,7 +97,7 @@ export function useLiveCardsQuick() {
   return useQuery({
     queryKey: ["live-cards-quick"],
     queryFn: async () => {
-      const apiCards = await fetchTopHoloCardsQuick(60);
+      const apiCards = await fetchTopHoloCardsQuick(36);
       const mapped = apiCards
         .map(toCardData)
         .filter((c): c is CardData & { _apiId: string; _image: string } => c !== null && c.market > 0)
