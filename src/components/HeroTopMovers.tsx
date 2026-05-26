@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { rawCards as fallbackCards } from "@/data/marketData";
 
 type Mover = {
   key: string;
@@ -98,8 +99,8 @@ const HeroTopMovers = () => {
 
 
   const pool = useMemo(() => {
-    if (!rawCards || rawCards.length === 0) return [];
-    return buildPool(rawCards as any[], badImages);
+    const sourceCards = rawCards && rawCards.length > 0 ? rawCards : fallbackCards;
+    return buildPool(sourceCards as any[], badImages);
   }, [rawCards, badImages]);
 
   const visible = useMemo(() => {
