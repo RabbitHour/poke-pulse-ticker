@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Lock, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { GATES_ENABLED } from "@/lib/featureGates";
 
 interface InstitutionalGateProps {
   children: React.ReactNode;
