@@ -180,13 +180,6 @@ const Index = () => {
         lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
       />
 
-      {/* Bioluminescent veil quick-link */}
-      <a
-        href="/bioluminescent"
-        className="block w-full bg-gradient-to-r from-emerald-400 via-cyan-300 to-violet-300 text-slate-900 text-center text-xs sm:text-sm font-semibold py-2 px-3 hover:brightness-110 transition"
-      >
-        ✨ Open the Bioluminescent veil → AI Builder + Government Contracting Master Kit
-      </a>
 
       <main
         id="main-content"
