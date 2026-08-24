@@ -21,6 +21,9 @@ const ProGate = ({ children, feature = "This feature", blur = false }: ProGatePr
 
   const isPro = subscribed && (tier === "pro" || tier === "premium" || tier === "team" || tier === "whale");
 
+  // Global unlock: all features are free until tier gating is re-enabled.
+  if (!GATES_ENABLED) return <>{children}</>;
+
   // Authenticated + subscribed/trial → full access
   if (user && isPro) return <>{children}</>;
 
