@@ -5,6 +5,7 @@ import { Lock, Zap, Clock, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import AuthModal from "./AuthModal";
 import { motion } from "framer-motion";
+import { GATES_ENABLED } from "@/lib/featureGates";
 
 interface ProGateProps {
   children: React.ReactNode;
