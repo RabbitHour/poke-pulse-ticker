@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { GATES_ENABLED } from "@/lib/featureGates";
 import { useLiveCards } from "@/hooks/usePokemonTcg";
 import { rawCards } from "@/data/marketData";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,7 @@ const PulseWalletWidget = () => {
 
   const isPro = subscribed && (tier === "pro" || tier === "premium" || tier === "team" || tier === "whale");
   const isOwner = user?.email === OWNER_EMAIL;
-  const canUse = isPro || isOwner;
+  const canUse = !GATES_ENABLED || isPro || isOwner;
 
   const [cycle, setCycle] = useState(0);
 

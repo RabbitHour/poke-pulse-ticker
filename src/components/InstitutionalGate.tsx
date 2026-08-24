@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Lock, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { GATES_ENABLED } from "@/lib/featureGates";
 
 interface InstitutionalGateProps {
   children: React.ReactNode;
@@ -18,7 +19,8 @@ const InstitutionalGate = ({ children, feature = "This feature" }: Institutional
   const isInstitutional = subscribed && (tier === "premium" || tier === "team" || tier === "whale");
   const isOwner = user?.email === OWNER_EMAIL;
 
-  if (isInstitutional || isOwner) return <>{children}</>;
+  // Global unlock: all features are free until tier gating is re-enabled.
+  if (!GATES_ENABLED || isInstitutional || isOwner) return <>{children}</>;
 
   return (
     <div className="relative">

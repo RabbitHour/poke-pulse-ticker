@@ -5,6 +5,7 @@ import { Lock, Zap, Clock, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import AuthModal from "./AuthModal";
 import { motion } from "framer-motion";
+import { GATES_ENABLED } from "@/lib/featureGates";
 
 interface ProGateProps {
   children: React.ReactNode;
@@ -19,6 +20,9 @@ const ProGate = ({ children, feature = "This feature", blur = false }: ProGatePr
   const [showAuth, setShowAuth] = useState(false);
 
   const isPro = subscribed && (tier === "pro" || tier === "premium" || tier === "team" || tier === "whale");
+
+  // Global unlock: all features are free until tier gating is re-enabled.
+  if (!GATES_ENABLED) return <>{children}</>;
 
   // Authenticated + subscribed/trial → full access
   if (user && isPro) return <>{children}</>;
