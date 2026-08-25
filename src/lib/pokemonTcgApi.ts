@@ -198,28 +198,35 @@ export async function fetchCardById(id: string): Promise<PokemonTCGCard> {
  * full multi-query high-value pull continues in the background.
  */
 export async function fetchTopHoloCardsQuick(pageSize = 250): Promise<PokemonTCGCard[]> {
-  try {
-    const params = new URLSearchParams({
-      q: "tcgplayer.prices.holofoil.market:[1 TO *]",
-      pageSize: String(pageSize),
-      page: "1",
-      orderBy: "-tcgplayer.prices.holofoil.market",
-    });
+  const params = new URLSearchParams({
+    q: "tcgplayer.prices.holofoil.market:[1 TO *]",
+    pageSize: String(pageSize),
+    page: "1",
+    orderBy: "-tcgplayer.prices.holofoil.market",
+  });
 
-    // Fast lane: use the public Poké TCG endpoint directly for the first-paint
-    // card pool so the landing page doesn't depend on backend proxy warmup.
-    const directRes = await fetch(`https://api.pokemontcg.io/v2/cards?${params.toString()}`);
+  // Fast lane: try the public Poké TCG endpoint directly for first paint.
+  try {
+    const directRes = await fetch(`https://api.pokemontcg.io/v2/cards?${params.toString()}`, {
+      signal: AbortSignal.timeout(6000),
+    });
     if (directRes.ok) {
       const data: APIResponse = await directRes.json();
-      return data.data;
+      if (data?.data?.length) return data.data;
     }
+  } catch {
+    // fall through to the proxy (which rotates free sources + TCGdex failover)
+  }
 
+  // Failover lane: the backend proxy rotates daily across free sources.
+  try {
     const data: APIResponse = await proxyFetch("/cards", Object.fromEntries(params.entries()));
-    return data.data;
+    return data?.data ?? [];
   } catch {
     return [];
   }
 }
+
 
 /**
  * Fetch high-value cards with pricing data.
