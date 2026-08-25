@@ -85,86 +85,95 @@ serve(async (req) => {
       }
     }
 
-    const url = new URL(`${POKEMON_TCG_BASE}${path}`);
-    if (params && typeof params === "object") {
-      for (const [key, value] of Object.entries(params)) {
-        url.searchParams.set(key, String(value));
-      }
-    }
+    // ---- Source rotation ----------------------------------------------
+    // Rotate the PRIMARY free source every day so no single provider sees
+    // all of our traffic (avoids rate-limit bans / disconnects). Whichever
+    // source is primary today, the others stay hot as automatic failover.
+    const dayIndex = Math.floor(Date.now() / 86_400_000);
+    const SOURCES = ["pokemontcg", "tcgdex"] as const;
+    const order = SOURCES.map((_, i) => SOURCES[(dayIndex + i) % SOURCES.length]);
 
-    const apiHeaders: Record<string, string> = {};
-    const apiKey = Deno.env.get("POKEMON_TCG_API_KEY");
-    if (apiKey) {
-      apiHeaders["X-Api-Key"] = apiKey;
-    }
-
-    let apiRes: Response | null = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        apiRes = await fetch(url.toString(), { headers: apiHeaders });
-      } catch (fetchErr) {
-        // Network-level failure (connection reset, DNS, etc.)
-        if (attempt === 2) {
-          return respond(false, {
-            error: "Upstream API connection failed",
-            diagnostics: { error_stage: "fetch", attempt },
-          });
+    const fetchPokemonTcg = async (): Promise<Record<string, unknown> | null> => {
+      const url = new URL(`${POKEMON_TCG_BASE}${path}`);
+      if (params && typeof params === "object") {
+        for (const [key, value] of Object.entries(params)) {
+          url.searchParams.set(key, String(value));
         }
-        await new Promise((r) => setTimeout(r, (attempt + 1) * 2000));
-        continue;
       }
 
-      if (apiRes.status === 429) {
-        const retryAfter = Number(apiRes.headers.get("Retry-After") || "2");
-        // Consume body to prevent resource leak
-        await apiRes.text();
-        await new Promise((r) => setTimeout(r, retryAfter * 1000));
-        continue;
+      const apiHeaders: Record<string, string> = {};
+      const apiKey = Deno.env.get("POKEMON_TCG_API_KEY");
+      if (apiKey) apiHeaders["X-Api-Key"] = apiKey;
+
+      let apiRes: Response | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          apiRes = await fetch(url.toString(), { headers: apiHeaders });
+        } catch {
+          if (attempt === 2) return null;
+          await new Promise((r) => setTimeout(r, (attempt + 1) * 1000));
+          continue;
+        }
+
+        if (apiRes.status === 429) {
+          const retryAfter = Number(apiRes.headers.get("Retry-After") || "2");
+          await apiRes.text();
+          await new Promise((r) => setTimeout(r, Math.min(retryAfter, 3) * 1000));
+          continue;
+        }
+        break;
       }
-      break;
+
+      if (!apiRes || !apiRes.ok) {
+        if (apiRes) await apiRes.text().catch(() => "");
+        return null;
+      }
+
+      let rawText: string;
+      try {
+        rawText = await apiRes.text();
+      } catch {
+        return null;
+      }
+
+      try {
+        const parsed = JSON.parse(rawText) as Record<string, unknown>;
+        if (!parsed || (Array.isArray((parsed as any).data) && (parsed as any).data.length === 0)) {
+          return null;
+        }
+        return { ...parsed, _source: "pokemontcg" };
+      } catch {
+        return null;
+      }
+    };
+
+    const fetchTcgdex = async (): Promise<Record<string, unknown> | null> => {
+      try {
+        return await tcgdexFallback(path, params);
+      } catch {
+        return null;
+      }
+    };
+
+    const attempted: string[] = [];
+    for (const source of order) {
+      attempted.push(source);
+      const data = source === "pokemontcg" ? await fetchPokemonTcg() : await fetchTcgdex();
+      if (data) {
+        return new Response(JSON.stringify({ ...data, _sourceOrder: order, _attempted: attempted }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
-    if (!apiRes) {
-      return respond(false, { error: "Upstream API unreachable after retries" });
-    }
-
-    // Read the upstream response as text first to avoid connection read errors
-    let rawText: string;
-    try {
-      rawText = await apiRes.text();
-    } catch {
-      return respond(false, {
-        error: "Failed to read upstream response body",
-        diagnostics: { error_stage: "body_read", status: apiRes.status },
-      });
-    }
-
-    // For non-2xx from upstream, wrap in our envelope
-    if (!apiRes.ok) {
-      return respond(false, {
-        error: `Upstream API error: ${apiRes.status}`,
-        diagnostics: { status: apiRes.status, body_preview: rawText.slice(0, 200) },
-      });
-    }
-
-    // Parse and re-serialize to ensure valid JSON
-    let data: unknown;
-    try {
-      data = JSON.parse(rawText);
-    } catch {
-      return respond(false, {
-        error: "Upstream returned invalid JSON",
-        diagnostics: { error_stage: "json_parse", body_preview: rawText.slice(0, 200) },
-      });
-    }
-
-    // Return the upstream data directly (matches existing client expectations)
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return respond(false, {
+      error: "All live pricing sources unavailable",
+      diagnostics: { attempted, order },
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return respond(false, { error: msg, diagnostics: { error_stage: "unhandled" } });
   }
+
 });
