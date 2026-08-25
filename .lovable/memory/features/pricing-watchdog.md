@@ -1,11 +1,13 @@
 ---
-name: Pricing Health Watchdog
-description: 6-source pricing engine with live signal-strength monitoring and auto-failover
+name: Pricing Health Watchdog & Daily Source Rotation
+description: Multi-source pricing engine with daily free-API rotation, failover, and live signal-strength monitoring
 type: feature
 ---
-- **Sources (6):** TCGPlayer (free), eBay (key pending), PriceCharting (paid), Card Ladder (paid), Probstein RSS (free), 130point scrape (free)
-- **Watchdog:** `pricing-health` edge fn probes all 6 every 5 min via pg_cron, caches result in `index_cache` (key: `pricing_health`)
-- **Signal strength:** `(liveSources / 6) * 100` — pill turns green ≥67%, yellow 34-66%, red <34%
-- **UI:** `usePricingHealth` hook polls cache + invokes function every 5 min; `CertifiedDataPartner` renders per-source pills
-- **Failover:** consensus-pricing returns `apiStatus` + `signalStrength` per request; missing sources skipped, never fabricated as live
-- **Free-tier signal:** ~50% (TCG + Probstein + 130point) until eBay App ID arrives → ~67%
+- **Daily rotation:** `pokemon-proxy` picks today's PRIMARY free source by `floor(Date.now()/86_400_000) % SOURCES.length` (currently pokemontcg.io ↔ TCGdex), then fails over through the rest in order. Prevents rate-limit bans/disconnects from hammering one provider.
+- **Failover chain:** pokemontcg.io (3 retries, 429 backoff) → TCGdex (`supabase/functions/pokemon-proxy/tcgdex.ts`, keyless, normalizes to pokemontcg.io shape). Empty `data` arrays count as failure and advance the chain.
+- **Response metadata:** proxy returns `_source`, `_sourceOrder`, `_attempted` so the UI/watchdog can see who served the data.
+- **Client fast lane:** `fetchTopHoloCardsQuick` hits api.pokemontcg.io directly (6s timeout) for first paint, then falls back to the proxy (and thus the rotation) on any failure or empty result.
+- **Watchdog:** `pricing-health` edge fn probes all sources every 5 min via pg_cron, caches in `index_cache` (key: `pricing_health`) with `primarySource`, `sourceOrder`, `rotatesAt`.
+- **Sources probed (10):** tcgplayer(pokemontcg.io), tcgdex, ebay (OAuth), pricecharting*, cardladder*, probstein, 130point, pokemonio/rarecandy/pokescope (Firecrawl). *=key required.
+- **Signal strength:** `(liveSources / totalSources) * 100` — green ≥67%, yellow 34-66%, red <34%.
+- Missing sources are skipped, never fabricated as live.
