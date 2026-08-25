@@ -121,8 +121,10 @@ serve(async (req) => {
       liveCount,
       totalSources: total,
       sources: results,
+      ...rotationToday(),
       checkedAt: new Date().toISOString(),
     };
+
 
     // Cache in index_cache for fast UI reads
     try {
