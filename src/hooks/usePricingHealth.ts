@@ -13,8 +13,13 @@ export interface PricingHealth {
   liveCount: number;
   totalSources: number;
   sources: PricingHealthSource[];
+  /** Free source serving live data today (rotates daily to avoid rate-limit bans) */
+  primarySource?: string;
+  sourceOrder?: string[];
+  rotatesAt?: string;
   checkedAt: string;
 }
+
 
 const CACHE_KEY = "pricing_health";
 

@@ -39,6 +39,7 @@ async function getEbayOAuthToken(): Promise<string> {
 
 const PROBES: SourceProbe[] = [
   { name: "tcgplayer", url: "https://api.pokemontcg.io/v2/cards?pageSize=1", timeoutMs: 4000 },
+  { name: "tcgdex", url: "https://api.tcgdex.net/v2/en/sets/sv08.5", timeoutMs: 5000 },
   { name: "ebay",      url: "https://api.ebay.com/buy/browse/v1/item_summary/search?q=pokemon&limit=1", timeoutMs: 4000 },
   { name: "pricecharting", url: "https://www.pricecharting.com/api/products?q=charizard&type=pokemon-cards", requiresKey: "PRICECHARTING_API_KEY", timeoutMs: 4000 },
   { name: "cardladder", url: "https://api.cardladder.com/v1/health", requiresKey: "CARDLADDER_API_KEY", timeoutMs: 4000 },
@@ -49,6 +50,15 @@ const PROBES: SourceProbe[] = [
   { name: "rarecandy", url: "https://api.firecrawl.dev/v2/health", requiresKey: "FIRECRAWL_API_KEY", timeoutMs: 4000 },
   { name: "pokescope", url: "https://api.firecrawl.dev/v2/health", requiresKey: "FIRECRAWL_API_KEY", timeoutMs: 4000 },
 ];
+
+// Mirrors the daily rotation in the pokemon-proxy edge function.
+const ROTATION = ["pokemontcg", "tcgdex"] as const;
+function rotationToday() {
+  const dayIndex = Math.floor(Date.now() / 86_400_000);
+  const order = ROTATION.map((_, i) => ROTATION[(dayIndex + i) % ROTATION.length]);
+  return { primarySource: order[0], sourceOrder: order, rotatesAt: new Date((dayIndex + 1) * 86_400_000).toISOString() };
+}
+
 
 async function probe(p: SourceProbe): Promise<{ name: string; isLive: boolean; latencyMs: number; reason?: string }> {
   if (p.name === "ebay") {
@@ -111,8 +121,10 @@ serve(async (req) => {
       liveCount,
       totalSources: total,
       sources: results,
+      ...rotationToday(),
       checkedAt: new Date().toISOString(),
     };
+
 
     // Cache in index_cache for fast UI reads
     try {
