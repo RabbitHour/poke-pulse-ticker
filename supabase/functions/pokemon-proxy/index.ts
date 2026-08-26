@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { tcgcsvFallback } from "./tcgcsv.ts";
 import { tcgdexFallback } from "./tcgdex.ts";
+import { tcgcsvFallback } from "./tcgcsv.ts";
 
 
 const corsHeaders = {
@@ -158,10 +158,22 @@ serve(async (req) => {
       }
     };
 
+    const fetchTcgcsv = async (): Promise<Record<string, unknown> | null> => {
+      try {
+        return await tcgcsvFallback(path, params);
+      } catch {
+        return null;
+      }
+    };
+
     const attempted: string[] = [];
     for (const source of order) {
       attempted.push(source);
-      const data = source === "pokemontcg" ? await fetchPokemonTcg() : await fetchTcgdex();
+      let data: Record<string, unknown> | null = null;
+      if (source === "pokemontcg") data = await fetchPokemonTcg();
+      else if (source === "tcgdex") data = await fetchTcgdex();
+      else if (source === "tcgcsv") data = await fetchTcgcsv();
+
       if (data) {
         return new Response(JSON.stringify({ ...data, _sourceOrder: order, _attempted: attempted }), {
           status: 200,
