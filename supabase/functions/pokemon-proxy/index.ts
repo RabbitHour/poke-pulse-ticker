@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { tcgdexFallback } from "./tcgdex.ts";
+import { tcgcsvFallback } from "./tcgcsv.ts";
 
 
 const corsHeaders = {
@@ -92,7 +93,7 @@ serve(async (req) => {
     // all of our traffic (avoids rate-limit bans / disconnects). Whichever
     // source is primary today, the others stay hot as automatic failover.
     const dayIndex = Math.floor(Date.now() / 86_400_000);
-    const SOURCES = ["pokemontcg", "tcgdex"] as const;
+    const SOURCES = ["pokemontcg", "tcgdex", "tcgcsv"] as const;
     const order = SOURCES.map((_, i) => SOURCES[(dayIndex + i) % SOURCES.length]);
 
     const fetchPokemonTcg = async (): Promise<Record<string, unknown> | null> => {
@@ -157,10 +158,22 @@ serve(async (req) => {
       }
     };
 
+    const fetchTcgcsv = async (): Promise<Record<string, unknown> | null> => {
+      try {
+        return await tcgcsvFallback(path, params);
+      } catch {
+        return null;
+      }
+    };
+
     const attempted: string[] = [];
     for (const source of order) {
       attempted.push(source);
-      const data = source === "pokemontcg" ? await fetchPokemonTcg() : await fetchTcgdex();
+      let data: Record<string, unknown> | null = null;
+      if (source === "pokemontcg") data = await fetchPokemonTcg();
+      else if (source === "tcgdex") data = await fetchTcgdex();
+      else if (source === "tcgcsv") data = await fetchTcgcsv();
+
       if (data) {
         return new Response(JSON.stringify({ ...data, _sourceOrder: order, _attempted: attempted }), {
           status: 200,
