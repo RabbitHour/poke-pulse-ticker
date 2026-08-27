@@ -91,7 +91,7 @@ function buildCard(p: Product, prices: Price[], group: Group) {
     name: p.name.replace(/\s*\([^)]*\)\s*$/, "").trim(),
     number: number.split("/")[0] || String(p.productId),
     rarity: ext(p, "Rarity"),
-    supertype: "Pokémon",
+    supertype: ext(p, "Card Type") ?? "Pokémon",
     set: { id: String(group.groupId), name: group.name, series: "" },
     images: { small: IMG(p.productId, 200), large: IMG(p.productId, 400) },
     tcgplayer: {
