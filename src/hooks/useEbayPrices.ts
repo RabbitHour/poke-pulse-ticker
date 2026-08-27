@@ -19,7 +19,13 @@ interface EbayPricingResponse {
   cached?: boolean;
 }
 
-async function fetchEbayPrices(queries: string[], conditionIds = "1000|3000|2750"): Promise<EbayPricingResponse> {
+export type EbayMarketType = "raw" | "graded" | "sealed";
+
+async function fetchEbayPrices(
+  queries: string[],
+  conditionIds = "1000|3000|2750",
+  marketType: EbayMarketType = "raw"
+): Promise<EbayPricingResponse> {
   const res = await fetch(URL_, {
     method: "POST",
     headers: {
@@ -27,7 +33,7 @@ async function fetchEbayPrices(queries: string[], conditionIds = "1000|3000|2750
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ queries, conditionIds }),
+    body: JSON.stringify({ queries, conditionIds, marketType }),
   });
   if (!res.ok) throw new Error(`ebay-pricing ${res.status}`);
   return res.json();
@@ -37,11 +43,11 @@ async function fetchEbayPrices(queries: string[], conditionIds = "1000|3000|2750
  * Pull median eBay Browse API prices for a batch of queries (card names / set names).
  * Used by the live ticker and era indexes as the primary price source.
  */
-export function useEbayPrices(queries: string[], conditionIds?: string) {
+export function useEbayPrices(queries: string[], conditionIds?: string, marketType: EbayMarketType = "raw") {
   const sorted = [...queries].sort();
   return useQuery({
-    queryKey: ["ebay-prices", sorted.join("|"), conditionIds || ""],
-    queryFn: () => fetchEbayPrices(sorted, conditionIds),
+    queryKey: ["ebay-prices", marketType, sorted.join("|"), conditionIds || ""],
+    queryFn: () => fetchEbayPrices(sorted, conditionIds, marketType),
     enabled: sorted.length > 0,
     staleTime: 30 * 60 * 1000,
     refetchInterval: 30 * 60 * 1000,

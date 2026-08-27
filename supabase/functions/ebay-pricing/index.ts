@@ -20,11 +20,13 @@ const POKEMON_SINGLES_CATEGORY = "183454";
 
 // Junk keywords excluded with -keyword syntax. Kept short — eBay Browse rejects
 // queries that are too long or end up with zero matches.
-const EXCLUDE_TERMS = [
+const RAW_EXCLUDE_TERMS = [
   "lot", "proxy", "custom", "fake", "replica", "metal",
   "sleeve", "playmat", "binder", "japanese",
   "booster", "etb", "pack", "box", "tin", "case",
 ];
+
+const SEALED_EXCLUDE_TERMS = ["lot", "proxy", "custom", "fake", "replica", "empty", "wrapper"];
 
 interface CachedToken { token: string; expiresAt: number; }
 let cachedToken: CachedToken | null = null;
@@ -57,8 +59,9 @@ interface PriceResult {
 }
 
 /** Build the q= string with negative keywords to drop junk listings. */
-function buildQuery(q: string): string {
-  const negatives = EXCLUDE_TERMS.map((t) => `-${t}`).join(" ");
+function buildQuery(q: string, marketType: "raw" | "graded" | "sealed"): string {
+  const terms = marketType === "sealed" ? SEALED_EXCLUDE_TERMS : RAW_EXCLUDE_TERMS;
+  const negatives = terms.map((t) => `-${t}`).join(" ");
   return `${q} ${negatives}`;
 }
 
@@ -81,10 +84,15 @@ function robustMedian(values: number[]): { median: number; low: number; high: nu
   };
 }
 
-async function fetchPriceForQuery(token: string, query: string, conditionIds = "1000|3000|2750"): Promise<Omit<PriceResult, "changePct">> {
+async function fetchPriceForQuery(
+  token: string,
+  query: string,
+  conditionIds = "1000|3000|2750",
+  marketType: "raw" | "graded" | "sealed" = "raw"
+): Promise<Omit<PriceResult, "changePct">> {
   const url = new URL(EBAY_BROWSE_URL);
-  url.searchParams.set("q", buildQuery(query));
-  url.searchParams.set("category_ids", POKEMON_SINGLES_CATEGORY);
+  url.searchParams.set("q", buildQuery(query, marketType));
+  if (marketType !== "sealed") url.searchParams.set("category_ids", POKEMON_SINGLES_CATEGORY);
   url.searchParams.set("limit", "50");
   url.searchParams.set("filter", `conditionIds:{${conditionIds}},buyingOptions:{FIXED_PRICE},priceCurrency:USD,price:[3..]`);
   // Default sort = BestMatch (relevance). DO NOT sort by price asc.
@@ -121,6 +129,8 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const queries: string[] = Array.isArray(body.queries) ? body.queries.slice(0, 30) : [];
     const conditionIds: string = typeof body.conditionIds === "string" ? body.conditionIds : "1000|3000|2750";
+    const marketType: "raw" | "graded" | "sealed" =
+      body.marketType === "graded" || body.marketType === "sealed" ? body.marketType : "raw";
     if (queries.length === 0) {
       return new Response(JSON.stringify({ error: "queries[] required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -131,7 +141,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-    const cacheKey = `ebay_pricing:v2:${conditionIds}:${queries.slice().sort().join("|")}`;
+    const cacheKey = `ebay_pricing:v3:${marketType}:${conditionIds}:${queries.slice().sort().join("|")}`;
     const { data: cached } = await supabase
       .from("index_cache").select("data, expires_at").eq("cache_key", cacheKey).maybeSingle();
     if (cached && new Date(cached.expires_at).getTime() > Date.now()) {
@@ -159,13 +169,13 @@ serve(async (req) => {
 
     const token = await getEbayToken();
     const baseResults = await Promise.all(
-      queries.map((q) => fetchPriceForQuery(token, q, conditionIds).catch(() => ({
+      queries.map((q) => fetchPriceForQuery(token, q, conditionIds, marketType).catch(() => ({
         query: q, median: 0, low: 0, high: 0, count: 0, sampleUrl: "",
       })))
     );
 
     // Compute live %change vs previous per-query snapshot.
-    const snapKeys = baseResults.map((r) => `ebay_snap:v2:${r.query.toLowerCase()}`);
+    const snapKeys = baseResults.map((r) => `ebay_snap:v3:${marketType}:${r.query.toLowerCase()}`);
     const { data: snaps } = await supabase
       .from("index_cache").select("cache_key, data").in("cache_key", snapKeys);
     const snapMap = new Map<string, number>();
@@ -175,7 +185,7 @@ serve(async (req) => {
     });
 
     const results: PriceResult[] = baseResults.map((r) => {
-      const key = `ebay_snap:v2:${r.query.toLowerCase()}`;
+      const key = `ebay_snap:v3:${marketType}:${r.query.toLowerCase()}`;
       const prev = snapMap.get(key);
       const changePct = prev && prev > 0 && r.median > 0
         ? Math.round(((r.median - prev) / prev) * 10000) / 100
@@ -183,13 +193,21 @@ serve(async (req) => {
       return { ...r, changePct };
     });
 
-    // Persist new snapshots (24h) for next call's delta.
+    // Keep each baseline for a full 24 hours so changePct is a true 24h comparison,
+    // not merely movement since the previous 30-minute refresh.
+    const snapRowsByKey = new Map((snaps || []).map((snapshot: any) => [snapshot.cache_key, snapshot]));
     const snapRows = results
       .filter((r) => r.median > 0)
+      .filter((r) => {
+        const key = `ebay_snap:v3:${marketType}:${r.query.toLowerCase()}`;
+        const existing = snapRowsByKey.get(key) as any;
+        const at = existing?.data?.at ? new Date(existing.data.at).getTime() : 0;
+        return !at || Date.now() - at >= 24 * 60 * 60 * 1000;
+      })
       .map((r) => ({
-        cache_key: `ebay_snap:v2:${r.query.toLowerCase()}`,
+        cache_key: `ebay_snap:v3:${marketType}:${r.query.toLowerCase()}`,
         data: { median: r.median, at: new Date().toISOString() } as any,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       }));
     if (snapRows.length > 0) {
       await supabase.from("index_cache").upsert(snapRows, { onConflict: "cache_key" });
