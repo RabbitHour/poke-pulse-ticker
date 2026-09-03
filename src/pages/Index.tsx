@@ -25,7 +25,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
-import PromoStack from "@/components/PromoStack";
 import ShareButton from "@/components/ShareButton";
 
 import DailySpotlight from "@/components/DailySpotlight";
@@ -62,7 +61,6 @@ import TeamPlanCTA from "@/components/TeamPlanCTA";
 import ReferralCTA from "@/components/ReferralCTA";
 import FinancialDisclaimer from "@/components/FinancialDisclaimer";
 import InstallPrompt from "@/components/InstallPrompt";
-import SimTraderPromo from "@/components/SimTraderPromo";
 // OnboardingWalkthrough removed — popups disabled except InstallPrompt
 import PulseScore from "@/components/PulseScore";
 import CorrelationMatrix from "@/components/CorrelationMatrix";
@@ -406,7 +404,6 @@ const Index = () => {
 
         <PokeRaceSection />
         <GamePromo />
-        <SimTraderPromo />
 
         <LazySection minHeight="70px">
           <TrustSignals />
@@ -505,8 +502,6 @@ const Index = () => {
         <LazySection minHeight="100px">
           <ValueUnlockPreview />
         </LazySection>
-
-        <PromoStack />
 
         <LazySection minHeight="80px">
           <ImportFromTCGPlayer />
