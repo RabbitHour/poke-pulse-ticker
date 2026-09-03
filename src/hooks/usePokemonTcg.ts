@@ -82,6 +82,9 @@ export function useLiveCards() {
     },
     staleTime: 30 * 60 * 1000, // 30 min stale time
     refetchInterval: 30 * 60 * 1000, // refresh every 30 min
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: 1, // Only retry once before falling back to cache
     // Initialize from cache while fetching
     placeholderData: () => getCachedCards() ?? undefined,
@@ -112,6 +115,10 @@ export function useLiveCardsQuick() {
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
+    refetchInterval: 30 * 60 * 1000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: 1,
     placeholderData: () => getQuickCachedCards() ?? undefined,
   });

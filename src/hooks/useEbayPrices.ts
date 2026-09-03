@@ -51,8 +51,10 @@ export function useEbayPrices(queries: string[], conditionIds?: string, marketTy
     enabled: sorted.length > 0,
     staleTime: 30 * 60 * 1000,
     refetchInterval: 30 * 60 * 1000,
+    refetchIntervalInBackground: true,
     retry: 1,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 }
 

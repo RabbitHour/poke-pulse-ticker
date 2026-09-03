@@ -70,7 +70,7 @@ const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) 
   useEffect(() => {
     if (!lastUpdated) return;
 
-    const REFRESH_MS = 60 * 60 * 1000;
+    const REFRESH_MS = 30 * 60 * 1000;
 
     const tick = () => {
       const elapsed = Date.now() - lastUpdated;
