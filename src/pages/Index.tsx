@@ -1,9 +1,9 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 
-import { rawCards, gradedCards, sealedProducts, getIndexValue, getIndexChange } from "@/data/marketData";
+import type { CardData, SealedProduct } from "@/data/marketData";
+import { getIndexValue, getIndexChange } from "@/data/marketData";
 import { useLiveCards } from "@/hooks/usePokemonTcg";
-import { useGradedCards } from "@/hooks/useGradedCards";
-import { useSealedProducts } from "@/hooks/useSealedProducts";
+import { useLiveMarketBenchmarks } from "@/hooks/useLiveMarketBenchmarks";
 import TerminalHeader from "@/components/TerminalHeader";
 import TickerBar from "@/components/TickerBar";
 import HeroSection from "@/components/HeroSection";
@@ -84,19 +84,6 @@ const Index = () => {
   const { toast } = useToast();
   const { checkSubscription } = useAuth();
 
-  const [chartRefreshKey, setChartRefreshKey] = useState(0);
-
-  const fallbackRawCards = useMemo(() => rawCards.map((card) => ({ ...card, change: 0 })), []);
-  const fallbackGradedCards = useMemo(() => gradedCards.map((card) => ({ ...card, change: 0 })), []);
-  const fallbackSealedProducts = useMemo(() => sealedProducts.map((product) => ({ ...product, change: 0 })), []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setChartRefreshKey((k) => k + 1);
-    }, 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   useEffect(() => {
     const checkout = searchParams.get("checkout");
     if (checkout === "success") {
@@ -116,16 +103,33 @@ const Index = () => {
     }
   }, [searchParams, checkSubscription, setSearchParams, toast]);
 
-  const displayCards = liveCards && liveCards.length > 0 ? liveCards : fallbackRawCards;
-  const liveGradedCards = useGradedCards(liveCards);
-  const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : fallbackGradedCards;
-  const liveSealedProducts = useSealedProducts(liveCards);
-  const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : fallbackSealedProducts;
+  const displayCards = liveCards?.filter((card) => card._apiId && card.market > 0) ?? [];
+  const benchmarks = useLiveMarketBenchmarks(displayCards);
+  const displayGraded: CardData[] = benchmarks.graded.map((item, index) => ({
+    name: item.label.replace(/\s+PSA 10$/i, ""),
+    set: item.set ?? "eBay graded market",
+    number: String(index + 1),
+    market: item.value,
+    low: item.value,
+    mid: item.value,
+    change: item.change,
+    grade: "PSA 10",
+    volume: item.sampleSize,
+    _apiId: item.apiId,
+    _image: item.image,
+  }));
+  const displaySealed: SealedProduct[] = benchmarks.sealed.map((item) => ({
+    name: item.label,
+    type: item.label.toLowerCase().includes("elite trainer") ? "ETB" : "Booster Box",
+    market: item.value,
+    low: item.value,
+    change: item.change,
+  }));
   const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
   const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
-  const rawIndex = getIndexValue(displayCards);
-  const rawChange = getIndexChange(displayCards);
+  const rawIndex = benchmarks.raw.length > 0 ? benchmarks.raw.reduce((sum, item) => sum + item.value, 0) / benchmarks.raw.length : 0;
+  const rawChange = benchmarks.raw.length > 0 ? benchmarks.raw.reduce((sum, item) => sum + item.change, 0) / benchmarks.raw.length : 0;
   const gradedIndex = getIndexValue(displayGraded);
   const gradedChange = getIndexChange(displayGraded);
   const sealedIndex = getIndexValue(displaySealed);
@@ -135,7 +139,7 @@ const Index = () => {
     rawIndex,
     gradedIndex,
     sealedIndex,
-    displayCards.length,
+    benchmarks.raw.length,
     displayGraded.length,
     displaySealed.length
   );
@@ -236,24 +240,24 @@ const Index = () => {
               title="RAW 1000 INDEX"
               value={rawIndex}
               change={rawChange}
-              count={1000}
-              description="1,000+ raw cards — live TCGPlayer pricing"
+              count={benchmarks.raw.length}
+              description="Observed raw eBay market comps"
               variant="green"
             />
             <MarketIndexCard
               title="GRADED 1000 INDEX"
               value={gradedIndex}
               change={gradedChange}
-              count={1000}
-              description="1,000+ graded cards (PSA/CGC/BGS/TAG)"
+              count={displayGraded.length}
+              description="Observed PSA 10 eBay market comps"
               variant="amber"
             />
             <MarketIndexCard
               title="SEALED 1000 INDEX"
               value={sealedIndex}
               change={sealedChange}
-              count={1000}
-              description="1,000+ sealed products (Boxes/Packs/ETBs)"
+              count={displaySealed.length}
+              description="Observed sealed eBay market comps"
               variant="blue"
             />
           </div>
@@ -269,21 +273,21 @@ const Index = () => {
                   indexValue={rawIndex}
                   indexChange={rawChange}
                   variant="green"
-                  refreshKey={chartRefreshKey}
+                  sampleSize={benchmarks.raw.reduce((sum, item) => sum + item.sampleSize, 0)}
                 />
                 <IndexDayChart
                   title="GRADED 1000 INDEX"
                   indexValue={gradedIndex}
                   indexChange={gradedChange}
                   variant="amber"
-                  refreshKey={chartRefreshKey}
+                  sampleSize={benchmarks.graded.reduce((sum, item) => sum + item.sampleSize, 0)}
                 />
                 <IndexDayChart
                   title="SEALED 1000 INDEX"
                   indexValue={sealedIndex}
                   indexChange={sealedChange}
                   variant="blue"
-                  refreshKey={chartRefreshKey}
+                  sampleSize={benchmarks.sealed.reduce((sum, item) => sum + item.sampleSize, 0)}
                 />
               </div>
             </div>
