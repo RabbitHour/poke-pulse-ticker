@@ -91,8 +91,38 @@ async function fetchTcgPlayerPrice(cardId: string): Promise<PriceSource[]> {
 /**
  * Fetch eBay prices (real if API key set, estimated otherwise)
  */
+let cachedEbayToken: { token: string; expiresAt: number } | null = null;
+
+/** Mint an eBay application access token from the stored client credentials. */
+async function getEbayToken(): Promise<string | null> {
+  if (cachedEbayToken && cachedEbayToken.expiresAt > Date.now() + 60_000) return cachedEbayToken.token;
+  const clientId = Deno.env.get("EBAY_CLIENT_ID");
+  const clientSecret = Deno.env.get("EBAY_CLIENT_SECRET");
+  if (!clientId || !clientSecret) return null;
+  try {
+    const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope",
+    });
+    if (!res.ok) {
+      console.error("eBay OAuth failed", res.status, await res.text());
+      return null;
+    }
+    const json = await res.json();
+    cachedEbayToken = { token: json.access_token, expiresAt: Date.now() + json.expires_in * 1000 };
+    return cachedEbayToken.token;
+  } catch (e) {
+    console.error("eBay OAuth error:", e);
+    return null;
+  }
+}
+
 async function fetchEbayPrice(cardName: string, setName: string, cardId: string, tcgPrice: number): Promise<PriceSource[]> {
-  const ebayKey = Deno.env.get("EBAY_API_KEY");
+  const ebayKey = await getEbayToken();
   const seed = simHash(cardId, 42);
 
   if (ebayKey) {
