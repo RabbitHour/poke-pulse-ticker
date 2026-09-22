@@ -245,8 +245,11 @@ async function fetchPriceChartingPrice(cardName: string, setName: string, cardId
         if (products.length > 0) {
           const p = products[0];
           const price = (p["loose-price"] || p["cib-price"] || 0) / 100; // PriceCharting returns cents
+          const psa10 = (p["manual-only-price"] || p["graded-price"] || 0) / 100;
+          const out: PriceSource[] = [];
+          const pcUrl = `https://www.pricecharting.com/search-products?q=${query}&type=pokemon-cards`;
           if (price > 0) {
-            return [{
+            out.push({
               source: "PriceCharting",
               variant: "Ungraded",
               price: Math.round(price * 100) / 100,
@@ -254,11 +257,26 @@ async function fetchPriceChartingPrice(cardName: string, setName: string, cardId
               high: Math.round(price * 1.15 * 100) / 100,
               shipping: 0,
               condition: "Ungraded",
-              url: `https://www.pricecharting.com/search-products?q=${query}&type=pokemon-cards`,
+              url: pcUrl,
               isLive: true,
               updatedAt: new Date().toISOString(),
-            }];
+            });
           }
+          if (psa10 > 0) {
+            out.push({
+              source: "PriceCharting",
+              variant: "PSA 10",
+              price: Math.round(psa10 * 100) / 100,
+              low: Math.round(psa10 * 0.9 * 100) / 100,
+              high: Math.round(psa10 * 1.1 * 100) / 100,
+              shipping: 0,
+              condition: "PSA 10",
+              url: pcUrl,
+              isLive: true,
+              updatedAt: new Date().toISOString(),
+            });
+          }
+          if (out.length > 0) return out;
         }
       } else {
         await res.text();
