@@ -11,7 +11,7 @@ interface DataQualityBadgeProps {
 // No fabrication, no synthetic blends. Activate by adding the listed env key.
 const SOURCES = [
   { key: "TCG", label: "TCGPlayer", active: true },
-  { key: "eBay", label: "eBay live listings (OAuth app credentials)", active: true },
+  { key: "eBay", label: "eBay sold-listings (EBAY_APP_ID)", active: false },
   { key: "PC", label: "PriceCharting (PRICECHARTING_API_KEY)", active: false },
   { key: "CL", label: "Card Ladder (CARDLADDER_API_KEY)", active: false },
   { key: "Prob", label: "Probstein Auctions (PROBSTEIN_FEED_URL)", active: false },
