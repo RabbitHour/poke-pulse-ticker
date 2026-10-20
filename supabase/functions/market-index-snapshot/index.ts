@@ -39,7 +39,6 @@ const GRADED_BASKET = [
   "Espeon VMAX 270 Fusion Strike PSA 10",
   "Charizard 4 Base Set Unlimited PSA 10",
   "Charizard ex 183 151 PSA 10",
-  "Moonbreon PSA 10",
   "Mewtwo ex 205 151 PSA 10",
   "Sylveon ex 156 Prismatic Evolutions PSA 10",
 ];
