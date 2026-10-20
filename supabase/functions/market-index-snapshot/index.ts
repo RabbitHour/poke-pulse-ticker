@@ -282,6 +282,16 @@ serve(async (req) => {
             catalog: { singles: singlesTotal, sealed: sealedTotal, groups: catalog.length },
             singles: movers(singles, 10, 60),
             sealed: movers(sealed, 25, 40),
+            topSealed: sealed
+              .slice()
+              .sort((a, b) => b.p - a.p)
+              .slice(0, 80)
+              .map((i) => ({
+                id: i.id, name: i.n, number: "", set: i.g,
+                market: Math.round(i.p * 100) / 100,
+                change: i.pv ? Math.round(((i.p - i.pv) / i.pv) * 10000) / 100 : null,
+                image: `https://tcgplayer-cdn.tcgplayer.com/product/${i.id}_400w.jpg`,
+              })),
             topSingles: singles
               .slice()
               .sort((a, b) => b.p - a.p)
