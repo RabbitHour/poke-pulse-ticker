@@ -234,8 +234,17 @@ serve(async (req) => {
     const coverage = groups.length ? catalog.length / groups.length : 0;
     report.coverage = coverage;
 
+    const { data: lastRaw } = await supabase
+      .from("market_index_snapshots")
+      .select("captured_at")
+      .eq("market_type", "raw")
+      .order("captured_at", { ascending: false })
+      .limit(1);
+    const lastRawAt = lastRaw?.[0]?.captured_at ? new Date(lastRaw[0].captured_at).getTime() : 0;
+    const rawDue = Date.now() - lastRawAt >= 5 * 60 * 1000;
+
     const snapshots: any[] = [];
-    if (coverage >= 0.9) {
+    if (coverage >= 0.9 && rawDue) {
       const raw = basketStats(singles);
       const sea = basketStats(sealed);
       const common = {
