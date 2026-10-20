@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
@@ -1106,6 +1106,72 @@ export type Database = {
           expires_at?: string
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      market_catalog_groups: {
+        Row: {
+          group_id: number
+          name: string
+          refreshed_at: string
+          sealed: Json
+          sealed_count: number
+          singles: Json
+          singles_count: number
+          source_updated: string | null
+        }
+        Insert: {
+          group_id: number
+          name: string
+          refreshed_at?: string
+          sealed?: Json
+          sealed_count?: number
+          singles?: Json
+          singles_count?: number
+          source_updated?: string | null
+        }
+        Update: {
+          group_id?: number
+          name?: string
+          refreshed_at?: string
+          sealed?: Json
+          sealed_count?: number
+          singles?: Json
+          singles_count?: number
+          source_updated?: string | null
+        }
+        Relationships: []
+      }
+      market_index_snapshots: {
+        Row: {
+          captured_at: string
+          change_pct: number | null
+          constituents: number
+          id: number
+          market_type: string
+          meta: Json
+          source: string
+          value: number
+        }
+        Insert: {
+          captured_at?: string
+          change_pct?: number | null
+          constituents?: number
+          id?: never
+          market_type: string
+          meta?: Json
+          source: string
+          value: number
+        }
+        Update: {
+          captured_at?: string
+          change_pct?: number | null
+          constituents?: number
+          id?: never
+          market_type?: string
+          meta?: Json
+          source?: string
+          value?: number
         }
         Relationships: []
       }
