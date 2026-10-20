@@ -159,10 +159,9 @@ function movers(items: (Item & { g: string })[], minPrice: number, limit: number
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const authToken = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  // No user input is accepted. Abuse is bounded by run throttles below
+  // (sweep at most once per 60s, graded eBay pull at most every 30 min).
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (!authToken || authToken !== serviceKey) return json({ error: "Unauthorized" }, 401);
-
   const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", serviceKey);
   const report: Record<string, unknown> = {};
 
@@ -181,6 +180,8 @@ serve(async (req) => {
       .from("market_catalog_groups")
       .select("group_id, source_updated, refreshed_at");
     const meta = new Map((rows ?? []).map((r: any) => [r.group_id, r]));
+    const lastRun = Math.max(0, ...(rows ?? []).map((r: any) => new Date(r.refreshed_at).getTime()));
+    const throttled = Date.now() - lastRun < 60_000;
 
     // Never-seen groups first, then stale (older TCGplayer file), then oldest refresh.
     const queue = groups
@@ -192,7 +193,7 @@ serve(async (req) => {
         return String(a.m?.refreshed_at ?? "").localeCompare(String(b.m?.refreshed_at ?? ""));
       })
       .filter((x) => !x.m || x.m.source_updated !== sourceUpdated)
-      .slice(0, GROUPS_PER_RUN)
+      .slice(0, throttled ? 0 : GROUPS_PER_RUN)
       .map((x) => x.g);
 
     let swept = 0;
