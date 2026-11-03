@@ -56,7 +56,7 @@ The old pricing routes and checkout functions predate this upgrade and have not 
 
 ## Future code updates from PyCharm
 
-Keep changes on your current working branch. First inspect `git status --short`. Stage only files you intend to publish; the unrelated package-lock.json changes were left untouched. Commit them, then fetch and merge the current remote main before pushing. Never use force-push to resolve a mismatch.
+Keep changes on your current working branch. First inspect `git status --short`. Stage only files you intend to publish; the existing local package-lock.json was validated and included because the old GitHub lockfile could not install the current dependencies. Commit them, then fetch and merge the current remote main before pushing. Never use force-push to resolve a mismatch.
 
 ```powershell
 git status --short
