@@ -75,7 +75,7 @@ const PokeRipz = () => {
               Digital pack ripping experience • Every era, every set, every product
             </p>
             <p className="font-mono text-[10px] text-muted-foreground mt-0.5">
-              © PGVA Ventures, LLC — All Rights Reserved • Noyes Family Trust
+              © PGVA Ventures, LLC — All Rights Reserved
             </p>
           </div>
           {user && wallet && (

@@ -303,7 +303,7 @@ const Index = () => {
           <PricePredictionGame cards={displayCards} />
         </LazySection>
 
-        
+
 
         <LazySection minHeight="120px">
           <div className="terminal-card p-4 sm:p-5">
@@ -388,7 +388,7 @@ const Index = () => {
           </ProGate>
         </LazySection>
 
-        
+
 
         <LazySection minHeight="200px">
           <ProGate feature="Grading Arbitrage Scanner" blur>
@@ -447,13 +447,13 @@ const Index = () => {
           <ImportFromTCGPlayer />
         </LazySection>
 
-        
 
-        
 
-        
 
-        
+
+
+
+
 
         {/* Pulse Philanthropic Project */}
         <section className="terminal-card border border-border rounded-lg p-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -465,9 +465,9 @@ const Index = () => {
             <span className="text-[8px] font-mono text-muted-foreground/60 border border-border/20 rounded px-1">TIER 5</span>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-            <span className="text-primary font-semibold">The National Museum of Trading Cards & Collectibles</span> — 
-            Our long-term philanthropic vision powered by Poke-Pulse-Engine™ revenue. Every subscription, 
-            every trade, every signal contributes to building the world's first museum dedicated to preserving 
+            <span className="text-primary font-semibold">The National Museum of Trading Cards & Collectibles</span> —
+            Our long-term philanthropic vision powered by Poke-Pulse-Engine™ revenue. Every subscription,
+            every trade, every signal contributes to building the world's first museum dedicated to preserving
             the cultural history of trading card games and collectibles for future generations.
           </p>
           <div className="grid grid-cols-3 gap-2 mb-2">
@@ -483,7 +483,7 @@ const Index = () => {
             ))}
           </div>
           <p className="text-[8px] text-muted-foreground/40 font-mono text-center">
-            © PGVA Ventures, LLC · Noyes Family Trust · 501(c)(3) Pending
+            © PGVA Ventures, LLC · 501(c)(3) Pending
           </p>
         </section>
 

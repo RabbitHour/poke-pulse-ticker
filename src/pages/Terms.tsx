@@ -59,7 +59,7 @@ const Terms = () => (
       <section className="space-y-3">
         <h2 className="font-mono text-sm font-semibold text-foreground uppercase tracking-wider">6A. SimTrader™ / SimTrader World™ Proprietary Game System</h2>
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-          SimTrader™ and SimTrader World™ (collectively, "SimTrader"), the Poké Stock Market Simulator, including but not limited to its concept, design, user interface, game mechanics, virtual trading engine, order types (market, limit, stop-loss), contest systems, leaderboard algorithms, portfolio simulation logic, AI bot opponents, token economy, FloatingOrbs visual effects, glassmorphism UI design, Bot Activity Feed, and all associated source code, artwork, audio, video assets, and documentation, is the exclusive proprietary intellectual property of PGVA Ventures, LLC, a company wholly owned by the Noyes Family Trust, managed by David Noyes.
+          SimTrader™ and SimTrader World™ (collectively, "SimTrader"), the Poké Stock Market Simulator, including but not limited to its concept, design, user interface, game mechanics, virtual trading engine, order types (market, limit, stop-loss), contest systems, leaderboard algorithms, portfolio simulation logic, AI bot opponents, token economy, FloatingOrbs visual effects, glassmorphism UI design, Bot Activity Feed, and all associated source code, artwork, audio, video assets, and documentation, is the exclusive proprietary intellectual property of PGVA Ventures, LLC, a company managed by David Noyes.
         </p>
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
           The name "SimTrader World™" is a branded extension of the original SimTrader™ trademark. All rights are reserved under United States and international copyright, trade secret, patent, and intellectual property law. The SimTrader™ brand, including all associated marks, logos, and trade dress, constitutes protectable intellectual property with first use in commerce established as of the date of initial public deployment.
@@ -77,9 +77,7 @@ const Terms = () => (
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
           All intellectual property rights in and to Poke-Pulse-Engine (poke-pulse-engine.com), SimTrader™, SimTrader World™, Pokegarageva, Poke Pulse Market Ticker, the Daily Price Predictions game, the Card of the Day system, the Live Market Pulse feed, and all associated trademarks, trade names, service marks, copyrights, trade secrets, patents (pending and granted), domain names, social media accounts, and proprietary technology are owned exclusively by PGVA Ventures, LLC.
         </p>
-        <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-          PGVA Ventures, LLC is wholly owned by the Noyes Family Trust. The Noyes Family Trust is managed by David Noyes, who serves as the ultimate beneficial owner, Trustee, and controlling party of all aforementioned intellectual property, both digital and physical. This ownership structure is established and maintained under the laws of the United States of America. The physical and digital assets of PGVA Ventures, LLC — including but not limited to servers, source code repositories, domain registrations, API keys, database contents, marketing materials, video assets, audio recordings, and all creative works — are held in trust for the benefit of the Noyes Family Trust beneficiaries.
-        </p>
+
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
           Any dispute regarding ownership, licensing, use, or infringement of said intellectual property shall be governed by the laws of the State in which PGVA Ventures, LLC is organized, without regard to conflict of law principles. The parties consent to exclusive jurisdiction and venue in the state and federal courts located in said State.
         </p>
@@ -116,14 +114,14 @@ const Terms = () => (
       <section className="space-y-3">
         <h2 className="font-mono text-sm font-semibold text-foreground uppercase tracking-wider">11. Limitation of Liability</h2>
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-          TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SERVICE IS PROVIDED "AS-IS" AND "AS-AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. PGVA VENTURES, LLC, ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AND THE NOYES FAMILY TRUST SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE, INCLUDING BUT NOT LIMITED TO DATA INACCURACIES, SERVICE INTERRUPTIONS, FINANCIAL LOSSES, OR RELIANCE ON MARKET ANALYTICS. IN NO EVENT SHALL OUR TOTAL LIABILITY EXCEED THE AMOUNT PAID BY YOU FOR THE SERVICE IN THE 12 MONTHS PRECEDING THE CLAIM.
+          TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SERVICE IS PROVIDED "AS-IS" AND "AS-AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. PGVA VENTURES, LLC, ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE, INCLUDING BUT NOT LIMITED TO DATA INACCURACIES, SERVICE INTERRUPTIONS, FINANCIAL LOSSES, OR RELIANCE ON MARKET ANALYTICS. IN NO EVENT SHALL OUR TOTAL LIABILITY EXCEED THE AMOUNT PAID BY YOU FOR THE SERVICE IN THE 12 MONTHS PRECEDING THE CLAIM.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-mono text-sm font-semibold text-foreground uppercase tracking-wider">12. Indemnification</h2>
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-          You agree to indemnify, defend, and hold harmless PGVA Ventures, LLC, the Noyes Family Trust, David Noyes, and their respective officers, directors, employees, agents, and successors from and against any claims, liabilities, damages, losses, costs, and expenses (including reasonable attorneys' fees) arising out of or relating to your use of the Service, violation of these Terms, or infringement of any intellectual property or other rights of any person or entity.
+          You agree to indemnify, defend, and hold harmless PGVA Ventures, LLC, David Noyes, and their respective officers, directors, employees, agents, and successors from and against any claims, liabilities, damages, losses, costs, and expenses (including reasonable attorneys' fees) arising out of or relating to your use of the Service, violation of these Terms, or infringement of any intellectual property or other rights of any person or entity.
         </p>
       </section>
 
@@ -155,12 +153,7 @@ const Terms = () => (
         </p>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="font-mono text-sm font-semibold text-foreground uppercase tracking-wider">17. Family &amp; Trust Liability Shield</h2>
-        <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-          PGVA Ventures, LLC is wholly owned by the Noyes Family Trust. The corporate structure provides dual-layer liability protection: (a) the LLC's statutory limited liability separates Company obligations from Trust assets under Delaware law (6 Del. C. § 18-101 et seq.); and (b) the Trust's independent legal status separates Trust assets from personal liability of any individual beneficiary, trustee, or family member. NO member of the Noyes family, beneficiary of the Noyes Family Trust, or individual trustee shall bear personal liability for any debt, obligation, claim, or liability arising from the operation of this Service. This protection extends to all current and future family members, regardless of their involvement or non-involvement with the Company. Users expressly waive any right to pursue claims against individual family members, trustees, or beneficiaries of the Noyes Family Trust.
-        </p>
-      </section>
+
 
       <section className="space-y-3">
         <h2 className="font-mono text-sm font-semibold text-foreground uppercase tracking-wider">18. Competitive Intelligence & Market Monitoring</h2>

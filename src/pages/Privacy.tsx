@@ -70,7 +70,7 @@ const Privacy = () => (
       <section className="space-y-3">
         <h2 className="font-mono text-sm font-semibold text-foreground uppercase tracking-wider">6. Data Sharing & Disclosure</h2>
         <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-          We do NOT sell, trade, rent, or monetize your personal information. We may disclose information: (a) to comply with legal obligations, court orders, or lawful government requests; (b) to protect the rights, property, or safety of PGVA Ventures, LLC, the Noyes Family Trust, or our users; (c) in connection with a merger, acquisition, or sale of assets (with advance notice); (d) in anonymized, aggregate form for analytical or research purposes.
+          We do NOT sell, trade, rent, or monetize your personal information. We may disclose information: (a) to comply with legal obligations, court orders, or lawful government requests; (b) to protect the rights, property, or safety of PGVA Ventures, LLC, or our users; (c) in connection with a merger, acquisition, or sale of assets (with advance notice); (d) in anonymized, aggregate form for analytical or research purposes.
         </p>
       </section>
 

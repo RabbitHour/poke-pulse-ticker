@@ -45,7 +45,7 @@ const PROMOS = [
   {
     tier: 5,
     title: "🏛️ Pulse Philanthropic Project™ — National Museum",
-    body: `The National Museum of Trading Cards & Collectibles — Washington, D.C.\nFree to the public, forever. A Noyes Family Trust venture.\n\n${SITE}/donate\n\n📩 ${CONTACT}\n\n#Museum #TradingCards #Culture #Philanthropy #pokegarageva`,
+    body: `The National Museum of Trading Cards & Collectibles — Washington, D.C.\nFree to the public, forever. A PGVA Ventures initiative.\n\n${SITE}/donate\n\n📩 ${CONTACT}\n\n#Museum #TradingCards #Culture #Philanthropy #pokegarageva`,
     videoUrl: `${SITE}/videos#tier5`,
     videoFile: `${STORAGE_BASE}/PGVA_Tier5_PulsePhilanthropic_Promo_VO.mp4`,
   },

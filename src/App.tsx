@@ -1,3 +1,5 @@
+import MarketPageHeader from "./components/MarketPageHeader";
+import Memberships from "./pages/Memberships";
 import CatalogRecord from "./pages/CatalogRecord";
 import FreeAccount from "./pages/FreeAccount";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -75,14 +77,17 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
+        className="bright-market min-h-screen"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
       >
+        {!["/","/index"].includes(location.pathname)&&<MarketPageHeader />}
         <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/catalog/:id" element={<CatalogRecord />} />
+          <Route path="/memberships" element={<Memberships />} />
           <Route path="/account" element={<FreeAccount />} />
           <Route path="/index" element={<Index />} />
           <Route path="/card/:slug" element={<CardDetail />} />
@@ -104,7 +109,7 @@ const AnimatedRoutes = () => {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/blog-editor" element={<BlogEditor />} />
           <Route path="/trade" element={<TradeCalculator />} />
-          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/pricing" element={<Memberships />} />
           <Route path="/methodology" element={<Methodology />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/accessible" element={<AccessibleLanding />} />
@@ -144,7 +149,7 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
-  useCopyProtection();
+
   useSessionTimeout();
   return (
   <QueryClientProvider client={queryClient}>

@@ -6,7 +6,7 @@ const CopyrightBanner = () => {
       <div className="max-w-7xl mx-auto px-2 py-0.5 flex items-center justify-center gap-1">
         <Lock className="w-2 h-2 text-primary flex-shrink-0" />
         <p className="font-mono text-[5px] sm:text-[6px] text-muted-foreground tracking-wide leading-none">
-          © {new Date().getFullYear()} PGVA Ventures, LLC · Noyes Family Trust · All Rights Reserved · Patent Pending · 18 U.S.C. § 1832 · Not Financial Advice · Pokémon™ Nintendo/Creatures/GAME FREAK
+          © {new Date().getFullYear()} PGVA Ventures, LLC · All Rights Reserved · Not Financial Advice · Pokémon™ Nintendo/Creatures/GAME FREAK
         </p>
         <Shield className="w-2 h-2 text-primary/60 flex-shrink-0" />
       </div>

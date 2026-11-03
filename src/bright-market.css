@@ -114,3 +114,8 @@
 .bright-market .terminal-card img.w-8{width:3.25rem;height:4.5rem;object-fit:contain;}
 .bright-market [class*="text-[6px]"],.bright-market [class*="text-[7px]"],.bright-market [class*="text-[8px]"]{font-size:.72rem;line-height:1.4;}
 @media(max-width:600px){.bright-market .catalog-tile img{height:190px;} .bright-market .text-xs{font-size:.8rem;}}
+
+/* Emerald mineral backdrop and consistent public-page navigation. */
+.bright-market{background:radial-gradient(ellipse at 12% 4%,#5b9d86aa,transparent 42%),repeating-linear-gradient(118deg,transparent 0 90px,#ffffff19 91px 92px,transparent 95px 180px),linear-gradient(135deg,#d8eee5,#85b6a4 52%,#c6e4d9);}
+.market-page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding:.8rem 1.5rem;background:linear-gradient(135deg,#fff,#e4f3ec);border-bottom:1px solid #458871;box-shadow:0 3px 15px #123f3620;}
+.bright-market .market-opening{border-color:#4a9579;box-shadow:0 8px 30px #164c3930;}

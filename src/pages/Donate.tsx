@@ -53,7 +53,7 @@ const Donate = () => {
             National Museum of Trading Cards<br />& Collectibles
           </h1>
           <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-            Washington, D.C. — Free to the public, forever. Under the Noyes Family Trust.
+            Washington, D.C. — Free to the public, forever.
             Help us build the world's first museum dedicated to preserving and celebrating
             the art, history, and culture of trading cards and collectibles.
           </p>
@@ -98,7 +98,7 @@ const Donate = () => {
               </div>
               <p className="text-[10px] text-muted-foreground">
                 Every dollar goes directly toward building the National Museum.
-                All donations are tax-deductible under the Noyes Family Trust 501(c)(3) application.
+                No tax deduction is promised. Contact us about current contribution terms.
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {[25, 100, 500, 1000, 5000, 10000].map(amt => (
@@ -172,7 +172,7 @@ const Donate = () => {
             {[
               { icon: Building2, title: "Cultural Preservation", desc: "Trading cards represent a $50B+ cultural phenomenon spanning 90+ years. This art form deserves institutional preservation." },
               { icon: Globe, title: "Free Forever", desc: "Modeled after the Smithsonian — no admission fee, ever. Accessible to every family, student, and collector regardless of income." },
-              { icon: Shield, title: "Legacy Protection", desc: "Under the Noyes Family Trust, the museum's free-forever mandate is legally binding and cannot be revoked by future leadership." },
+              { icon: Shield, title: "Legacy Protection", desc: "Our long-term goal is accessible preservation of trading-card history." },
             ].map(c => (
               <Card key={c.title} className="bg-card border-border/40">
                 <CardContent className="p-4 space-y-2 text-center">
@@ -196,7 +196,7 @@ const Donate = () => {
         </Card>
 
         <p className="text-[8px] text-muted-foreground text-center font-mono">
-          © 2026 PGVA Ventures, LLC — Noyes Family Trust. All donations managed under 501(c)(3) application.
+          © 2026 PGVA Ventures, LLC All donations managed under 501(c)(3) application.
           Pulse Philanthropic Project™ is a trademark of PGVA Ventures, LLC.
         </p>
         <FinancialDisclaimer compact />

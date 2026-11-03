@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
+      VITE_CUSTOMER_PLANS_ENABLED: ${{ vars.VITE_CUSTOMER_PLANS_ENABLED || 'false' }}
+      VITE_REPORTS_ENABLED: ${{ vars.VITE_REPORTS_ENABLED || 'false' }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_PROJECT: ${{ vars.CLOUDFLARE_PROJECT }}
@@ -80,7 +82,9 @@ jobs:
           retention-days: 7
       - name: Deploy to Cloudflare Pages
         if: (steps.data.outputs.changed == 'true' || github.event_name != 'schedule') && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.CLOUDFLARE_PROJECT != ''
-        run: npx wrangler@4 pages deploy dist --project-name "$CLOUDFLARE_PROJECT" --branch main
+        run: |
+          node scripts/prepare-cloudflare.mjs
+          npx wrangler@4 pages deploy dist --project-name "$CLOUDFLARE_PROJECT" --branch main
       - name: Report missing hosting setup
         if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.CLOUDFLARE_PROJECT == ''
         run: echo '::warning::Public deployment needs Cloudflare configuration. See PUBLIC-LAUNCH.md.'

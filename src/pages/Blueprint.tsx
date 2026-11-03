@@ -260,7 +260,7 @@ const Blueprint = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <Badge variant="outline" className="mb-3 text-xs font-mono tracking-widest border-primary/30 text-primary">
-              NOYES FAMILY TRUST — PGVA VENTURES, LLC
+              PGVA VENTURES, LLC
             </Badge>
             <h2 className="text-2xl md:text-3xl font-bold">5-Tier Vertical Integration™</h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
@@ -563,8 +563,7 @@ const Blueprint = () => {
                 { title: "Security & Legal IP", desc: "Patent, trademark, copyright, trade secret protections & compliance", file: "/PGVA_Security_Legal_IP_Protection.pdf", icon: Shield, color: "text-destructive" },
                 { title: "Financial Projections", desc: "2026–2029 ARR forecasts, unit economics, break-even analysis", file: "/PGVA_Financial_Projections_2026_2029.pdf", icon: TrendingUp, color: "text-green-500" },
                 { title: "LLC Operating Agreement", desc: "PGVA Ventures, LLC corporate governance & member rights", file: "/PGVA_Ventures_LLC_Operating_Agreement.pdf", icon: Layers, color: "text-blue-500" },
-                { title: "Trust Documentation", desc: "Noyes Family Trust structure & liability shield framework", file: "/Noyes_Family_Trust_Documentation.pdf", icon: Lock, color: "text-amber-500" },
-                { title: "IP Assignment Agreement", desc: "Intellectual property assignment & protection terms", file: "/PGVA_IP_Assignment_Protection_Agreement.pdf", icon: Star, color: "text-purple-500" },
+                                { title: "IP Assignment Agreement", desc: "Intellectual property assignment & protection terms", file: "/PGVA_IP_Assignment_Protection_Agreement.pdf", icon: Star, color: "text-purple-500" },
                 { title: "Franchise Blueprint", desc: "12-vertical expansion strategy & market opportunity overview", file: "/Pulse_Market_Terminal_Franchise_Blueprint.pdf", icon: Globe, color: "text-cyan-500" },
               ].map(doc => (
                 <Card key={doc.title} className="bg-card border-border/40 hover:border-primary/40 transition-all group">
