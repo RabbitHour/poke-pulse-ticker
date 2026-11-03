@@ -1,0 +1,1 @@
+{"version":1,"model":"Seven-day log trend v1","methodology":"Extrapolates the latest seven-day log price slope for seven more days. Requires eight daily observations. Persistence (unchanged price) is the baseline. Experimental, not investment advice.","forecasts":[],"outcomes":[],"generatedAt":"2026-11-03T17:19:38.797Z"}
