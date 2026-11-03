@@ -119,3 +119,25 @@
 .bright-market{background:radial-gradient(ellipse at 12% 4%,#5b9d86aa,transparent 42%),repeating-linear-gradient(118deg,transparent 0 90px,#ffffff19 91px 92px,transparent 95px 180px),linear-gradient(135deg,#d8eee5,#85b6a4 52%,#c6e4d9);}
 .market-page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding:.8rem 1.5rem;background:linear-gradient(135deg,#fff,#e4f3ec);border-bottom:1px solid #458871;box-shadow:0 3px 15px #123f3620;}
 .bright-market .market-opening{border-color:#4a9579;box-shadow:0 8px 30px #164c3930;}
+
+.bright-market .market-tape {
+  background: linear-gradient(110deg, #c2e7d7, #e9f7ef 46%, #b6dfcd);
+  border-color: #74aa94;
+}
+.bright-market .market-opening { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.opening-copy { align-items: center; text-align: center; gap: .65rem; }
+.opening-mark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  color: white;
+  background: linear-gradient(140deg, #258e68, #07503d);
+}
+.opening-kicker { color: #146247; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.market-opening #poke-help { width: min(100%, 50rem); min-width: 0; justify-self: center; }
+.opening-gallery { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 600px) {
+  .opening-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

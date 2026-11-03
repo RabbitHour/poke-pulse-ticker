@@ -4,7 +4,6 @@ import MarketOpening from "@/components/MarketOpening";
 import CatalogExplorer from "@/components/CatalogExplorer";
 import MarketOverview from "@/components/MarketOverview";
 import CardValuer from "@/components/CardValuer";
-import PokeHelp from "@/components/PokeHelp";
 import PortalPreview from "@/components/PortalPreview";
 import { useObservedProducts } from "@/hooks/useObservedProducts";
 import { useRef, useEffect, useMemo, useState } from "react";
@@ -350,7 +349,6 @@ const Index = () => {
 
 
 
-        <PokeHelp />
         <details className="terminal-card research-previews p-4"><summary className="font-bold cursor-pointer">Research & simulator previews — experimental estimates</summary><p className="market-note">These older tools include modeled signals and simulated data. They are not verified sale histories, investment predictions, or measured returns.</p>
         <LazySection minHeight="280px">
           <ProGate feature="Historical price charts" blur>

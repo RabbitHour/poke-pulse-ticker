@@ -31,7 +31,7 @@ const Contact = () => {
     const result = contactSchema.safeParse(form);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
+      result.error.issues.forEach((err) => {
         if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
       });
       setErrors(fieldErrors);
@@ -40,10 +40,10 @@ const Contact = () => {
 
     setSending(true);
     try {
-      // For now, we'll simulate the send since transactional email needs scaffolding
-      await new Promise((r) => setTimeout(r, 1000));
+      const body = 'From: '+form.name+' <'+form.email+'>\n\n'+form.message;
+      window.location.assign('mailto:pokegarageva@gmail.com?subject='+encodeURIComponent(form.subject)+'&body='+encodeURIComponent(body));
       setSubmitted(true);
-      toast.success("Message sent successfully!");
+      toast.info("Review and send the draft in your email app.");
     } catch {
       toast.error("Failed to send. Please try again.");
     } finally {
@@ -63,9 +63,9 @@ const Contact = () => {
           >
             <CheckCircle className="w-14 h-14 text-terminal-green mx-auto" />
           </motion.div>
-          <h1 className="font-mono text-xl font-bold text-foreground">Message Sent!</h1>
+          <h1 className="font-mono text-xl font-bold text-foreground">Email draft opened</h1>
           <p className="font-mono text-sm text-muted-foreground">
-            Thanks for reaching out. We'll get back to you soon at {form.email}.
+            Review and send the draft in your email app. The website has not sent a message automatically.
           </p>
           <button
             onClick={() => navigate("/")}
@@ -143,7 +143,7 @@ const Contact = () => {
             className="w-full flex items-center justify-center gap-2 font-mono text-sm font-semibold bg-primary text-primary-foreground rounded-md py-2.5 hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
             <Send className="w-4 h-4" />
-            {sending ? "Sending…" : "Send Message"}
+            {sending ? "Opening draft…" : "Open email draft"}
           </button>
         </motion.form>
 
