@@ -111,4 +111,6 @@
 .price-history-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:.5rem;margin-block:.75rem;}
 .price-history-grid>div{padding:.65rem;border:1px solid #b8d6cb;border-radius:.5rem;background:#fff;}
 .bright-market a:focus-visible,.bright-market button:focus-visible{outline:3px solid #2563eb;outline-offset:3px;}
+.bright-market .terminal-card img.w-8{width:3.25rem;height:4.5rem;object-fit:contain;}
+.bright-market [class*="text-[6px]"],.bright-market [class*="text-[7px]"],.bright-market [class*="text-[8px]"]{font-size:.72rem;line-height:1.4;}
 @media(max-width:600px){.bright-market .catalog-tile img{height:190px;} .bright-market .text-xs{font-size:.8rem;}}

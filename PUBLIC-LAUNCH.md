@@ -10,7 +10,7 @@ Open the project folder C:\Users\noyes\PycharmProjects\Poke-Pulse-Ticker-GitHub.
 Set-Location 'C:\Users\noyes\PycharmProjects\Poke-Pulse-Ticker-GitHub'
 npm run market:sync
 npm test
-node --test scripts/record-history.test.mjs
+node --test scripts/record-history.test.mjs scripts/service-worker.test.mjs
 npm run build
 npm run dev -- --host 127.0.0.1 --port 5182
 ```
@@ -63,12 +63,16 @@ git status --short
 git fetch origin
 git merge --no-edit origin/main
 npm test
-node --test scripts/record-history.test.mjs
+node --test scripts/record-history.test.mjs scripts/service-worker.test.mjs
 npm run build
 git push origin HEAD
 ```
 
 These commands assume your intended edits have already been committed. If Git reports uncommitted changes or conflicts, stop and resolve those before pushing. A merge into main starts the website updater/deployment; a feature branch push runs verification only. The scheduled updater never changes application source or your local files.
+
+## Browser caching
+
+The public-shell service worker now bypasses authenticated API responses and market JSON, and fetches navigation HTML from the network first. Older Poke Pulse caches are removed during activation. This prevents one signed-in account’s cached API response from being reused for another and allows new deployments to appear on refresh.
 
 ## Known limits
 

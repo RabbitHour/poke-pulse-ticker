@@ -26,12 +26,12 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
       image:c._image, href:c._apiId ? `/card/${encodeURIComponent(c._apiId)}` : undefined,
     }));
     const needle = debounced.toLowerCase();
-    const raw = catalog.data ? catalog.data.entries.filter(e => e.kind === "raw" && e.market != null && e.market > 0 && (!needle || `${e.name} ${e.set} ${e.number}`.toLowerCase().includes(needle))).map(e => ({key:e.id,name:e.name,detail:`${e.set} · #${e.number} · ${e.variant || "variant unspecified"}`,price:e.market!,image:e.image,href:e.cardId?"/card/"+encodeURIComponent(e.cardId):undefined})) : fallbackRaw;
+    const raw = catalog.data ? catalog.data.entries.filter(e => e.kind === "raw" && e.market != null && e.market > 0 && (!needle || `${e.name} ${e.set} ${e.number}`.toLowerCase().includes(needle))).map(e => ({key:e.id,name:e.name,detail:`${e.set} · #${e.number} · ${e.variant || "variant unspecified"}`,price:e.market!,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackRaw;
     const graded = observed.graded.map(c => ({ key:`graded:${c.name}:${c.set}:${c.number}:${c.grade}`, name:c.name,
       detail:`${c.set} · #${c.number} · ${c.grade}`, price:c.market, image:c._image, href:undefined }));
     const fallbackSealed = observed.sealed.map(c => ({key:`sealed:${c.name}:${c.type}`, name:c.name,
       detail:c.type, price:c.market, image:c.image, href:undefined }));
-    const sealed = catalog.data ? catalog.data.entries.filter(e => e.kind === "sealed" && e.market != null && e.market > 0).map(e => ({key:e.id,name:e.name,detail:e.set,price:e.market!,image:e.image,href:undefined})) : fallbackSealed;
+    const sealed = catalog.data ? catalog.data.entries.filter(e => e.kind === "sealed" && e.market != null && e.market > 0).map(e => ({key:e.id,name:e.name,detail:e.set,price:e.market!,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackSealed;
     const q=debounced.toLowerCase();
     return (category === "raw" ? raw : category === "graded" ? graded : sealed)
       .filter(c => Number.isFinite(c.price) && c.price > 0 && (!q || `${c.name} ${c.detail}`.toLowerCase().includes(q)))

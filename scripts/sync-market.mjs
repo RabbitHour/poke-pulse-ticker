@@ -45,14 +45,14 @@ async function run(){
     for(const quote of available){const market=Number.isFinite(quote.marketPrice)&&quote.marketPrice>0?quote.marketPrice:null;
      entries.push({id:'tcg:'+p.productId+':'+(quote.subTypeName||'unknown'),productId:p.productId,cardId:art?.id,name:p.name,set:g.name,setId:g.abbreviation||String(g.groupId),number,kind,
       category:kind==='sealed'?classifyProduct(p.name,description):null,market,variant:quote.subTypeName||null,image:art?.image?art.image+'/low.webp':'',
-      sourceUrl:p.url||'https://www.tcgplayer.com/product/'+p.productId,sourceUpdated});
+      sourceUrl:'https://www.tcgplayer.com/product/'+encodeURIComponent(p.productId),sourceUpdated});
     }
    }
   }
-  for(const c of englishCards){if(matchedDex.has(c.id))continue;const setId=c.id.slice(0,c.id.lastIndexOf('-'));entries.push({id:'dex:'+c.id,cardId:c.id,name:c.name,set:setNames.get(setId)||setId,setId,number:c.localId||c.id.split('-').at(-1),kind:'raw',category:null,market:null,variant:null,image:c.image?c.image+'/low.webp':'',sourceUrl:'https://www.tcgdex.net/database/'+c.id,sourceUpdated:null});}
-  for(const c of digitalCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));entries.push({id:'pocket:'+c.id,cardId:c.id,name:c.name,set:setNames.get(setId)||setId,setId,number:c.localId||c.id.split('-').at(-1),kind:'digital',category:null,market:null,variant:null,image:c.image?c.image+'/low.webp':'',sourceUrl:'https://www.tcgdex.net/database/'+c.id,sourceUpdated:null});}
+  for(const c of englishCards){if(matchedDex.has(c.id))continue;const setId=c.id.slice(0,c.id.lastIndexOf('-'));entries.push({id:'dex:'+c.id,cardId:c.id,name:c.name,set:setNames.get(setId)||setId,setId,number:c.localId||c.id.split('-').at(-1),kind:'raw',category:null,market:null,variant:null,image:c.image?c.image+'/low.webp':'',sourceUrl:'https://api.tcgdex.net/v2/en/cards/'+encodeURIComponent(c.id),sourceUpdated:null});}
+  for(const c of digitalCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));entries.push({id:'pocket:'+c.id,cardId:c.id,name:c.name,set:setNames.get(setId)||setId,setId,number:c.localId||c.id.split('-').at(-1),kind:'digital',category:null,market:null,variant:null,image:c.image?c.image+'/low.webp':'',sourceUrl:'https://api.tcgdex.net/v2/en/cards/'+encodeURIComponent(c.id),sourceUpdated:null});}
   entries.sort((a,b)=>Number(Boolean(b.image))-Number(Boolean(a.image)) || Number(b.market!==null)-Number(a.market!==null) || (b.market??0)-(a.market??0) || a.id.localeCompare(b.id));
-  const catalog={version:3,digitalCatalogCount:digitalCards.length,catalogRefreshedAt:dex.at,generatedAt:start,sourceUpdated,languageScope:'English physical and Pocket digital TCGdex catalogs plus TCGplayer-listed physical products; not guaranteed worldwide coverage',englishCatalogCount:englishCards.length,excludedDigitalEntries:0,providerGroups:groups.length,
+  const catalog={version:4,digitalCatalogCount:digitalCards.length,catalogRefreshedAt:dex.at,generatedAt:start,sourceUpdated,languageScope:'English physical and Pocket digital TCGdex catalogs plus TCGplayer-listed physical products; not guaranteed worldwide coverage',englishCatalogCount:englishCards.length,excludedDigitalEntries:0,providerGroups:groups.length,
    pricedRecords:entries.filter(e=>e.market!==null).length,entries};
   const histFile=path.join(cacheDir,'category-history.json');const history=await read(histFile,await read(path.join(publicDir,'sealed-indexes.json'),{version:1,categories:{}}));
   const historyBefore=JSON.stringify(history);

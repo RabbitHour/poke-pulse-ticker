@@ -1,3 +1,4 @@
+import CatalogRecord from "./pages/CatalogRecord";
 import FreeAccount from "./pages/FreeAccount";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
@@ -81,6 +82,7 @@ const AnimatedRoutes = () => {
       >
         <Routes location={location}>
           <Route path="/" element={<Index />} />
+          <Route path="/catalog/:id" element={<CatalogRecord />} />
           <Route path="/account" element={<FreeAccount />} />
           <Route path="/index" element={<Index />} />
           <Route path="/card/:slug" element={<CardDetail />} />

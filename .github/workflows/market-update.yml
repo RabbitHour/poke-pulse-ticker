@@ -69,7 +69,7 @@ jobs:
       - name: Verify and build
         if: steps.data.outputs.changed == 'true' || github.event_name != 'schedule'
         run: |
-          node --test scripts/record-history.test.mjs
+          node --test scripts/record-history.test.mjs scripts/service-worker.test.mjs
           npm test
           npm run build
       - uses: actions/upload-artifact@v4
