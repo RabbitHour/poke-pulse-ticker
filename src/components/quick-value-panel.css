@@ -1,0 +1,15 @@
+.poke-quick-value {
+  --background: 0 0% 100%;
+  --foreground: 140 61% 20%;
+  --primary: 142 72% 29%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 138 76% 97%;
+  --muted-foreground: 140 30% 30%;
+  --border: 141 50% 78%;
+  background: white;
+  color: #14532d;
+}
+.poke-quick-value button:focus-visible {
+  outline: 3px solid #15803d;
+  outline-offset: 3px;
+}

@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local provider download cache (publish only public/data outputs)
+/work/market-cache/
+
+# Local backups and credentials
+*.before-poke-patch
+.env
+.env.*
+!.env.example
+.wrangler/

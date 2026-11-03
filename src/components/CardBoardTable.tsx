@@ -1,3 +1,4 @@
+import { CardImage } from "./CardImage";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -51,7 +52,7 @@ const CardBoardTable = ({ cards, title, showGrade = false }: CardBoardTableProps
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
+      viewport={{ once: true, amount: "some" }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="terminal-card overflow-hidden"
     >
@@ -128,14 +129,14 @@ const CardBoardTable = ({ cards, title, showGrade = false }: CardBoardTableProps
           </thead>
           <tbody>
             {sorted.slice(0, 100).map((card, i) => (
-              <tr key={i} className={`data-row cursor-pointer ${compact ? "h-8" : ""}`} onClick={() => navigate(cardRoute(card))}>
+              <tr key={i} className={`data-row cursor-pointer ${compact ? "h-8" : ""}`} onClick={() => { if (card._apiId) navigate(cardRoute(card)); }}>
                 <td className={compact ? "px-2 py-1" : "px-4 py-2"}>
                   <span className="font-mono text-[10px] text-primary font-bold tracking-wider bg-primary/10 px-1.5 py-0.5 rounded">
                     {getCardToken(card)}
                   </span>
                 </td>
                 <td className={`${compact ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm"} font-mono text-foreground font-medium flex items-center gap-2`}>
-                  {!compact && <img src={card._image || "/icon-192.png"} alt="" className={`w-6 h-8 rounded ${card._image ? "object-cover" : "object-contain p-0.5 bg-muted"}`} onError={(e) => { (e.target as HTMLImageElement).src = '/icon-192.png'; (e.target as HTMLImageElement).className = 'w-6 h-8 rounded object-contain p-0.5 bg-muted'; }} />}
+                  {!compact && <CardImage src={card._image} alt={card.name} className="w-9 h-12 rounded object-contain" />}
                   {card.name}
                 </td>
                 {!compact && <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{card.set}</td>}
@@ -149,19 +150,19 @@ const CardBoardTable = ({ cards, title, showGrade = false }: CardBoardTableProps
                 {!compact && (
                   <>
                     <td className="px-4 py-2 font-mono text-xs text-muted-foreground text-right">
-                      ${card.low.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {showGrade ? "—" : "$" + card.low.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-4 py-2 font-mono text-xs text-muted-foreground text-right">
-                      ${card.mid.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {showGrade ? "—" : "$" + card.mid.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
                   </>
                 )}
                 <td className={`${compact ? "px-2 py-1 text-xs" : "px-4 py-2 text-sm"} font-mono text-right font-semibold ${card.change >= 0 ? "text-terminal-green" : "text-terminal-red"}`}>
-                  {card.change >= 0 ? "+" : ""}{card.change.toFixed(2)}%
+                  {showGrade ? "—" : (card.change >= 0 ? "+" : "") + card.change.toFixed(2) + "%"}
                 </td>
                 {!compact && (
                   <td className="px-4 py-2 text-center">
-                    <SignalBadge result={getCardSignal(card)} />
+                    {showGrade ? "Not measured" : <SignalBadge result={getCardSignal(card)} />}
                   </td>
                 )}
               </tr>

@@ -47,6 +47,7 @@ const moreNav = [
   { path: "/guides", label: "Guides", icon: BookOpen },
   { path: "/trade", label: "Trade", icon: ArrowLeftRight },
   { path: "/command-center", label: "AI Center", icon: Brain },
+  { path: "/account", label: "Free account", icon: User },
   { path: "/profile", label: "Profile", icon: User },
   { path: "/contact", label: "Contact", icon: Mail },
 ];
@@ -131,7 +132,7 @@ const TerminalHeader = () => {
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="sm:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+              className="xl:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
               aria-label="Toggle menu"
             >
               {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -157,7 +158,7 @@ const TerminalHeader = () => {
               </div>
             </div>
 
-            <nav className="hidden sm:flex items-center gap-0.5 ml-3 lg:ml-4">
+            <nav className="hidden xl:flex items-center gap-0.5 ml-3 lg:ml-4">
               {primaryNav.map((item) => (
                 <button
                   key={item.path}
@@ -263,7 +264,7 @@ const TerminalHeader = () => {
         </div>
 
         {menuOpen && (
-          <div className="sm:hidden border-t border-border bg-terminal-header animate-in slide-in-from-top-2 duration-200">
+          <div className="xl:hidden border-t border-border bg-terminal-header animate-in slide-in-from-top-2 duration-200">
             <nav className="flex flex-col py-2">
               {primaryNav.map((item) => {
                 const Icon = item.icon;
@@ -328,7 +329,7 @@ const TerminalHeader = () => {
 
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm sm:hidden"
+          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm xl:hidden"
           onClick={() => setMenuOpen(false)}
         />
       )}

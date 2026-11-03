@@ -1,0 +1,86 @@
+name: Unattended market updater
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: ['public/data/**', '**.md']
+permissions:
+  contents: write
+concurrency:
+  group: market-update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PROJECT: ${{ vars.CLOUDFLARE_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Restore durable data branch
+        shell: bash
+        run: |
+          mkdir -p public/data
+          if git ls-remote --exit-code --heads origin market-data >/dev/null; then
+            git fetch origin market-data:refs/remotes/origin/market-data
+            git archive FETCH_HEAD | tar -x -C public/data
+          fi
+      - uses: actions/cache@v4
+        with:
+          path: work/market-cache
+          key: market-provider-${{ hashFiles('public/data/catalog.json') }}
+          restore-keys: market-provider-
+      - name: Remove abandoned process lock from restored cache
+        run: node -e "require('fs').rmSync('work/market-cache/sync.lock',{force:true})"
+      - name: Refresh catalog and record observations
+        run: npm run market:sync
+      - name: Publish durable data only when changed
+        id: data
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          old=$(git rev-parse --verify refs/remotes/origin/market-data 2>/dev/null || true)
+          export GIT_INDEX_FILE="$RUNNER_TEMP/market-data-index"
+          git read-tree --empty
+          git -C "$GITHUB_WORKSPACE/public/data" --git-dir="$GITHUB_WORKSPACE/.git" --work-tree="$GITHUB_WORKSPACE/public/data" add -A
+          tree=$(git write-tree)
+          oldtree=""
+          if [ -n "$old" ]; then oldtree=$(git show -s --format=%T "$old"); fi
+          if [ "$tree" != "$oldtree" ]; then
+            parents=()
+            if [ -n "$old" ]; then parents=(-p "$old"); fi
+            commit=$(git commit-tree "$tree" "${parents[@]}" -m 'Record provider catalog and dated price history')
+            git push origin "$commit:refs/heads/market-data"
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install website dependencies
+        if: steps.data.outputs.changed == 'true' || github.event_name != 'schedule'
+        run: npm ci
+      - name: Verify and build
+        if: steps.data.outputs.changed == 'true' || github.event_name != 'schedule'
+        run: |
+          node --test scripts/record-history.test.mjs
+          npm test
+          npm run build
+      - uses: actions/upload-artifact@v4
+        if: steps.data.outputs.changed == 'true' || github.event_name != 'schedule'
+        with:
+          name: website-dist
+          path: dist
+          retention-days: 7
+      - name: Deploy to Cloudflare Pages
+        if: (steps.data.outputs.changed == 'true' || github.event_name != 'schedule') && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' && env.CLOUDFLARE_PROJECT != ''
+        run: npx wrangler@4 pages deploy dist --project-name "$CLOUDFLARE_PROJECT" --branch main
+      - name: Report missing hosting setup
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' || env.CLOUDFLARE_PROJECT == ''
+        run: echo '::warning::Public deployment needs Cloudflare configuration. See PUBLIC-LAUNCH.md.'

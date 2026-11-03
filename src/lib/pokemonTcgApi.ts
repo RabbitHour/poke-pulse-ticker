@@ -175,7 +175,8 @@ export async function searchCards(name: string, pageSize = 100): Promise<Pokemon
   const tokens = clean.split(/\s+/).filter(Boolean);
   const nameQ = tokens.map(t => `name:*${t}*`).join(" ");
   const setQ = tokens.map(t => `set.name:*${t}*`).join(" ");
-  const q = `(${nameQ}) OR (${setQ})`;
+  const numberQ = /^[A-Za-z]*\d+[A-Za-z]*$/.test(clean) ? ` OR number:"${clean}"` : "";
+  const q = `(${nameQ}) OR (${setQ})${numberQ}`;
   const data: APIResponse = await proxyFetch("/cards", {
     q,
     pageSize: String(pageSize),

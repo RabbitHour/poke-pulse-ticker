@@ -1,134 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import type { CardData } from "@/data/marketData";
-import { getCardToken } from "@/lib/tokenSymbols";
-import { useEbayPrices, ebayPriceMap, ebayChangeMap } from "@/hooks/useEbayPrices";
-import { ebayAffiliateLink } from "@/lib/ebay";
-
-interface TickerBarProps {
-  cards?: CardData[];
-  isLive?: boolean;
-  lastUpdated?: number;
+import {useEffect,useMemo,useState} from "react";
+import {Link} from "react-router-dom";
+import type {CardData} from "@/data/marketData";
+import {useCatalog,type CatalogEntry} from "@/hooks/useCatalog";
+import {useObservedProducts} from "@/hooks/useObservedProducts";
+import {catalogSymbol} from "@/lib/catalogSymbols";
+import {PRODUCT_CATEGORIES} from "@/lib/productCategories";
+import {CardImage} from "./CardImage";
+export default function TickerBar({cards=[]}:{cards?:CardData[];isLive?:boolean;lastUpdated?:number}){
+ const q=useCatalog();const observed=useObservedProducts(cards);const [page,setPage]=useState(0);const [paused,setPaused]=useState(false);const [category,setCategory]=useState('raw');
+ useEffect(()=>{if(paused)return;const t=setInterval(()=>setPage(p=>p+1),30000);return()=>clearInterval(t);},[paused]);
+ const pool=useMemo(()=>{const fallback:CatalogEntry[]=cards.map(c=>({id:c._apiId||c.name,cardId:c._apiId,name:c.name,set:c.set,setId:c.setCode||c.set,number:c.number,kind:'raw',category:null,market:c.market,image:c._image||'',sourceUrl:'',sourceUpdated:null,variant:c._variant}));
+ const graded:CatalogEntry[]=observed.graded.map(c=>({id:c.name+c.grade+c.set,name:c.name,set:c.set,setId:c.setCode||c.set,number:c.number,kind:'graded',grade:c.grade,category:null,market:c.market,image:c._image||'',sourceUrl:'',sourceUpdated:observed.gradedAt||null}));
+ const entries=[...(q.data?.entries??fallback),...graded];return entries.filter(e=>category==='all'||(category==='raw'||category==='sealed'||category==='graded'||category==='digital'?e.kind===category:e.category===category));
+ },[q.data,cards,observed.graded,category,observed.gradedAt]);
+ const start=pool.length?(page*24)%pool.length:0;const slice=pool.slice(start,start+24);
+ return <section className="market-tape" aria-label="Indexed market ticker"><div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2"><div className="flex flex-wrap items-center gap-2"><strong className="text-xs">POKE MARKET TAPE</strong><label className="sr-only" htmlFor="tape-category">Ticker category</label><select id="tape-category" className="rounded border border-border bg-card p-1 text-xs" value={category} onChange={e=>{setCategory(e.target.value);setPage(0);}}><option value="all">All indexed products</option><option value="raw">Raw cards</option><option value="digital">TCG Pocket · digital</option><option value="graded">Graded quotes</option><option value="sealed">All sealed products</option>{PRODUCT_CATEGORIES.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select><span className="text-xs text-muted-foreground">{pool.length.toLocaleString()} indexed · window {pool.length?start+1:0}–{start+slice.length}</span></div><div className="flex gap-3 text-xs"><button onClick={()=>setPaused(!paused)} aria-pressed={paused}>{paused?'Resume':'Pause'}</button><a href="#catalog" className="underline">Search full catalog</a></div></div>
+ {slice.length?<div className="overflow-x-auto"><div className="ticker-scroll flex w-max py-2" style={{animationPlayState:paused?'paused':'running',animationDuration:'120s'}}>{[...slice,...slice].map((e,i)=><div key={e.id+'-'+i} className="inline-flex items-center gap-2 border-r border-border px-4"><CardImage src={e.image} alt={e.name} className="w-10 h-14 object-contain"/><div className="text-xs"><strong className="block text-primary font-mono" title={e.id}>{catalogSymbol(e)}</strong>{e.kind==='raw'&&e.cardId?<Link to={'/card/'+encodeURIComponent(e.cardId)} tabIndex={i>=slice.length?-1:0}>{e.name}</Link>:<span>{e.name}</span>}<span className="block text-muted-foreground">{e.set} {e.grade}</span></div><strong className="text-sm whitespace-nowrap">{e.kind==='digital'?'DIGITAL':e.market==null?'No quote':'$'+e.market.toFixed(2)}</strong></div>)}</div></div>:<p className="px-4 py-2 text-sm">No records in this category yet.</p>}
+ <p className="px-4 pb-2 text-[11px] text-muted-foreground">Catalog coverage is provider-specific, not every worldwide printing. Prices are available source quotes; missing prices are never zero.</p></section>;
 }
-
-const TickerBar = ({ cards = [], isLive = false, lastUpdated }: TickerBarProps) => {
-  const [countdown, setCountdown] = useState("");
-
-  const candidateCards = useMemo(() => {
-    // Pull a broader candidate pool so the live eBay layer has enough cards
-    // to choose from even when many quotes are currently flat.
-    return [...cards]
-      .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-  }, [cards, lastUpdated]);
-
-  // Primary price source: eBay Browse API (median active listing price).
-  // Falls back to TCGPlayer market price if eBay returns no result for a query.
-  const ebayQueries = useMemo(
-    () => Array.from(new Set(candidateCards.slice(0, 30).map((c) => `${c.name} ${c.set}`))),
-    [candidateCards]
-  );
-  const { data: ebayData } = useEbayPrices(ebayQueries);
-  const priceMap = useMemo(() => ebayPriceMap(ebayData?.results), [ebayData]);
-  const changeMap = useMemo(() => ebayChangeMap(ebayData?.results), [ebayData]);
-  const keyFor = (card: CardData) => `${card.name} ${card.set}`.toLowerCase();
-  const priceFor = (card: CardData) => priceMap[keyFor(card)] || card.market;
-  const changeFor = (card: CardData) => {
-    const live = changeMap[keyFor(card)];
-    if (typeof live === "number" && Math.abs(live) >= 0.01) return live;
-    return card.change;
-  };
-
-  const tickerCards = useMemo(() => {
-    // Prefer cards with real live movement so the tape does not flatten at 0.0%.
-    // If live movement is sparse, gracefully fall back to the broader candidate pool.
-    const ranked = candidateCards
-      .slice(0, 30)
-      .map((card) => {
-        const live = changeMap[keyFor(card)];
-        return {
-          card,
-          liveChange: typeof live === "number" ? live : null,
-          displayChange: typeof live === "number" && Math.abs(live) >= 0.01 ? live : card.change,
-        };
-      })
-      .sort((a, b) => {
-        const aHasLiveMovement = a.liveChange !== null && Math.abs(a.liveChange) >= 0.01;
-        const bHasLiveMovement = b.liveChange !== null && Math.abs(b.liveChange) >= 0.01;
-        if (aHasLiveMovement !== bHasLiveMovement) return Number(bHasLiveMovement) - Number(aHasLiveMovement);
-        return Math.abs(b.displayChange) - Math.abs(a.displayChange);
-      });
-
-    const pool = ranked.slice(0, 16);
-    const seed = Math.floor(Date.now() / (10 * 60 * 1000));
-    const shuffled = [...pool]
-      .map((entry, i) => ({ entry, k: Math.sin((i + 1) * (seed + 1) * 9301) * 233280 }))
-      .sort((a, b) => a.k - b.k)
-      .map((x) => x.entry.card);
-
-    return [...shuffled, ...shuffled];
-  }, [candidateCards, changeMap]);
-
-  useEffect(() => {
-    if (!lastUpdated) return;
-
-    const REFRESH_MS = 30 * 60 * 1000;
-
-    const tick = () => {
-      const elapsed = Date.now() - lastUpdated;
-      const remaining = Math.max(0, REFRESH_MS - elapsed);
-      const mins = Math.floor(remaining / 60_000);
-      const secs = Math.floor((remaining % 60_000) / 1000);
-      setCountdown(`${mins}:${secs.toString().padStart(2, "0")}`);
-    };
-
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [lastUpdated]);
-
-  if (!tickerCards.length) return null;
-
-  return (
-    <div className="border-b border-border/40 bg-terminal-header overflow-hidden">
-      <div className="flex items-center">
-        {isLive && countdown && (
-          <div className="flex-shrink-0 px-2.5 py-1.5 border-r border-border/40 bg-terminal-header z-10 relative shadow-[6px_0_12px_4px_hsl(var(--terminal-header))]">
-            <span className="font-mono text-[9px] text-secondary uppercase tracking-wider font-bold">
-              ↻ {countdown}
-            </span>
-          </div>
-        )}
-
-        <div
-          className="ticker-scroll flex whitespace-nowrap py-1.5"
-          style={{ animationDuration: `${Math.max(70, tickerCards.length * 5.5)}s` }}
-        >
-          {tickerCards.map((card, i) => {
-            const price = priceFor(card);
-            const change = changeFor(card);
-            return (
-              <a
-                key={`${card.name}-${i}`}
-                href={ebayAffiliateLink(`${card.name} ${card.set}`)}
-                target="_blank"
-                rel="noopener noreferrer sponsored"
-                className="inline-flex items-center gap-2 px-4 font-mono text-xs hover:bg-primary/5 transition-colors"
-              >
-                <span className="text-primary font-bold text-[10px]">{getCardToken(card)}</span>
-                <span className="text-foreground/80 font-medium">{card.name}</span>
-                <span className="text-foreground font-semibold">
-                  ${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <span className={change >= 0 ? "text-terminal-green" : "text-terminal-red"}>
-                  {change >= 0 ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
-                </span>
-                <span className="text-border/40">•</span>
-              </a>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default TickerBar;

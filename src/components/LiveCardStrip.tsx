@@ -1,3 +1,4 @@
+import { CardImage } from "./CardImage";
 import { useEffect, useMemo, useState } from "react";
 import { useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { Link } from "react-router-dom";
@@ -110,7 +111,7 @@ const LiveCardStrip = ({
             {subtitle}
           </p>
         </div>
-        <span className="font-mono text-[9px] text-primary shrink-0">● LIVE</span>
+        <span className="font-mono text-[9px] text-primary shrink-0">SOURCE QUOTES</span>
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-9 gap-2">
@@ -134,7 +135,7 @@ const LiveCardStrip = ({
                 {(c.change || 0).toFixed(1)}%
               </div>
               <div className="aspect-[3/4] w-full overflow-hidden bg-muted/40">
-                <img
+                <CardImage
                   src={c._image}
                   alt={`${c.name} — live price`}
                   loading="lazy"
