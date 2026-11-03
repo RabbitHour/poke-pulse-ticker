@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Calculator, DollarSign, TrendingUp, ArrowRight, Sparkles, Loader2, Shuffle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { CardImage } from "./CardImage";
+import "./quick-value-panel.css";
 import { useLiveCards } from "@/hooks/usePokemonTcg";
 
 const DISPLAY_COUNT = 8;
@@ -30,7 +32,7 @@ const QuickValueCalculator = () => {
     if (!liveCards || liveCards.length === 0) return [];
     return liveCards
       .slice(0, 500)
-      .filter((c) => c._image && c.market > 0)
+      .filter((c) => Number.isFinite(c.market) && c.market > 0)
       .map((c) => ({
         name: `${c.name} (${c.set})`,
         price: c.market,
@@ -84,9 +86,9 @@ const QuickValueCalculator = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: "some" }}
       transition={{ duration: 0.5 }}
-      className="terminal-card overflow-hidden"
+      className="terminal-card overflow-hidden poke-quick-value"
     >
       <div className="border-b border-border px-4 py-3 flex items-center justify-between">
         <h3 className="text-sm font-bold tracking-wide text-foreground uppercase flex items-center gap-2">
@@ -112,13 +114,13 @@ const QuickValueCalculator = () => {
 
       <div className="p-4 space-y-3">
         <p className="font-mono text-xs text-muted-foreground">
-          Own any of these? Tap to see what they're worth right now:
+          Select matching raw cards to total their available feed prices. Condition and printing may affect value:
         </p>
 
         {isLoading && pool.length === 0 ? (
           <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="font-mono text-xs">Loading live prices…</span>
+            <span className="font-mono text-xs">Loading available prices…</span>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-2">
@@ -126,19 +128,17 @@ const QuickValueCalculator = () => {
               <button
                 key={`${card.name}-${idx}`}
                 onClick={() => toggle(idx)}
+                aria-pressed={selected.has(idx)}
                 className={`flex items-center gap-2.5 text-left px-2.5 py-2 rounded-lg border font-mono text-xs transition-all min-h-[56px] ${
                   selected.has(idx)
                     ? "border-primary/50 bg-primary/10 text-foreground"
                     : "border-border bg-muted/20 text-muted-foreground hover:border-muted-foreground/30"
                 }`}
               >
-                <img
-                  src={card.image || "/icon-192.png"}
+                <CardImage
+                  src={card.image}
                   alt={card.name}
-                  loading="eager"
-                  crossOrigin="anonymous"
                   className="w-9 h-12 object-contain rounded flex-shrink-0"
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/icon-192.png'; }}
                 />
                 <div className="min-w-0">
                   <span className="block font-medium truncate text-[11px]">{card.name}</span>
@@ -158,7 +158,7 @@ const QuickValueCalculator = () => {
         >
           <div className="mt-2 p-3 rounded-lg border border-primary/30 bg-primary/5 flex items-center justify-between">
             <div>
-              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Your Collection Value</p>
+              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Selected raw-card estimate</p>
               <p className="font-mono text-xl font-bold text-primary flex items-center gap-1">
                 <DollarSign className="w-4 h-4" />
                 {totalValue.toFixed(2)}
@@ -179,7 +179,10 @@ const QuickValueCalculator = () => {
           </div>
         </motion.div>
 
-        {totalValue === 0 && !isLoading && (
+        {!isLoading && pool.length === 0 && (
+          <p role="status" className="font-mono text-xs">Prices are unavailable. Please try again later.</p>
+        )}
+        {totalValue === 0 && !isLoading && pool.length > 0 && (
           <p className="font-mono text-[10px] text-center text-muted-foreground/60 mt-1">
             Select cards you own to see their combined value
           </p>
@@ -190,3 +193,4 @@ const QuickValueCalculator = () => {
 };
 
 export default QuickValueCalculator;
+

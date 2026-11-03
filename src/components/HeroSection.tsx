@@ -26,8 +26,8 @@ const actions = [
   },
   {
     icon: TrendingUp,
-    label: "Start Pro Trial",
-    desc: "14 days free · no card",
+    label: "Account preview",
+    desc: "Accounts & billing coming next",
     path: "/pricing",
   },
 ];
@@ -202,11 +202,11 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
                 </button>
 
                 <button
-                  onClick={() => navigate("/pricing")}
+                  onClick={() => document.getElementById("portal-preview")?.scrollIntoView({behavior:"smooth"})}
                   className="inline-flex items-center gap-2 px-4 py-3 sm:py-2.5 rounded-lg font-mono text-sm font-medium border border-primary/30 text-foreground hover:border-primary/60 hover:bg-primary/5 transition-all duration-300 min-h-[48px]"
                 >
                   <Zap className="w-4 h-4 text-primary" />
-                  Start 14-Day Pro Trial
+                  Explore account preview
                 </button>
               </motion.div>
 
@@ -257,7 +257,8 @@ const HeroSection = ({ onSearchFocus, topMoverName, topMoverChange, isLive = fal
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => {
-                if (item.action === "search") onSearchFocus?.();
+                if (item.path === "/pricing") document.getElementById("portal-preview")?.scrollIntoView({behavior:"smooth"});
+                else if (item.action === "search") onSearchFocus?.();
                 else if (item.path) navigate(item.path);
               }}
               className="relative flex flex-col items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-4 sm:py-5 transition-colors group cursor-pointer hover:bg-muted/30 overflow-hidden min-h-[72px] sm:min-h-0"

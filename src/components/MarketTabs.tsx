@@ -20,9 +20,9 @@ interface MarketTabsProps {
 
 const MarketTabs = ({ liveCards, liveGradedCards, liveSealedProducts }: MarketTabsProps) => {
   const [active, setActive] = useState<TabId>("raw");
-  const displayRaw = liveCards && liveCards.length > 0 ? liveCards : rawCards;
-  const displayGraded = liveGradedCards && liveGradedCards.length > 0 ? liveGradedCards : gradedCards;
-  const displaySealed = liveSealedProducts && liveSealedProducts.length > 0 ? liveSealedProducts : sealedProducts;
+  const displayRaw = liveCards ?? [];
+  const displayGraded = liveGradedCards ?? [];
+  const displaySealed = liveSealedProducts ?? [];
 
   return (
     <div>
@@ -42,8 +42,9 @@ const MarketTabs = ({ liveCards, liveGradedCards, liveSealedProducts }: MarketTa
         ))}
       </div>
       <div className="mt-4">
-        {active === "raw" && <CardBoardTable cards={displayRaw} title="Live Card Board — Raw Market Feed" />}
-        {active === "graded" && <CardBoardTable cards={displayGraded} title="Live Card Board — Graded Market Feed (PSA/CGC/BGS/TAG)" showGrade />}
+        {((active === "raw" && !displayRaw.length) || (active === "graded" && !displayGraded.length) || (active === "sealed" && !displaySealed.length)) && <p role="status" className="market-note">No source-backed quotes are available in this category. Sample prices are not substituted.</p>}
+        {active === "raw" && <CardBoardTable cards={displayRaw} title="Raw card source quotes" />}
+        {active === "graded" && <CardBoardTable cards={displayGraded} title="Graded asking-price quotes (available grades only)" showGrade />}
         {active === "sealed" && <SealedTable products={displaySealed} />}
       </div>
     </div>

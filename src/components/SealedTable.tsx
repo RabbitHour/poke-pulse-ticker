@@ -1,3 +1,4 @@
+import { CardImage } from "./CardImage";
 import { motion } from "framer-motion";
 import type { SealedProduct } from "@/data/marketData";
 import { getSealedToken } from "@/lib/tokenSymbols";
@@ -11,13 +12,13 @@ const SealedTable = ({ products }: SealedTableProps) => {
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: "some" }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="terminal-card overflow-hidden"
     >
       <div className="border-b border-border px-4 py-3 flex items-center justify-between">
         <h2 className="font-mono text-xs tracking-widest text-secondary uppercase font-semibold">
-          Live Sealed Product Feed
+          Sealed product source quotes
         </h2>
         <span className="font-mono text-[10px] text-muted-foreground">{products.length} items</span>
       </div>
@@ -41,13 +42,13 @@ const SealedTable = ({ products }: SealedTableProps) => {
                     {getSealedToken(p)}
                   </span>
                 </td>
-                <td className="px-4 py-2 font-mono text-sm text-foreground font-medium">{p.name}</td>
+                <td className="px-4 py-2 font-mono text-sm text-foreground font-medium"><div className="flex items-center gap-2"><CardImage src={p.image} alt={p.name} className="w-10 h-12 object-contain" /><span>{p.name}</span></div></td>
                 <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{p.type}</td>
                 <td className="px-4 py-2 font-mono text-sm text-foreground text-right">
                   ${p.market.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </td>
                 <td className="px-4 py-2 font-mono text-xs text-muted-foreground text-right">
-                  ${p.low.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  —
                 </td>
                 <td className={`px-4 py-2 font-mono text-sm text-right font-semibold ${p.change >= 0 ? "text-terminal-green" : "text-terminal-red"}`}>
                   {p.change >= 0 ? "+" : ""}{p.change.toFixed(2)}%

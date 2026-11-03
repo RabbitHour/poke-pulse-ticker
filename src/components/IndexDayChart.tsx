@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useId } from "react";
 import {
   AreaChart,
   Area,
@@ -17,6 +17,7 @@ interface IndexDayChartProps {
   variant: "green" | "amber" | "blue";
   index?: MarketIndex;
   isLoading?: boolean;
+  unit?: "usd" | "points";
 }
 
 const VARIANT_CONFIG = {
@@ -45,9 +46,11 @@ function fmtTime(iso: string, range: TimeRange) {
  * Plots ONLY real stored index observations. When a range has too few
  * observations we say so instead of drawing an invented curve.
  */
-const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps) => {
-  const [range, setRange] = useState<TimeRange>("1D");
+const IndexDayChart = ({ title, variant, index, isLoading, unit = "usd" }: IndexDayChartProps) => {
+  const [range, setRange] = useState<TimeRange>("1M");
+  const gradientId = useId().replace(/:/g, "");
   const config = VARIANT_CONFIG[variant];
+  const formatValue = (v: number) => (unit === "usd" ? "$" : "") + v.toLocaleString("en-US", { maximumFractionDigits:2, minimumFractionDigits:2 }) + (unit === "points" ? " pts" : "");
 
   const data = useMemo(() => {
     if (!index) return [];
@@ -96,7 +99,7 @@ const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps)
       <div className="px-3 pt-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm font-bold text-foreground">
-            {index ? `$${index.value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}
+            {index ? formatValue(index.value) : "—"}
           </span>
           {enoughHistory && (
             <span
@@ -111,7 +114,7 @@ const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps)
           )}
         </div>
         <span className="font-mono text-[8px] text-muted-foreground">
-          {index ? `${data.length} live obs` : ""}
+          {index ? `${data.length} stored observations` : ""}
         </span>
       </div>
 
@@ -125,25 +128,26 @@ const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps)
               })} ET`
             : isLoading
             ? "Loading live observations…"
-            : "Collecting first live observations…"}
+            : "No stored observations available"}
         </span>
       </div>
 
-      <div className="px-2 pb-3 relative" style={{ height: 180 }}>
-        {!enoughHistory && (
+      {data.length === 1 && <p className="px-3 py-1 text-xs text-muted-foreground">First recorded observation; history begins here.</p>}
+      <div className="px-2 pb-3 relative" style={{ height: data.length < 2 ? 135 : 250 }}>
+        {data.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
             <p className="font-mono text-[10px] text-muted-foreground">
               {index
-                ? "Building real price history — new live points are added every 10 minutes."
-                : "Waiting for the first live price snapshot."}
+                ? "Recording history from the first observed price. A line needs at least two real observations."
+                : "No recorded history yet. Start the catalog updater or check the source job."}
             </p>
           </div>
         )}
-        {enoughHistory && (
+        {data.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id={`gradient-${variant}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`gradient-${gradientId}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={config.stroke} stopOpacity={0.25} />
                   <stop offset="100%" stopColor={config.stroke} stopOpacity={0.02} />
                 </linearGradient>
@@ -162,7 +166,7 @@ const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps)
                 tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))", fontFamily: "JetBrains Mono" }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(v: number) => `$${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0)}`}
+                tickFormatter={(v: number) => (unit === "usd" ? "$" : "") + (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0))}
                 width={48}
               />
               <Tooltip
@@ -174,8 +178,8 @@ const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps)
                   fontSize: 11,
                 }}
                 formatter={(value: number) => [
-                  `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                  config.label,
+                  formatValue(value),
+                  unit === "points" ? title : config.label,
                 ]}
                 labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10 }}
               />
@@ -185,8 +189,8 @@ const IndexDayChart = ({ title, variant, index, isLoading }: IndexDayChartProps)
                 dataKey="value"
                 stroke={config.stroke}
                 strokeWidth={2}
-                fill={`url(#gradient-${variant})`}
-                dot={false}
+                fill={`url(#gradient-${gradientId})`}
+                dot={data.length === 1 ? { r: 5 } : false}
                 isAnimationActive={false}
               />
             </AreaChart>

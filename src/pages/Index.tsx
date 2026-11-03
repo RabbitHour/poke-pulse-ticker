@@ -1,7 +1,16 @@
+import ForecastLedger from "@/components/ForecastLedger";
+import SealedCategoryCharts from "@/components/SealedCategoryCharts";
+import MarketOpening from "@/components/MarketOpening";
+import CatalogExplorer from "@/components/CatalogExplorer";
+import MarketOverview from "@/components/MarketOverview";
+import CardValuer from "@/components/CardValuer";
+import PokeHelp from "@/components/PokeHelp";
+import PortalPreview from "@/components/PortalPreview";
+import { useObservedProducts } from "@/hooks/useObservedProducts";
 import { useRef, useEffect, useMemo, useState } from "react";
 
 import { rawCards, gradedCards, sealedProducts, getIndexValue, getIndexChange } from "@/data/marketData";
-import { useLiveCards } from "@/hooks/usePokemonTcg";
+import { useLiveCards, useLiveCardsQuick } from "@/hooks/usePokemonTcg";
 import { useGradedCards } from "@/hooks/useGradedCards";
 import { useSealedProducts } from "@/hooks/useSealedProducts";
 import TerminalHeader from "@/components/TerminalHeader";
@@ -77,6 +86,7 @@ import LiveCardStrip from "@/components/LiveCardStrip";
 
 const Index = () => {
   const { data: liveCards, isLoading, dataUpdatedAt } = useLiveCards();
+  const { data: quickCards } = useLiveCardsQuick();
   const { health } = usePricingHealth();
   const marketOpen = useMarketStatus();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -101,8 +111,8 @@ const Index = () => {
     const checkout = searchParams.get("checkout");
     if (checkout === "success") {
       toast({
-        title: "Subscription activated!",
-        description: "Welcome to Pro. Refreshing your status...",
+        title: "Checking subscription status",
+        description: "Access depends on the server-confirmed payment status.",
       });
       checkSubscription();
       setSearchParams({}, { replace: true });
@@ -116,11 +126,12 @@ const Index = () => {
     }
   }, [searchParams, checkSubscription, setSearchParams, toast]);
 
-  const displayCards = liveCards && liveCards.length > 0 ? liveCards : fallbackRawCards;
-  const liveGradedCards = useGradedCards(liveCards);
-  const displayGraded = liveGradedCards.length > 0 ? liveGradedCards : fallbackGradedCards;
-  const liveSealedProducts = useSealedProducts(liveCards);
-  const displaySealed = liveSealedProducts.length > 0 ? liveSealedProducts : fallbackSealedProducts;
+  const displayCards = (liveCards?.length ? liveCards : quickCards) ?? [];
+  const observed = useObservedProducts(liveCards);
+  const liveGradedCards = observed.graded;
+  const displayGraded = liveGradedCards;
+  const liveSealedProducts = observed.sealed;
+  const displaySealed = liveSealedProducts;
   const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
   const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
@@ -161,15 +172,15 @@ const Index = () => {
   const cardsWithImages = useMemo(() => displayCards.filter((c) => c._image), [displayCards]);
 
   const handleSearchFocus = () => {
-    searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("card-valuer")?.scrollIntoView({ behavior: "smooth", block: "center" });
     setTimeout(() => {
-      const input = searchRef.current?.querySelector("input");
+      const input = document.getElementById("card-valuer")?.querySelector("input");
       input?.focus();
     }, 400);
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bright-market">
       {/* StickyUpgradeBanner removed — popups disabled */}
       <TerminalHeader />
       <TickerBar
@@ -183,31 +194,20 @@ const Index = () => {
         id="main-content"
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
-        <HeroSection
-          onSearchFocus={handleSearchFocus}
-          topMoverName={topMover?.name}
-          topMoverChange={topMover?.change}
-          isLive={isLive}
-          cardCount={displayCards.length}
-        />
+        <MarketOpening />
 
-        <SocialProofBar
-          totalMarketValue={totalMarketValue}
-          isLive={isLive}
-          lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
-          cardCount={displayCards.length}
-        />
+        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="#portal-preview">Free account & reports</a></nav>
 
         {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
         <LiveCardStrip
-          title="🔥 TOP LIVE CARDS — REAL-TIME TCGPLAYER"
-          subtitle="18 highest-value Poké cards trading right now"
+          title="FEATURED RAW CARDS"
+          subtitle="Available source quotes • feed checked every 30 minutes"
           count={18}
           mode="value"
         />
 
         {/* === PULSE ENGINE WALLET — PRO USERS ONLY === */}
-        <PulseWalletWidget />
+        <div className="market-note">Explore cards and market observations below. Simulated trading is available separately in the navigation.</div>
 
         {/* === EBAY LIVE DEALS — MOVED UP for buy intent === */}
         <LazySection minHeight="200px">
@@ -216,84 +216,23 @@ const Index = () => {
 
         {/* === MARKET PULSE + NOTABLE SALES === */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5">
-          <LiveMarketPulse cards={displayCards} />
+          <div className="terminal-card p-4"><h2 className="font-bold text-lg">Featured card feed</h2><p className="text-sm text-muted-foreground mt-2">{displayCards.length.toLocaleString()} featured source records loaded. This showcase is a subset; the full indexed catalog is above. Raw quotes refresh every 30 minutes. Price movements are source-derived momentum, not verified transaction volume.</p><a href="#card-valuer" className="market-action mt-3">Value a card</a></div>
           <RecentNotableSales cards={displayCards} />
         </div>
 
         {/* === SELL ON EBAY (affiliate, live TCG pricing) === */}
         <SellOnEbaySection />
 
-        {/* === MARKET INDEXES === */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-            <SkeletonIndexCard />
-            <SkeletonIndexCard />
-            <SkeletonIndexCard />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-            <MarketIndexCard
-              title="RAW 1000 INDEX"
-              value={rawIndex}
-              change={rawChange}
-              count={1000}
-              description="1,000+ raw cards — live TCGPlayer pricing"
-              variant="green"
-            />
-            <MarketIndexCard
-              title="GRADED 1000 INDEX"
-              value={gradedIndex}
-              change={gradedChange}
-              count={1000}
-              description="1,000+ graded cards (PSA/CGC/BGS/TAG)"
-              variant="amber"
-            />
-            <MarketIndexCard
-              title="SEALED 1000 INDEX"
-              value={sealedIndex}
-              change={sealedChange}
-              count={1000}
-              description="1,000+ sealed products (Boxes/Packs/ETBs)"
-              variant="blue"
-            />
-          </div>
-        )}
-
-        {(() => {
-          const isNYSE = marketOpen;
-          return (
-            <div className="relative">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                <IndexDayChart
-                  title="RAW 1000 INDEX"
-                  indexValue={rawIndex}
-                  indexChange={rawChange}
-                  variant="green"
-                  refreshKey={chartRefreshKey}
-                />
-                <IndexDayChart
-                  title="GRADED 1000 INDEX"
-                  indexValue={gradedIndex}
-                  indexChange={gradedChange}
-                  variant="amber"
-                  refreshKey={chartRefreshKey}
-                />
-                <IndexDayChart
-                  title="SEALED 1000 INDEX"
-                  indexValue={sealedIndex}
-                  indexChange={sealedChange}
-                  variant="blue"
-                  refreshKey={chartRefreshKey}
-                />
-              </div>
-            </div>
-          );
-        })()}
+        <MarketOverview />
+        <SealedCategoryCharts />
+        <ForecastLedger />
+        <CatalogExplorer />
+        <CardValuer id="card-valuer" />
 
         <LazySection minHeight="280px">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
             <TopMoversTable cards={displayCards} title="Top Movers — Raw Cards" isLoading={isLoading} />
-            <TopMoversTable cards={displayGraded} title="Top Movers — Graded Cards" isLoading={isLoading} />
+            <TopMoversTable cards={displayGraded} title="Graded asking-price observations" isLoading={isLoading} />
           </div>
         </LazySection>
 
@@ -301,7 +240,7 @@ const Index = () => {
         <LazySection minHeight="260px">
           <LiveCardStrip
             title="📈 MOST ACTIVE CARDS — NAMES + PRICES"
-            subtitle="Live names, live prices, live momentum — sourced from TCGPlayer"
+            subtitle="Available raw-card quotes • prices and source age can vary"
             count={18}
             mode="mix"
             offset={6}
@@ -312,12 +251,13 @@ const Index = () => {
 
 
 
+        <h2 className="market-section-title">Understand the market <span>Summaries, not guarantees</span></h2>
         <LazySection minHeight="200px">
           <AIMarketInsights cards={displayCards} />
         </LazySection>
 
         <LazySection minHeight="180px">
-          <MacroCorrelation />
+          <section className="terminal-card p-4"><h2>Compare with other markets</h2><p className="text-muted-foreground text-sm">S&amp;P 500, Nasdaq, gold and Bitcoin comparisons need aligned historical observations. Verified comparisons are not connected yet.</p></section>
         </LazySection>
 
         <LazySection minHeight="150px">
@@ -344,6 +284,7 @@ const Index = () => {
           <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
         </LazySection>
 
+        <h2 className="market-section-title">Explore cards & sets <span>Find your next card</span></h2>
         <TrendingCards cards={displayCards} isLoading={isLoading} />
 
         <LazySection minHeight="100px">
@@ -355,16 +296,14 @@ const Index = () => {
         </LazySection>
 
         <div ref={searchRef}>
-          <LazySection minHeight="100px">
-            <CardSearch />
-          </LazySection>
+          <a href="#card-valuer" className="market-action">Open the free card and product valuer ↑</a>
         </div>
 
         <LazySection minHeight="200px">
           <PricePredictionGame cards={displayCards} />
         </LazySection>
 
-        <InlineUpgradeNudge variant="savings" />
+        
 
         <LazySection minHeight="120px">
           <div className="terminal-card p-4 sm:p-5">
@@ -399,23 +338,23 @@ const Index = () => {
 
         {/* === GRADING ROI CALCULATOR — ABOVE GAMES === */}
         <LazySection minHeight="210px">
-          <GradingROICalculator cards={displayCards} />
+          <details className="terminal-card p-4"><summary className="font-bold">Grading scenario calculator — modeled estimates</summary><p className="market-note">This tool uses assumed grade premiums and example service costs. Verify current grading fees directly; the output is not a market quote.</p><details className="terminal-card p-4"><summary className="font-bold">Grading scenario calculator — modeled estimates</summary><p className="market-note">This tool uses assumed grade premiums and example service costs. Verify current grading fees directly; the output is not a market quote.</p><GradingROICalculator cards={displayCards} /></details></details>
         </LazySection>
 
-        <PokeRaceSection />
+        <section id="poke-race" className="scroll-mt-20"><p className="market-note">Simulated entertainment — virtual coins, modeled movement, no real trading.</p><PokeRaceSection /></section>
         <GamePromo />
 
         <LazySection minHeight="70px">
           <TrustSignals />
         </LazySection>
 
-        <div className="relative">
-          <div className="absolute inset-x-0 -top-8 h-16 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
-        </div>
 
+
+        <PokeHelp />
+        <details className="terminal-card research-previews p-4"><summary className="font-bold cursor-pointer">Research & simulator previews — experimental estimates</summary><p className="market-note">These older tools include modeled signals and simulated data. They are not verified sale histories, investment predictions, or measured returns.</p>
         <LazySection minHeight="280px">
           <ProGate feature="Historical price charts" blur>
-            <PriceChart cards={displayCards} />
+            <div className="terminal-card p-4"><h3>Individual card history</h3><p className="text-sm text-muted-foreground">Verified per-card historical prices are not connected. The market charts above show stored observations; no random curve is substituted.</p></div>
           </ProGate>
         </LazySection>
 
@@ -449,7 +388,7 @@ const Index = () => {
           </ProGate>
         </LazySection>
 
-        <InlineUpgradeNudge variant="trust" />
+        
 
         <LazySection minHeight="200px">
           <ProGate feature="Grading Arbitrage Scanner" blur>
@@ -481,6 +420,7 @@ const Index = () => {
           </ProGate>
         </LazySection>
 
+        </details>
         <LazySection minHeight="0px">
           <ProGate feature="Full card board (500+ cards)" blur>
             <MarketTabs
@@ -492,37 +432,31 @@ const Index = () => {
         </LazySection>
 
         <LazySection minHeight="200px">
-          <VerifiedLeaderboard />
+          <div className="terminal-card p-4"><h3>Collector portfolios</h3><p className="text-sm text-muted-foreground">Public verified performance rankings are not connected yet.</p></div>
         </LazySection>
 
         <LazySection minHeight="200px">
-          <WhaleReport cards={displayCards} />
+          <CardValuer id="card-valuer-lower" compact />
         </LazySection>
 
         <LazySection minHeight="100px">
-          <ValueUnlockPreview />
+          <PortalPreview />
         </LazySection>
 
         <LazySection minHeight="80px">
           <ImportFromTCGPlayer />
         </LazySection>
 
-        <InlineUpgradeNudge variant="default" />
+        
 
-        <LazySection minHeight="280px">
-          <SubscriptionTiers />
-        </LazySection>
+        
 
-        <LazySection minHeight="90px">
-          <TeamPlanCTA />
-        </LazySection>
+        
 
-        <LazySection minHeight="70px">
-          <ReferralCTA />
-        </LazySection>
+        
 
         {/* Pulse Philanthropic Project */}
-        <section className="border border-border/[0.08] rounded-lg p-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <section className="terminal-card border border-border rounded-lg p-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xl">🏛️</span>
             <h2 className="font-mono text-sm font-bold tracking-tight text-foreground">
@@ -598,7 +532,7 @@ const Index = () => {
             </div>
             <p className="text-[9px] text-muted-foreground/60 text-center max-w-md leading-snug">
               Poké is a trademark of Nintendo/Creatures Inc./GAME FREAK inc. Not affiliated with The Poké
-              Company International. Data powered by pokemontcg.io. Not financial advice.
+              Company International. Catalog: TCGdex. Prices: TCGplayer via TCGCSV and graded asking medians from eBay. Not financial advice.
             </p>
             <p className="text-[10px] text-muted-foreground/50 font-mono">
               © {new Date().getFullYear()} PGVA Ventures, LLC. All rights reserved.
@@ -608,6 +542,7 @@ const Index = () => {
       </main>
 
       {/* All popups removed per user request */}
+      <a href="#poke-help" className="poke-floating-help">Ask Poke</a>
       <ShareButton />
     </div>
   );

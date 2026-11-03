@@ -171,7 +171,7 @@ const AIMarketInsights = ({ cards }: { cards: CardData[] }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: "some" }}
       transition={{ duration: 0.5 }}
       className="terminal-card overflow-hidden"
     >
@@ -184,7 +184,7 @@ const AIMarketInsights = ({ cards }: { cards: CardData[] }) => {
           AI Market Insights
         </h2>
         <span className="font-mono text-[9px] bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full font-bold">
-          POWERED BY AI
+          EXPERIMENTAL SUMMARY
         </span>
         <button
           onClick={handleRefresh}
@@ -215,7 +215,7 @@ const AIMarketInsights = ({ cards }: { cards: CardData[] }) => {
                     insight.confidence >= 60 ? "bg-terminal-amber/15 text-terminal-amber" :
                     "bg-muted text-muted-foreground"
                   }`}>
-                    {insight.confidence}% conf.
+                    Heuristic
                   </span>
                 </div>
                 <AnimatePresence>
@@ -254,7 +254,7 @@ const AIMarketInsights = ({ cards }: { cards: CardData[] }) => {
 
       <div className="border-t border-border/40 px-4 py-2 bg-muted/10">
         <p className="font-mono text-[9px] text-muted-foreground text-center">
-          AI insights generated from live market data • Not financial advice • Updated every refresh cycle
+          Rule-based summaries from available quotes • Not financial advice • Updated every refresh cycle
         </p>
       </div>
     </motion.div>

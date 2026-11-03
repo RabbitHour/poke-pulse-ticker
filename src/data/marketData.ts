@@ -15,6 +15,8 @@ export interface CardData {
 }
 
 export interface SealedProduct {
+  image?: string;
+  sourceUpdated?: string;
   name: string;
   type: string;
   market: number;
