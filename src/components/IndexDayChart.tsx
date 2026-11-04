@@ -192,8 +192,7 @@ const IndexDayChart = ({ title, variant, accent, index, isLoading, unit = "usd" 
                 stroke={config.stroke}
                 strokeWidth={3}
                 fill={`url(#gradient-${gradientId})`}
-                dot={index && <p className="px-3 py-1 text-sm font-semibold text-foreground">{index.constituents.toLocaleString()} items observed in latest snapshot</p>}
-      {data.length === 1 ? { r: 5 } : false}
+                dot={data.length === 1 ? { r: 5 } : false}
                 isAnimationActive={false}
               />
             </AreaChart>
