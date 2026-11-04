@@ -141,3 +141,12 @@
 @media (max-width: 600px) {
   .opening-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+.bright-market .catalog-tile { padding: .4rem; }
+.bright-market .catalog-tile .catalog-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 7;
+}
+.bright-market .opening-gallery { gap: .35rem; }

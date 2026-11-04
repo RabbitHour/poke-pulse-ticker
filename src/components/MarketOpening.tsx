@@ -13,13 +13,14 @@ export default function MarketOpening(){const catalog=useCatalog();const quick=u
  return <section className="market-opening" aria-labelledby="opening-title"><div className="opening-copy"><span className="opening-mark"><ChartCandlestick aria-hidden="true" /></span>
  <h1 id="opening-title">Poke Pulse Ticker</h1>
  <p className="opening-kicker">Collector Market Terminal</p>
- <p className="text-muted-foreground">Look up Pokémon card prices and track raw, graded, and sealed markets.</p>
+ <p className="text-muted-foreground">Find a card, slab, or sealed product.</p>
  <nav aria-label="Market shortcuts" className="flex flex-wrap justify-center gap-2">
    <a className="market-action opening-primary" href="#card-valuer">Check a card value</a>
+   <a className="market-action" href="#catalog">Search catalog</a>
    <a className="market-action" href="#market-charts">Market charts</a>
    <Link className="market-action" to="/account">Create a free account</Link>
  </nav></div>
  <PokeHelp />
- <p className="text-center text-sm text-muted-foreground">Featured cards rotate every 30 minutes. Prices reflect available provider quotes. We may earn a commission from qualifying eBay purchases.</p>
+ <p className="text-center text-sm text-muted-foreground">Featured quotes · eBay affiliate links may earn us a commission.</p>
  <div className="opening-gallery">{cards.map(c=><a className="opening-card" key={c.id} href={ebayAffiliateLink(`Pokemon ${c.name} ${c.set} ${c.number} ${c.variant||""}`,"opening-gallery")} target="_blank" rel="sponsored noopener noreferrer" title="Find this card on eBay · affiliate link"><CardImage src={c.image} alt={c.name} className="w-full aspect-[3/4] object-contain"/><div className="p-2"><span className="text-[10px] text-primary font-mono">{catalogSymbol(c)}</span><strong className="block text-xs truncate">{c.name}</strong><span className="text-sm font-bold">{c.market==null?'No quote':'$'+c.market.toFixed(2)}</span></div></a>)}</div></section>;
 }
