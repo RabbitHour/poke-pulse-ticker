@@ -14,6 +14,7 @@ import type { MarketIndex } from "@/hooks/useMarketIndexes";
 
 interface IndexDayChartProps {
   title: string;
+  accent?: string;
   variant: "green" | "amber" | "blue";
   index?: MarketIndex;
   isLoading?: boolean;
@@ -46,10 +47,10 @@ function fmtTime(iso: string, range: TimeRange) {
  * Plots ONLY real stored index observations. When a range has too few
  * observations we say so instead of drawing an invented curve.
  */
-const IndexDayChart = ({ title, variant, index, isLoading, unit = "usd" }: IndexDayChartProps) => {
+const IndexDayChart = ({ title, variant, accent, index, isLoading, unit = "usd" }: IndexDayChartProps) => {
   const [range, setRange] = useState<TimeRange>("1M");
   const gradientId = useId().replace(/:/g, "");
-  const config = VARIANT_CONFIG[variant];
+  const config = { ...VARIANT_CONFIG[variant], stroke: accent ?? VARIANT_CONFIG[variant].stroke };
   const formatValue = (v: number) => (unit === "usd" ? "$" : "") + v.toLocaleString("en-US", { maximumFractionDigits:2, minimumFractionDigits:2 }) + (unit === "points" ? " pts" : "");
 
   const data = useMemo(() => {
@@ -132,6 +133,7 @@ const IndexDayChart = ({ title, variant, index, isLoading, unit = "usd" }: Index
         </span>
       </div>
 
+      {index && <p className="px-3 py-1 text-sm font-semibold text-foreground">{index.constituents.toLocaleString()} items observed in latest snapshot</p>}
       {data.length === 1 && <p className="px-3 py-1 text-xs text-muted-foreground">First recorded observation; history begins here.</p>}
       <div className="px-2 pb-3 relative" style={{ height: data.length < 2 ? 135 : 250 }}>
         {data.length === 0 && (
@@ -188,7 +190,7 @@ const IndexDayChart = ({ title, variant, index, isLoading, unit = "usd" }: Index
                 type="stepAfter"
                 dataKey="value"
                 stroke={config.stroke}
-                strokeWidth={2}
+                strokeWidth={3}
                 fill={`url(#gradient-${gradientId})`}
                 dot={data.length === 1 ? { r: 5 } : false}
                 isAnimationActive={false}
