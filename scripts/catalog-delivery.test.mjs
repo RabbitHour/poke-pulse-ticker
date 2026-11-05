@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {writeCatalog,prepareCatalog} from './catalog-delivery.mjs';
 const catalog={version:4,sourceUpdated:'2026-11-04T20:06:16+0000',generatedAt:'2026-11-05T15:27:30.734Z',entries:Array.from({length:9},(_,i)=>({id:`tcg:${i}:Holofoil`,name:'Pikachu',market:10+i,image:'https://assets.tcgdex.net/en/swsh/swsh4/025/low.webp'}))};
 test('same-origin shards preserve every exact variant, quote, image and source timestamp within asset limits',async()=>{
@@ -20,4 +21,14 @@ test('build fails instead of deploying a missing catalog or partial bundled shar
 test('incomplete newer durable shards cannot replace the complete bundled release',async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'catalog-remote-'));
  try{await writeCatalog(dir,catalog);const remote={delivery:'sharded-v1',sourceUpdated:'2026-11-05T20:00:00Z',recordCount:1,shards:[{url:'/data/catalog/abc.json',count:1}]};const m=await prepareCatalog(dir,async(url)=>String(url).includes('catalog.json')?new Response(JSON.stringify(remote)):new Response('missing',{status:404}));assert.equal(m.sourceUpdated,catalog.sourceUpdated);assert.equal(m.recordCount,9);}finally{await fs.rm(dir,{recursive:true,force:true});}
+});
+test('both-host build hydration delivers exact sealed photo files and the durable forecast ledger',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'catalog-photos-'));try{
+ const body=Buffer.from('provider-photo'),name=createHash('sha256').update(body).digest('hex').slice(0,24)+'.jpg';
+ const image='/data/images/'+name,remote={...catalog,entries:[{...catalog.entries[0],image,kind:'sealed',imageProvenance:{provider:'TCGCSV',recordId:'0'}}]};
+ const ledger={generatedAt:'2026-11-05T16:00:00Z',forecasts:[{id:'real'}],outcomes:[]};
+ const history={days:[{file:'2026-11-05.json',sourceUpdated:catalog.sourceUpdated}]};
+ const fetcher=async url=>{const u=new URL(url);if(u.pathname.endsWith(name))return new Response(body);if(u.pathname.endsWith('forecasts.json'))return Response.json(ledger);if(u.pathname.endsWith('history/manifest.json'))return Response.json(history);if(u.pathname.endsWith('history/2026-11-05.json'))return Response.json({prices:{exact:123},sourceUpdated:catalog.sourceUpdated});if(u.pathname.endsWith('sealed-indexes.json'))return Response.json({categories:{}});return Response.json(remote);};
+ await prepareCatalog(dir,fetcher);assert.deepEqual(await fs.readFile(path.join(dir,'images',name)),body);assert.deepEqual(JSON.parse(await fs.readFile(path.join(dir,'forecasts.json'))),ledger);assert.equal(JSON.parse(await fs.readFile(path.join(dir,'history/2026-11-05.json'))).prices.exact,123);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
 });

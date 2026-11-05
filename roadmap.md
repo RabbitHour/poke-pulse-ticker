@@ -1,5 +1,12 @@
 # Live market index completion
 
+## Production image coverage and forecast lifecycle
+- [x] Add bounded exact-ID provider discovery with durable last-good images (80 requests/run, existing half-hour updater)
+- [x] Show image provenance, coverage/missing counts and reduced-motion foil sparkle
+- [x] Verify persisted forecast eligibility/scoring: 51 tests pass; live ledger has one day and zero outcomes, not measurable accuracy
+- [x] Verify host-neutral catalog/photo/ledger hydration tests, automatic build, desktop/mobile lookup and real sealed photo; changes recorded by managed Git sync
+- [ ] Confirm production rollout: Worker hosts return HTTP 403 Cloudflare challenge here; remote GitHub workflow completion cannot be inspected without additional access
+
 ## Production catalog hotfix
 - [x] Verify Bun 1.2.15 clean frozen install, isolated Vite/Rollup tooltip bundle, automatic full-app build and 57,921 generated catalog records; Cloudflare main deployment not run here
 - [x] Restore latest durable catalog into Worker and Lovable builds using same-origin generated shards
@@ -26,5 +33,5 @@
 
 ## External dependencies
 - [ ] Real forecast outcomes: awaiting eight distinct daily observations and future due dates; no results backfilled.
-- [ ] Custom domains: www has no DNS response; apex requires Cloudflare Access sign-in. No changes authorized.
+- [ ] Custom domains: both www and apex return Cloudflare challenge HTTP 403 in the latest check. No changes authorized.
 - [ ] Local :5182 reproduction: unavailable in this sandbox; / and /index verified on managed preview :8080.

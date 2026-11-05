@@ -3,6 +3,7 @@
 import fs from 'node:fs/promises';import path from 'node:path';import {fileURLToPath} from 'node:url';
 import {recordHistory} from './record-history.mjs';
 import {writeCatalog} from './catalog-delivery.mjs';
+import {discoverImages} from './image-discovery.mjs';
 import {classifyProduct,PRODUCT_CATEGORIES} from '../src/lib/productCategories.ts';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const cacheDir=path.join(root,'work','market-cache');const publicDir=path.join(root,'public','data');
@@ -24,8 +25,8 @@ async function run(){
   const pocketSetIds=new Set(dex.sets.filter(s=>/^(?:[AB][0-9]+[a-z]?|P-A)$/.test(s.id)||String(s.logo||s.symbol||" ").includes("/tcgp/")).map(s=>s.id));
   const digitalCards=dex.cards.filter(c=>pocketSetIds.has(c.id.slice(0,c.id.lastIndexOf('-'))));
   const englishCards=dex.cards.filter(c=>!pocketSetIds.has(c.id.slice(0,c.id.lastIndexOf("-"))));
-  const setNames=new Map(dex.sets.map(s=>[s.id,s.name]));const artMap=new Map();
-  for(const c of englishCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));const key=norm(setNames.get(setId))+'|'+num(c.localId||c.id.split('-').at(-1))+'|'+norm(c.name);artMap.set(key,c);}
+  const setNames=new Map(dex.sets.map(s=>[s.id,s.name]));const artMap=new Map();const exactCandidates=new Map();
+  for(const c of englishCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));const identity=norm(setNames.get(setId))+'|'+num(c.localId||c.id.split('-').at(-1));const key=identity+'|'+norm(c.name);artMap.set(key,c);if(!exactCandidates.has(identity))exactCandidates.set(identity,[]);exactCandidates.get(identity).push(c.id);}
   let groupCache=await read(path.join(cacheDir,'groups.json'),null);
   if(!groupCache||groupCache.sourceUpdated!==sourceUpdated){groupCache={sourceUpdated,results:(await json('https://tcgcsv.com/tcgplayer/3/groups')).results};await write(path.join(cacheDir,'groups.json'),groupCache);}
   const groups=groupCache.results;if(!Array.isArray(groups)||!groups.length)throw Error('No groups returned');
@@ -37,14 +38,14 @@ async function run(){
   }}
   await Promise.all([worker(),worker(),worker()]);
   if(failures.length){await write(path.join(cacheDir,'last-failures.json'),failures);throw Error(failures.length+' groups failed. Previous published catalog preserved. Cached successes will be reused on retry.');}
-  const entries=[];const matchedDex=new Set();
+  const entries=[];const matchedDex=new Set();const productImages=new Map();
   for(const {g,cache} of results){const prices=new Map();for(const p of cache.prices){if(!prices.has(p.productId))prices.set(p.productId,[]);prices.get(p.productId).push(p);}
-   for(const p of cache.products){const ext=p.extendedData??[];const number=ext.find(e=>e.name==='Number')?.value??'';const description=ext.find(e=>e.name==='CardText')?.value??'';
+   for(const p of cache.products){productImages.set(p.productId,p);const ext=p.extendedData??[];const number=ext.find(e=>e.name==='Number')?.value??'';const description=ext.find(e=>e.name==='CardText')?.value??'';
     const kind=number?'raw':'sealed';if(!number&&/code card|sleeves|playmat|deck box|portfolio|\bcoin\b|\bdice\b|jumbo|oversized/i.test(p.name))continue;
-    const art=number?artMap.get(norm(g.name)+'|'+num(number)+'|'+norm(p.name)):null;if(art)matchedDex.add(art.id);
+    const art=number?artMap.get(norm(g.name)+'|'+num(number)+'|'+norm(p.name)):null;if(art)matchedDex.add(art.id);const candidates=number?exactCandidates.get(norm(g.name)+'|'+num(number)):null;
     const variants=prices.get(p.productId)??[];const available=variants.length?variants:[{}];
     for(const quote of available){const market=Number.isFinite(quote.marketPrice)&&quote.marketPrice>0?quote.marketPrice:null;
-     entries.push({id:'tcg:'+p.productId+':'+(quote.subTypeName||'unknown'),productId:p.productId,cardId:art?.id,name:p.name,set:g.name,setId:g.abbreviation||String(g.groupId),number,kind,
+     entries.push({id:'tcg:'+p.productId+':'+(quote.subTypeName||'unknown'),productId:p.productId,groupId:g.groupId,language:'en',cardId:art?.id,imageCandidateId:!art&&candidates?.length===1?candidates[0]:undefined,name:p.name,set:g.name,setId:g.abbreviation||String(g.groupId),number,kind,
       category:kind==='sealed'?classifyProduct(p.name,description):null,market,variant:quote.subTypeName||null,image:art?.image?art.image+'/low.webp':'',
       sourceUrl:'https://www.tcgplayer.com/product/'+encodeURIComponent(p.productId),sourceUpdated});
     }
@@ -52,8 +53,9 @@ async function run(){
   }
   for(const c of englishCards){if(matchedDex.has(c.id))continue;const setId=c.id.slice(0,c.id.lastIndexOf('-'));entries.push({id:'dex:'+c.id,cardId:c.id,name:c.name,set:setNames.get(setId)||setId,setId,number:c.localId||c.id.split('-').at(-1),kind:'raw',category:null,market:null,variant:null,image:c.image?c.image+'/low.webp':'',sourceUrl:'https://api.tcgdex.net/v2/en/cards/'+encodeURIComponent(c.id),sourceUpdated:null});}
   for(const c of digitalCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));entries.push({id:'pocket:'+c.id,cardId:c.id,name:c.name,set:setNames.get(setId)||setId,setId,number:c.localId||c.id.split('-').at(-1),kind:'digital',category:null,market:null,variant:null,image:c.image?c.image+'/low.webp':'',sourceUrl:'https://api.tcgdex.net/v2/en/cards/'+encodeURIComponent(c.id),sourceUpdated:null});}
+  const imageDiscovery=await discoverImages(entries,productImages,publicDir,{now:start});
   entries.sort((a,b)=>Number(Boolean(b.image))-Number(Boolean(a.image)) || Number(b.market!==null)-Number(a.market!==null) || (b.market??0)-(a.market??0) || a.id.localeCompare(b.id));
-  const catalog={version:4,digitalCatalogCount:digitalCards.length,catalogRefreshedAt:dex.at,generatedAt:start,sourceUpdated,languageScope:'English physical and Pocket digital TCGdex catalogs plus TCGplayer-listed physical products; not guaranteed worldwide coverage',englishCatalogCount:englishCards.length,excludedDigitalEntries:0,providerGroups:groups.length,
+  const catalog={version:5,imageDiscovery,digitalCatalogCount:digitalCards.length,catalogRefreshedAt:dex.at,generatedAt:start,sourceUpdated,languageScope:'English physical and Pocket digital TCGdex catalogs plus TCGplayer-listed physical products; not guaranteed worldwide coverage',englishCatalogCount:englishCards.length,excludedDigitalEntries:0,providerGroups:groups.length,
    pricedRecords:entries.filter(e=>e.market!==null).length,entries};
   const histFile=path.join(cacheDir,'category-history.json');const history=await read(histFile,await read(path.join(publicDir,'sealed-indexes.json'),{version:1,categories:{}}));
   const historyBefore=JSON.stringify(history);
@@ -68,9 +70,9 @@ async function run(){
   }
   history.sourceUpdated=sourceUpdated;history.methodology='Equal-weight fixed launch basket, rebased to 100; points added only when every constituent has a current quote.';
   if(JSON.stringify(history)!==historyBefore)history.generatedAt=start;
-  await write(histFile,history);await recordHistory(publicDir,entries,sourceUpdated,start);const previousCatalog=await read(path.join(publicDir,'catalog.json'),null);const publishCatalog=previousCatalog?.version!==catalog.version||previousCatalog?.sourceUpdated!==sourceUpdated||previousCatalog?.catalogRefreshedAt!==dex.at;if(publishCatalog)await writeCatalog(publicDir,catalog);await write(path.join(publicDir,'sealed-indexes.json'),history);
+  await write(histFile,history);await recordHistory(publicDir,entries,sourceUpdated,start);const previousCatalog=await read(path.join(publicDir,'catalog.json'),null);const publishCatalog=imageDiscovery.requests>0||previousCatalog?.version!==catalog.version||previousCatalog?.sourceUpdated!==sourceUpdated||previousCatalog?.catalogRefreshedAt!==dex.at;if(publishCatalog)await writeCatalog(publicDir,catalog);await write(path.join(publicDir,'sealed-indexes.json'),history);
   // Vite preview serves dist; keep its data current when a build already exists.
-  try{await fs.access(path.join(root,'dist','index.html'));const d=path.join(root,'dist','data');await fs.mkdir(d,{recursive:true});if(publishCatalog)await writeCatalog(d,catalog);await write(path.join(d,'sealed-indexes.json'),history);}catch{}
+  try{await fs.access(path.join(root,'dist','index.html'));const d=path.join(root,'dist','data');await fs.mkdir(d,{recursive:true});if(publishCatalog){await fs.cp(path.join(publicDir,'images'),path.join(d,'images'),{recursive:true}).catch(e=>{if(e.code!=='ENOENT')throw e;});await writeCatalog(d,catalog);}await write(path.join(d,'sealed-indexes.json'),history);await fs.cp(path.join(publicDir,'history'),path.join(d,'history'),{recursive:true});await fs.copyFile(path.join(publicDir,'forecasts.json'),path.join(d,'forecasts.json'));}catch{}
   console.log(JSON.stringify({englishCards:englishCards.length,records:entries.length,priced:catalog.pricedRecords,groups:groups.length,categories:Object.fromEntries(PRODUCT_CATEGORIES.map(c=>[c.id,history.categories[c.id]?.available??0]))},null,2));
  }finally{await handle?.close();await fs.unlink(lock).catch(()=>{});}
 }

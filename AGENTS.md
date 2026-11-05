@@ -6,3 +6,4 @@
 - Treat set forecasts as fixed launch-basket indexes, adding observations only with complete current constituent coverage.
 - Keep exact catalog product/variant identifiers in internal links; card-level fallback links must not masquerade as catalog records.
 - Bundle a same-origin catalog manifest and content-hashed shards; all Vite/Worker builds hydrate the latest public GitHub market-data release and retain validated bundled data if retrieval fails, avoiding host-specific CDN delivery.
+- Persist bounded provider image discovery state and exact sealed photo files on the existing market-data branch, and hydrate required photos plus forecast/history companions in both build hosts; expiring provider caches must not erase provenance or ledger outcomes.
