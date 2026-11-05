@@ -1,5 +1,11 @@
 # Live market index completion
 
+## Production image coverage and forecast lifecycle
+- [ ] Add bounded exact-ID provider discovery with durable last-good images
+- [ ] Show image provenance, coverage/missing counts and reduced-motion foil sparkle
+- [ ] Verify persisted forecast eligibility/scoring with targeted tests and live ledger checks
+- [ ] Verify both-host catalog delivery and browser lookup/images; use existing GitHub sync only
+
 ## Production catalog hotfix
 - [x] Verify Bun 1.2.15 clean frozen install, isolated Vite/Rollup tooltip bundle, automatic full-app build and 57,921 generated catalog records; Cloudflare main deployment not run here
 - [x] Restore latest durable catalog into Worker and Lovable builds using same-origin generated shards
