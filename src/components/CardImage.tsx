@@ -27,11 +27,8 @@ function ImageAttempt({ source, alt, style, ...props }: Omit<Props, "src"> & { s
   const [failed, setFailed] = useState(false);
   if (!source || failed) {
     return (
-      <span {...props} role="img" aria-label={`${alt}: image unavailable`}
-        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center",
-          background: "#ecfdf5", color: "#166534", border: "1px solid #bbf7d0",
-          borderRadius: 8, minWidth: 48, minHeight: 64, fontSize: 11,
-          textAlign: "center", padding: 4, ...style }}>
+      <span {...props} className={`card-image-placeholder ${props.className ?? ""}`} role="img" aria-label={`${alt}: image unavailable`}
+        style={style}>
         Image unavailable
       </span>
     );
