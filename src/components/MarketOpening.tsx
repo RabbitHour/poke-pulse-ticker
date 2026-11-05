@@ -1,25 +1,21 @@
-import PokeHelp from "./PokeHelp";
-import { ChartCandlestick } from "lucide-react";
-import {ebayAffiliateLink} from "@/lib/ebay";
-import {useEffect,useMemo,useState} from "react";
-import {Link} from "react-router-dom";
-import {useLiveCardsQuick} from "@/hooks/usePokemonTcg";
-import {useCatalog} from "@/hooks/useCatalog";
-import {catalogSymbol} from "@/lib/catalogSymbols";
-import {CardImage} from "./CardImage";
-export default function MarketOpening(){const catalog=useCatalog();const quick=useLiveCardsQuick();const [epoch,setEpoch]=useState(Math.floor(Date.now()/1800000));
- useEffect(()=>{const t=setInterval(()=>setEpoch(Math.floor(Date.now()/1800000)),30000);return()=>clearInterval(t);},[]);
- const cards=useMemo(()=>{const seen=new Set<string>();const full=(catalog.data?.entries??[]).filter(e=>e.kind==='raw'&&e.image&&e.market!==null&&e.market>=20).filter(e=>{const key=e.cardId||e.id;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,500);const pool=full.length?full:(quick.data??[]).map(c=>({id:c._apiId||c.name,cardId:c._apiId,name:c.name,set:c.set,setId:c.setCode||c.set,number:c.number,kind:'raw' as const,category:null,market:c.market,image:c._image||'',variant:c._variant,sourceUrl:'',sourceUpdated:null}));if(!pool.length)return[];const start=(epoch*6)%pool.length;return Array.from({length:Math.min(6,pool.length)},(_,i)=>pool[(start+i*83)%pool.length]);},[catalog.data,quick.data,epoch]);
- return <section className="market-opening" aria-labelledby="opening-title"><div className="opening-copy"><span className="opening-mark"><ChartCandlestick aria-hidden="true" /></span>
- <h1 id="opening-title">Poke Pulse Ticker</h1>
- <p className="opening-kicker">Collector Market Terminal</p>
- <p className="text-muted-foreground">Look up Pokémon card prices and track raw, graded, and sealed markets.</p>
- <nav aria-label="Market shortcuts" className="flex flex-wrap justify-center gap-2">
-   <a className="market-action opening-primary" href="#card-valuer">Check a card value</a>
-   <a className="market-action" href="#market-charts">Market charts</a>
-   <Link className="market-action" to="/account">Create a free account</Link>
- </nav></div>
- <PokeHelp />
- <p className="text-center text-sm text-muted-foreground">Featured cards rotate every 30 minutes. Prices reflect available provider quotes. We may earn a commission from qualifying eBay purchases.</p>
- <div className="opening-gallery">{cards.map(c=><a className="opening-card" key={c.id} href={ebayAffiliateLink(`Pokemon ${c.name} ${c.set} ${c.number} ${c.variant||""}`,"opening-gallery")} target="_blank" rel="sponsored noopener noreferrer" title="Find this card on eBay · affiliate link"><CardImage src={c.image} alt={c.name} className="w-full aspect-[3/4] object-contain"/><div className="p-2"><span className="text-[10px] text-primary font-mono">{catalogSymbol(c)}</span><strong className="block text-xs truncate">{c.name}</strong><span className="text-sm font-bold">{c.market==null?'No quote':'$'+c.market.toFixed(2)}</span></div></a>)}</div></section>;
+import {useEffect,useMemo,useState} from 'react';
+import {Link} from 'react-router-dom';
+import {Search,ArrowRight} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {useLiveCardsQuick} from '@/hooks/usePokemonTcg';
+import {useCatalog} from '@/hooks/useCatalog';
+import {useMarketMovers} from '@/hooks/useMarketIndexes';
+import {rotatingWindow,recordLink} from '@/lib/marketRecords';
+import {CardImage} from './CardImage';
+export default function MarketOpening(){
+ const catalog=useCatalog(),quick=useLiveCardsQuick(),movers=useMarketMovers();const [epoch,setEpoch]=useState(0),[search,setSearch]=useState('');
+ useEffect(()=>{const t=setInterval(()=>setEpoch(e=>e+1),1800000);return()=>clearInterval(t);},[]);
+ const verified=(movers.data?.singles??[]).filter(m=>Number.isFinite(m.prev)&&Number.isFinite(m.market)&&Number.isFinite(m.change)&&m.prev>0&&Math.abs(m.change)>=3&&m.image);
+ const cards=useMemo(()=>{const seen=new Set<string>();const pool=(catalog.data?.entries??[]).filter(e=>e.kind==='raw'&&e.image&&e.market>0).filter(e=>{const key=e.cardId||e.id;if(seen.has(key))return false;seen.add(key);return true;});const foil=pool.filter(e=>/holo|foil/i.test(e.variant||''));return rotatingWindow(foil.length>=6?foil:pool,epoch,6);},[catalog.data,epoch]);
+ const fallback=rotatingWindow((quick.data??[]).filter(c=>c._apiId&&c._image&&c.market>0),epoch,6);
+ function lookup(e:React.FormEvent){e.preventDefault();window.dispatchEvent(new CustomEvent('poke-value-search',{detail:search}));document.getElementById('card-valuer')?.scrollIntoView({behavior:'smooth'});}
+ return <section className="market-opening" aria-labelledby="opening-title"><div className="opening-copy"><p className="opening-kicker">Source quotes · Collector terminal</p><h1 id="opening-title">Poké Pulse Engine</h1><p className="text-muted-foreground">Cards. Graded. Sealed. Find the exact printing.</p><form onSubmit={lookup} className="opening-search"><label className="sr-only" htmlFor="opening-search">Poké Search</label><Search aria-hidden="true" className="w-5 h-5"/><input id="opening-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Card name, set or number"/><Button type="submit">Value lookup <ArrowRight/></Button></form><nav className="flex flex-wrap gap-3" aria-label="Market shortcuts"><Button variant="outline" asChild><a href="#market-charts">Market charts</a></Button><Button variant="outline" asChild><a href="#forecast-results">Forecast history</a></Button><Button variant="ghost" asChild><Link to="/sets">Browse sets</Link></Button></nav></div>
+ <div className="opening-gallery">{cards.length?cards.map(c=><Link className="opening-card" key={c.id} to={recordLink(c)||'/#catalog'}><CardImage src={c.image} alt={c.name} loading="eager" className="w-full aspect-[3/4] object-contain"/><div className="p-2"><strong className="block text-xs line-clamp-2">{c.name}</strong><span className="block text-xs text-muted-foreground">{c.set} · {c.variant}</span><span className="text-sm font-bold">${c.market.toFixed(2)}</span></div></Link>):fallback.map(c=><Link className="opening-card" key={c._apiId} to={'/card/'+encodeURIComponent(c._apiId)}><CardImage src={c._image} alt={c.name} loading="eager" className="w-full aspect-[3/4] object-contain"/><div className="p-2"><strong className="block text-xs line-clamp-2">{c.name}</strong><span className="block text-xs">{c.set}</span><span className="font-bold">${c.market.toFixed(2)}</span></div></Link>)}{!cards.length&&!fallback.length&&<p className="text-sm">Card artwork is loading; no stand-in prices.</p>}</div>
+ <p className="text-xs text-muted-foreground">Artwork and quote from the same source record · featured selection rotates every 30 minutes. TCGCSV publishes daily, not continuously.</p>
+ {verified.length>0&&Date.now()-Date.parse(movers.data?.generatedAt||'')<36*3600000&&<div><h2 className="font-bold text-lg">Verified source-price movers</h2><div className="flex flex-wrap gap-4">{verified.slice(0,3).map(m=><span key={m.id}>{m.name} · ${m.market.toFixed(2)} · {m.change>0?'+':''}{m.change.toFixed(2)}%</span>)}</div><p className="text-xs">Compared source releases: {movers.data?.sourceUpdated}; not completed sales.</p></div>}</section>;
 }

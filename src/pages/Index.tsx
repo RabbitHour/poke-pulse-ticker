@@ -1,3 +1,4 @@
+import PokeHelp from "@/components/PokeHelp";
 import ForecastLedger from "@/components/ForecastLedger";
 import SealedCategoryCharts from "@/components/SealedCategoryCharts";
 import MarketOpening from "@/components/MarketOpening";
@@ -194,8 +195,9 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
         <MarketOpening />
+        <CardValuer id="card-valuer" compact />
 
-        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="#portal-preview">Free account & reports</a></nav>
+        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="/account">Free account & reports</a></nav>
 
         {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
         <LiveCardStrip
@@ -226,7 +228,7 @@ const Index = () => {
         <SealedCategoryCharts />
         <ForecastLedger />
         <CatalogExplorer />
-        <CardValuer id="card-valuer" />
+        <PokeHelp />
 
         <LazySection minHeight="280px">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">

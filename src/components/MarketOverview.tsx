@@ -20,7 +20,7 @@ export default function MarketOverview() {
       {groups.map(g => { const index = indexes[g.type];
         const stale = index && Date.now() - Date.parse(index.capturedAt) > 36 * 3600_000;
         return <div key={g.type} className="min-w-0 space-y-2">
-          <div className="terminal-card p-4 border-t-2" style={{borderTopColor:g.variant === "green" ? "#34d399" : g.variant === "amber" ? "#fbbf24" : "#60a5fa"}}>
+          <div className="terminal-card p-4 border-t-2" style={{borderTopColor:g.variant === "green" ? "hsl(var(--terminal-green))" : g.variant === "amber" ? "hsl(var(--terminal-amber))" : "hsl(var(--terminal-blue))"}}>
             <h3 className="font-bold text-base">{g.title}</h3><p className="text-xs text-muted-foreground mt-1">{g.description}</p>
             <p className="text-xs mt-2">{index ? `${index.constituents.toLocaleString()} observed constituents` : "Coverage unavailable"}</p>
             <p className="text-xs text-muted-foreground">{index ? `Last snapshot: ${new Date(index.capturedAt).toLocaleString()}` : isLoading ? "Loading history…" : "No snapshot returned"}{stale ? " • STALE" : ""}</p>
