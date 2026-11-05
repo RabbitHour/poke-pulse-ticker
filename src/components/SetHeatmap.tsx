@@ -95,6 +95,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
   const maxVal = Math.max(...setPerformance.map((s) => s.totalValue), 1);
 
   const getColor = (change: number) => {
+    if (!Number.isFinite(change) || change === 0) return "bg-muted text-muted-foreground";
     if (change > 5) return "bg-emerald-500/90 text-white";
     if (change > 3) return "bg-emerald-500/70 text-white";
     if (change > 1) return "bg-emerald-500/40 text-emerald-100";
