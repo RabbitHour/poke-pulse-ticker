@@ -25,8 +25,8 @@ async function run(){
   const pocketSetIds=new Set(dex.sets.filter(s=>/^(?:[AB][0-9]+[a-z]?|P-A)$/.test(s.id)||String(s.logo||s.symbol||" ").includes("/tcgp/")).map(s=>s.id));
   const digitalCards=dex.cards.filter(c=>pocketSetIds.has(c.id.slice(0,c.id.lastIndexOf('-'))));
   const englishCards=dex.cards.filter(c=>!pocketSetIds.has(c.id.slice(0,c.id.lastIndexOf("-"))));
-  const setNames=new Map(dex.sets.map(s=>[s.id,s.name]));const artMap=new Map();
-  for(const c of englishCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));const key=norm(setNames.get(setId))+'|'+num(c.localId||c.id.split('-').at(-1))+'|'+norm(c.name);artMap.set(key,c);}
+  const setNames=new Map(dex.sets.map(s=>[s.id,s.name]));const artMap=new Map();const exactCandidates=new Map();
+  for(const c of englishCards){const setId=c.id.slice(0,c.id.lastIndexOf('-'));const identity=norm(setNames.get(setId))+'|'+num(c.localId||c.id.split('-').at(-1));const key=identity+'|'+norm(c.name);artMap.set(key,c);if(!exactCandidates.has(identity))exactCandidates.set(identity,[]);exactCandidates.get(identity).push(c.id);}
   let groupCache=await read(path.join(cacheDir,'groups.json'),null);
   if(!groupCache||groupCache.sourceUpdated!==sourceUpdated){groupCache={sourceUpdated,results:(await json('https://tcgcsv.com/tcgplayer/3/groups')).results};await write(path.join(cacheDir,'groups.json'),groupCache);}
   const groups=groupCache.results;if(!Array.isArray(groups)||!groups.length)throw Error('No groups returned');
@@ -42,10 +42,10 @@ async function run(){
   for(const {g,cache} of results){const prices=new Map();for(const p of cache.prices){if(!prices.has(p.productId))prices.set(p.productId,[]);prices.get(p.productId).push(p);}
    for(const p of cache.products){productImages.set(p.productId,p);const ext=p.extendedData??[];const number=ext.find(e=>e.name==='Number')?.value??'';const description=ext.find(e=>e.name==='CardText')?.value??'';
     const kind=number?'raw':'sealed';if(!number&&/code card|sleeves|playmat|deck box|portfolio|\bcoin\b|\bdice\b|jumbo|oversized/i.test(p.name))continue;
-    const art=number?artMap.get(norm(g.name)+'|'+num(number)+'|'+norm(p.name)):null;if(art)matchedDex.add(art.id);
+    const art=number?artMap.get(norm(g.name)+'|'+num(number)+'|'+norm(p.name)):null;if(art)matchedDex.add(art.id);const candidates=number?exactCandidates.get(norm(g.name)+'|'+num(number)):null;
     const variants=prices.get(p.productId)??[];const available=variants.length?variants:[{}];
     for(const quote of available){const market=Number.isFinite(quote.marketPrice)&&quote.marketPrice>0?quote.marketPrice:null;
-     entries.push({id:'tcg:'+p.productId+':'+(quote.subTypeName||'unknown'),productId:p.productId,groupId:g.groupId,language:'en',cardId:art?.id,name:p.name,set:g.name,setId:g.abbreviation||String(g.groupId),number,kind,
+     entries.push({id:'tcg:'+p.productId+':'+(quote.subTypeName||'unknown'),productId:p.productId,groupId:g.groupId,language:'en',cardId:art?.id,imageCandidateId:!art&&candidates?.length===1?candidates[0]:undefined,name:p.name,set:g.name,setId:g.abbreviation||String(g.groupId),number,kind,
       category:kind==='sealed'?classifyProduct(p.name,description):null,market,variant:quote.subTypeName||null,image:art?.image?art.image+'/low.webp':'',
       sourceUrl:'https://www.tcgplayer.com/product/'+encodeURIComponent(p.productId),sourceUpdated});
     }

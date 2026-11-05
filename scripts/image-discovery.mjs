@@ -27,15 +27,15 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
   const records=state.records;
   for (const e of entries) {
     const old=records[e.id];
-    if(old?.image) { e.image=old.image; e.imageProvenance=old.provenance; }
+    if(old?.image) { e.image=old.image; e.imageProvenance=old.provenance;if(old.verifiedCardId)e.cardId=old.verifiedCardId; }
     else if(e.image) {e.imageProvenance=e.imageProvenance||{provider:'TCGdex',recordId:e.cardId,language:e.language||'en',match:'catalog artwork; exact detail not yet checked'};records[e.id]={...old,image:e.image,provenance:e.imageProvenance};}
   }
   const unique=new Map();
   for(const e of entries) {
     // No supported exact listing/certificate provider is connected for graded images.
     if(e.kind!=='raw' && e.kind!=='sealed' && e.kind!=='digital')continue;
-    if(e.kind!=='sealed' && !e.cardId)continue;
-    const key=e.kind==='sealed'?'tcg:'+e.productId:'dex:'+(e.language||'en')+':'+e.cardId+':'+(e.productId||'metadata');
+    if(e.kind!=='sealed' && !e.cardId && !e.imageCandidateId)continue;
+    const key=e.kind==='sealed'?'tcg:'+e.productId:'dex:'+(e.language||'en')+':'+(e.cardId||e.imageCandidateId)+':'+(e.productId||'metadata');
     if(!unique.has(key))unique.set(key,[]);unique.get(key).push(e);
   }
   const pending=[...unique.values()].filter(rows => {
@@ -50,8 +50,9 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
   for(const rows of candidates){const e=rows[0];if(requests+(e.kind==='sealed'?1:2)>budget)break;
     let image,provenance,error;
     try {
-      const endpoint=e.kind==='sealed'?'https://tcgcsv.com/tcgplayer/3/'+e.groupId+'/products':'https://api.tcgdex.net/v2/'+(e.language||'en')+'/cards/'+encodeURIComponent(e.cardId);
-      const url=e.kind==='sealed'?exactSealedImage(e,products.get(e.productId)):exactDexImage(e,await (await request(endpoint)).json());
+      const cardId=e.cardId||e.imageCandidateId;
+      const endpoint=e.kind==='sealed'?'https://tcgcsv.com/tcgplayer/3/'+e.groupId+'/products':'https://api.tcgdex.net/v2/'+(e.language||'en')+'/cards/'+encodeURIComponent(cardId);
+      const url=e.kind==='sealed'?exactSealedImage(e,products.get(e.productId)):exactDexImage({...e,cardId},await (await request(endpoint)).json());
       if(!url)throw Error('No exact provider image');
       const r=await request(url),type=(r.headers.get('content-type')||'').split(';')[0];
       if(!['image/jpeg','image/png','image/webp'].includes(type)||Number(r.headers.get('content-length'))>MAX_BYTES)throw Error('Invalid image payload');
@@ -62,9 +63,9 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
       if(!magic)throw Error('Invalid image bytes');
       if(e.kind==='sealed') {const ext=type==='image/jpeg'?'jpg':type==='image/png'?'png':'webp';const name=createHash('sha256').update(body).digest('hex').slice(0,24)+'.'+ext;await fs.mkdir(path.join(dataDir,'images'),{recursive:true});await fs.writeFile(path.join(dataDir,'images',name),body);image='/data/images/'+name;}
       else image=url;
-      provenance={provider:e.kind==='sealed'?'TCGCSV':'TCGdex',recordId:e.kind==='sealed'?String(e.productId):e.cardId,language:e.kind==='sealed'?undefined:e.language||'en',sourceUrl:endpoint,originalUrl:url,verifiedAt:now,match:e.kind==='sealed'?'exact product ID':'exact card/set/language'+(e.productId?' and provider product ID':'')};discovered+=rows.length;
+      provenance={provider:e.kind==='sealed'?'TCGCSV':'TCGdex',recordId:e.kind==='sealed'?String(e.productId):cardId,language:e.kind==='sealed'?undefined:e.language||'en',sourceUrl:endpoint,originalUrl:url,verifiedAt:now,match:e.kind==='sealed'?'exact product ID':'exact card/set/language'+(e.productId?' and provider product ID':'')};discovered+=rows.length;
     } catch(err) {error=err.message;}
-    for(const row of rows) {const old=records[row.id];records[row.id]={...old,checkedAt:now,error:error||null,...(image?{image,provenance}:{})};if(image){row.image=image;row.imageProvenance=provenance;}}
+    for(const row of rows) {const old=records[row.id];records[row.id]={...old,checkedAt:now,error:error||null,...(image?{image,provenance,verifiedCardId:row.kind==='sealed'?undefined:provenance.recordId}:{})};if(image){row.image=image;row.imageProvenance=provenance;if(row.kind!=='sealed')row.cardId=provenance.recordId;}}
   }
   // The durable branch, not an expiring Actions cache, preserves successful discoveries.
   const tmp=stateFile+'.tmp';await fs.writeFile(tmp,JSON.stringify({...state,lastCheckedAt:now,lastRequests:requests,records}));await fs.rename(tmp,stateFile);

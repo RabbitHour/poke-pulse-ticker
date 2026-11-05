@@ -29,3 +29,9 @@ test('exact sealed photo is stored same-origin and invalid payloads cannot overw
  const old=e.image;await discoverImages([e],products,dir,{budget:1,fetcher:async()=>new Response('not a photo',{headers:{'content-type':'image/webp'}}),now:'2026-02-02T00:00:00Z'});assert.equal(e.image,old);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+test('a missing raw candidate becomes a card identity only after exact product-ID verification',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'candidate-image-'));try{
+ const e={...entry,cardId:undefined,imageCandidateId:card.id};await discoverImages([e],new Map(),dir,{budget:2,fetcher:async url=>String(url).includes('/cards/')?Response.json(card):new Response(bytes,{headers:{'content-type':'image/webp'}})});assert.equal(e.cardId,card.id);
+ const wrong={...entry,id:'wrong',cardId:undefined,imageCandidateId:card.id,productId:1};await discoverImages([wrong],new Map(),dir,{budget:2,fetcher:async()=>Response.json(card)});assert.equal(wrong.image,'');assert.equal(wrong.cardId,undefined);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});
