@@ -70,8 +70,6 @@ git push origin HEAD
 
 These commands assume your intended edits have already been committed. If Git reports uncommitted changes or conflicts, stop and resolve those before pushing. A merge into main starts the website updater/deployment; a feature branch push runs verification only. The scheduled updater never changes application source or your local files.
 
-## Browser caching
-
 ## Cross-host catalog builds
 
 `npm run build` prepares the latest public `RabbitHour/poke-pulse-ticker` **market-data** catalog before Vite copies static assets. `wrangler.jsonc` uses this same build command for Workers; the existing Pages workflow still deploys the prepared `dist`. Lovable builds use the identical Vite preparation hook. The catalog is shipped as `/data/catalog.json` plus content-hashed `/data/catalog/*.json` shards, each below 1 MB. No browser catalog request depends on a Lovable asset URL. A validated bundled release remains available if GitHub cannot be reached; a build without any complete catalog fails instead of shipping zero results. Source timestamps are copied unchanged, and the half-hour updater continues to check for distinct daily TCGCSV releases.

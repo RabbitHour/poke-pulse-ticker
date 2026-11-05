@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 export const MARKET_DATA_URL = 'https://raw.githubusercontent.com/RabbitHour/poke-pulse-ticker/market-data/catalog.json';
 export const MAX_SHARD_BYTES = 1000000;
-const valid = d => d && typeof d.sourceUpdated === 'string' && (Array.isArray(d.entries) && d.entries.length > 0 || Array.isArray(d.shards) && d.shards.length > 0);
+const valid = d => d && Number.isFinite(Date.parse(d.sourceUpdated)) && (Array.isArray(d.entries) && d.entries.length > 0 || Array.isArray(d.shards) && d.shards.length > 0);
 const freshness = d => [Date.parse(d.sourceUpdated) || 0, Number(d.catalogRefreshedAt) || 0, Date.parse(d.generatedAt) || 0];
 export function newer(a, b) { const x = freshness(a), y = freshness(b); for (let i=0;i<x.length;i++) { if(x[i]!==y[i]) return x[i]>y[i]; } return false; }
 
@@ -47,7 +47,7 @@ export async function prepareCatalog(dataDir, fetcher = fetch) {
   try { local = JSON.parse(await fs.readFile(path.join(dataDir,'catalog.json'),'utf8')); } catch {}
   if (local?.shards) {
     // A partial checkout must never silently ship a manifest with missing shards.
-    try { for (const s of local.shards) await fs.access(path.join(dataDir,'catalog',path.basename(s.url))); } catch { local = undefined; }
+    try { let count=0; for (const s of local.shards) {if(!/^\/data\/catalog\/[a-f0-9]+\.json$/.test(s.url))throw Error('Invalid shard path');const rows=JSON.parse(await fs.readFile(path.join(dataDir,'catalog',path.basename(s.url)),'utf8'));if(!Array.isArray(rows)||rows.length!==s.count)throw Error('Incomplete bundled shard');count+=rows.length;}if(count!==local.recordCount)throw Error('Incomplete bundled catalog'); } catch { local = undefined; }
   }
   let candidate;
   try {
@@ -69,6 +69,7 @@ export async function prepareCatalog(dataDir, fetcher = fetch) {
       candidate={...candidate,entries};
     }
   } catch (error) {
+    candidate = undefined;
     if (!valid(local)) throw Error('No deployable catalog: ' + error.message);
     console.warn('Durable catalog unavailable; retaining bundled source release ' + local.sourceUpdated);
   }

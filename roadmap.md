@@ -1,9 +1,9 @@
 # Live market index completion
 
 ## Production catalog hotfix
-- [ ] Restore latest durable catalog into Worker and Lovable builds using same-origin generated shards
-- [ ] Preserve half-hour checks and source-release timestamps
-- [ ] Verify production-like catalog lookup, exact record links and visible images
+- [x] Restore latest durable catalog into Worker and Lovable builds using same-origin generated shards
+- [x] Preserve half-hour checks and source-release timestamps
+- [x] Verify production-like catalog lookup, exact record links and visible images (static files with host-specific fallback blocked)
 
 - [x] Add protected persistent index snapshot storage
 - [x] Record real eBay raw, graded, and sealed aggregate snapshots

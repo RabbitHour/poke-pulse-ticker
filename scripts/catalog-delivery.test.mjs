@@ -17,3 +17,7 @@ test('build fails instead of deploying a missing catalog or partial bundled shar
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'catalog-missing-'));
  try{await assert.rejects(prepareCatalog(dir,async()=>{throw Error('offline')}),/No deployable catalog/);const m=await writeCatalog(dir,catalog);await fs.rm(path.join(dir,'catalog',path.basename(m.shards[0].url)));await assert.rejects(prepareCatalog(dir,async()=>{throw Error('offline')}),/No deployable catalog/);}finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+test('incomplete newer durable shards cannot replace the complete bundled release',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'catalog-remote-'));
+ try{await writeCatalog(dir,catalog);const remote={delivery:'sharded-v1',sourceUpdated:'2026-11-05T20:00:00Z',recordCount:1,shards:[{url:'/data/catalog/abc.json',count:1}]};const m=await prepareCatalog(dir,async(url)=>String(url).includes('catalog.json')?new Response(JSON.stringify(remote)):new Response('missing',{status:404}));assert.equal(m.sourceUpdated,catalog.sourceUpdated);assert.equal(m.recordCount,9);}finally{await fs.rm(dir,{recursive:true,force:true});}
+});
