@@ -1,3 +1,4 @@
+import PokeHelp from "@/components/PokeHelp";
 import ForecastLedger from "@/components/ForecastLedger";
 import SealedCategoryCharts from "@/components/SealedCategoryCharts";
 import MarketOpening from "@/components/MarketOpening";
@@ -182,11 +183,7 @@ const Index = () => {
     <div className="min-h-screen bg-background bright-market">
       {/* StickyUpgradeBanner removed — popups disabled */}
       <TerminalHeader />
-      <TickerBar
-        cards={displayCards}
-        isLive={isLive}
-        lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
-      />
+
 
 
       <main
@@ -194,8 +191,14 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
         <MarketOpening />
+      <TickerBar
+        cards={displayCards}
+        isLive={isLive}
+        lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
+      />
+        <CardValuer id="card-valuer" />
+        <PokeHelp />
 
-        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="#portal-preview">Free account & reports</a></nav>
 
         {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
         <LiveCardStrip
@@ -215,7 +218,7 @@ const Index = () => {
 
         {/* === MARKET PULSE + NOTABLE SALES === */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5">
-          <div className="terminal-card p-4"><h2 className="font-bold text-lg">Featured card feed</h2><p className="text-sm text-muted-foreground mt-2">{displayCards.length.toLocaleString()} featured source records loaded. This showcase is a subset; the full indexed catalog is above. Raw quotes refresh every 30 minutes. Price movements are source-derived momentum, not verified transaction volume.</p><a href="#card-valuer" className="market-action mt-3">Value a card</a></div>
+          <div className="terminal-card p-4"><h2 className="font-bold text-lg">Featured card feed</h2><p className="text-sm text-muted-foreground mt-2">{displayCards.length.toLocaleString()} featured source records loaded. This showcase is a subset; the searchable catalog is below. Raw quotes refresh every 30 minutes. Price movements are source-derived momentum, not verified transaction volume.</p><a href="#card-valuer" className="market-action mt-3">Value a card</a></div>
           <RecentNotableSales cards={displayCards} />
         </div>
 
@@ -226,11 +229,11 @@ const Index = () => {
         <SealedCategoryCharts />
         <ForecastLedger />
         <CatalogExplorer />
-        <CardValuer id="card-valuer" />
+
 
         <LazySection minHeight="280px">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
-            <TopMoversTable cards={displayCards} title="Top Movers — Raw Cards" isLoading={isLoading} />
+            <TopMoversTable cards={displayCards} title="Raw Card Movers — Loaded Sample" isLoading={isLoading} />
             <TopMoversTable cards={displayGraded} title="Graded asking-price observations" isLoading={isLoading} />
           </div>
         </LazySection>
@@ -352,7 +355,7 @@ const Index = () => {
         <details className="terminal-card research-previews p-4"><summary className="font-bold cursor-pointer">Research & simulator previews — experimental estimates</summary><p className="market-note">These older tools include modeled signals and simulated data. They are not verified sale histories, investment predictions, or measured returns.</p>
         <LazySection minHeight="280px">
           <ProGate feature="Historical price charts" blur>
-            <div className="terminal-card p-4"><h3>Individual card history</h3><p className="text-sm text-muted-foreground">Verified per-card historical prices are not connected. The market charts above show stored observations; no random curve is substituted.</p></div>
+            <div className="terminal-card p-4"><h3>Individual card history</h3><p className="text-sm text-muted-foreground">Open an exact raw card or sealed product in the catalog to see its recorded quotes. Coverage varies by item and date.</p></div>
           </ProGate>
         </LazySection>
 

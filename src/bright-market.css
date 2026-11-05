@@ -141,3 +141,46 @@
 @media (max-width: 600px) {
   .opening-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+.bright-market .catalog-tile { padding: .4rem; }
+.bright-market .catalog-tile .catalog-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 7;
+}
+.bright-market .opening-gallery { gap: .35rem; }
+
+/* Collector-first hero with restrained foil framing and readable search. */
+.bright-market{background:radial-gradient(ellipse at 85% 0%,#e3d6ff,transparent 40%),linear-gradient(160deg,#f4f9ff,#edf9f5 65%,#fff9e9);}
+.bright-market .collector-hero{display:grid;grid-template-columns:1.1fr 1fr;gap:2rem;padding:clamp(1.2rem,4vw,3.5rem);background:linear-gradient(115deg,#fff 15%,#eff9ff 60%,#ede4ff);border:1px solid #c0d7e8;border-radius:1.5rem;overflow:hidden;}
+.collector-eyebrow{display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:800;letter-spacing:.12em;color:#7150a5;}
+.collector-brand{margin-top:1.25rem;font-weight:800;color:#234b75;font-size:1.15rem;}
+.collector-hero h1{font-size:clamp(2.1rem,4vw,3.8rem);font-weight:900;letter-spacing:-.045em;line-height:1.05;margin:1rem 0;color:#152c4b;}
+.collector-hero h1 span{color:#6242b2;}
+.collector-intro{max-width:33rem;color:#496078;font-size:1.05rem;line-height:1.7;}
+.collector-search{display:flex;align-items:center;gap:.65rem;background:white;border:2px solid #9baed2;border-radius:.85rem;padding:.45rem .5rem .45rem .85rem;margin:1.4rem 0 1rem;box-shadow:0 7px 20px #394f7a12;}
+.collector-search input{flex:1;min-width:0;background:transparent;color:#182c4d;font-size:.95rem;}
+.collector-search button{display:flex;align-items:center;gap:.4rem;background:#6442b1;color:white;border-radius:.55rem;padding:.75rem .9rem;font-weight:700;}
+.collector-shortcuts{display:flex;flex-wrap:wrap;gap:.5rem;}
+.collector-trust{font-size:.78rem;line-height:1.7;color:#52627a;margin-top:1.2rem;}
+.collector-showcase{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;min-height:320px;}
+.collector-orbit{position:absolute;inset:8% 0 12%;border-radius:50%;background:radial-gradient(circle,#fff5bf,#e4daff 50%,transparent 70%);opacity:.8;}
+.collector-card-fan{position:relative;display:flex;align-items:center;justify-content:center;min-height:270px;padding:1rem;}
+.collector-fan-card{position:relative;width:35%;max-width:160px;padding:.3rem;background:linear-gradient(135deg,#fff8ba,#e6d6ff,#d3fbff);border:1px solid white;border-radius:.8rem;box-shadow:0 14px 24px #283b6b30;transition:transform .2s;}
+.collector-fan-card img{aspect-ratio:5/7;object-fit:contain;border-radius:.45rem;}
+.collector-fan-card span{display:block;text-align:center;font-size:.8rem;font-weight:800;color:#25334c;padding:.35rem;}
+.collector-fan-card.card-0{transform:rotate(-12deg) translateX(12px);}
+.collector-fan-card.card-1{z-index:2;transform:translateY(-15px);}
+.collector-fan-card.card-2{transform:rotate(12deg) translateX(-12px);}
+.collector-fan-card:hover{z-index:3;transform:translateY(-22px);}
+.collector-spark{position:absolute;font-size:2rem;color:#a68125;z-index:3;pointer-events:none;}.spark-one{top:0;right:15%;}.spark-two{left:5%;bottom:20%;font-size:1.4rem;}
+.collector-spotlight{position:relative;display:grid;gap:.2rem;padding:.9rem 1rem;border:1px solid #c6cfe8;border-radius:1rem;background:#fffffff0;box-shadow:0 5px 20px #3340770f;}
+.collector-spotlight span{font-size:.75rem;color:#586784;}.collector-spotlight strong{font-size:1.1rem;}.collector-spotlight b{color:#176148;font-size:.9rem;}
+.collector-empty{display:grid;justify-items:center;gap:1rem;text-align:center;padding:2rem;color:#614c8b;}
+.bright-market img,.bright-market .catalog-tile img,.bright-market .opening-card img{filter:brightness(1.035) saturate(1.07) drop-shadow(0 3px 4px #183c4925);}
+#catalog-search{scroll-margin-top:7rem;}
+@media(max-width:850px){.bright-market .collector-hero{grid-template-columns:1fr;gap:1rem;}.collector-showcase{min-height:260px;}.collector-card-fan{min-height:240px;}.collector-fan-card{max-width:140px;}}
+@media(max-width:420px){.collector-search{gap:.3rem;padding-left:.5rem;}.collector-search>svg{display:none;}.collector-search button{padding:.7rem .6rem;}.collector-hero h1{font-size:2.1rem;}}
+@media(prefers-reduced-motion:reduce){.collector-fan-card{transition:none;}.collector-fan-card:hover{transform:none;}}
+.high-contrast .bright-market img{filter:none;}

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useMarketIndexes, useMarketMovers } from "./useMarketIndexes";
+import type { CatalogEntry } from "./useCatalog";
 import type { CardData, SealedProduct } from "@/data/marketData";
 import {useCatalog} from './useCatalog';
 
@@ -22,6 +23,14 @@ export function useObservedProducts(rawCards: CardData[] = []) {
     name:p.name, type:/\bcase\b/i.test(p.name)?'Case':/elite trainer box/i.test(p.name)?'ETB':/booster box/i.test(p.name)?'Booster Box':/booster pack/i.test(p.name)?'Booster Pack':/blister/i.test(p.name)?'Blister':'Sealed', market:p.market, low:p.market, change:p.change ?? 0,
     image:p.image, sourceUpdated:movers.data?.sourceUpdated,
   })), [movers.data]);
-  return { graded, sealed, gradedAt:history.indexes.graded?.capturedAt, sealedAt:movers.data?.sourceUpdated,
+  const gradedRecords = useMemo<CatalogEntry[]>(() => graded.map(c => ({
+    id: `graded:${c.name}:${c.set}:${c.number}:${c.grade}`,
+    name: c.name, set: c.set, setId: c.set, number: c.number,
+    grade: c.grade, kind: "graded", category: null, market: c.market,
+    image: c._image ?? "", sourceUrl: "",
+    sourceUpdated: history.indexes.graded?.capturedAt ?? null,
+    sampleSize: history.indexes.graded?.basket?.find(b => b.q === `${c.name} ${c.number} ${c.set} ${c.grade}`)?.n,
+  })), [graded, history.indexes.graded]);
+  return { graded, gradedRecords, sealed, gradedAt:history.indexes.graded?.capturedAt, sealedAt:movers.data?.sourceUpdated,
     isLoading:history.isLoading || movers.isLoading, isError:history.isError || movers.isError };
 }
