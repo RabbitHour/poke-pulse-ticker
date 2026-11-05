@@ -2,6 +2,7 @@
 // Run with Node 24: npm run market:sync. Keep npm run market:watch open for 30-minute checks.
 import fs from 'node:fs/promises';import path from 'node:path';import {fileURLToPath} from 'node:url';
 import {recordHistory} from './record-history.mjs';
+import {writeCatalog} from './catalog-delivery.mjs';
 import {classifyProduct,PRODUCT_CATEGORIES} from '../src/lib/productCategories.ts';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const cacheDir=path.join(root,'work','market-cache');const publicDir=path.join(root,'public','data');
@@ -67,9 +68,9 @@ async function run(){
   }
   history.sourceUpdated=sourceUpdated;history.methodology='Equal-weight fixed launch basket, rebased to 100; points added only when every constituent has a current quote.';
   if(JSON.stringify(history)!==historyBefore)history.generatedAt=start;
-  await write(histFile,history);await recordHistory(publicDir,entries,sourceUpdated,start);const previousCatalog=await read(path.join(publicDir,'catalog.json'),null);const publishCatalog=previousCatalog?.version!==catalog.version||previousCatalog?.sourceUpdated!==sourceUpdated||previousCatalog?.catalogRefreshedAt!==dex.at;if(publishCatalog)await write(path.join(publicDir,'catalog.json'),catalog);await write(path.join(publicDir,'sealed-indexes.json'),history);
+  await write(histFile,history);await recordHistory(publicDir,entries,sourceUpdated,start);const previousCatalog=await read(path.join(publicDir,'catalog.json'),null);const publishCatalog=previousCatalog?.version!==catalog.version||previousCatalog?.sourceUpdated!==sourceUpdated||previousCatalog?.catalogRefreshedAt!==dex.at;if(publishCatalog)await writeCatalog(publicDir,catalog);await write(path.join(publicDir,'sealed-indexes.json'),history);
   // Vite preview serves dist; keep its data current when a build already exists.
-  try{await fs.access(path.join(root,'dist','index.html'));const d=path.join(root,'dist','data');await fs.mkdir(d,{recursive:true});if(publishCatalog)await write(path.join(d,'catalog.json'),catalog);await write(path.join(d,'sealed-indexes.json'),history);}catch{}
+  try{await fs.access(path.join(root,'dist','index.html'));const d=path.join(root,'dist','data');await fs.mkdir(d,{recursive:true});if(publishCatalog)await writeCatalog(d,catalog);await write(path.join(d,'sealed-indexes.json'),history);}catch{}
   console.log(JSON.stringify({englishCards:englishCards.length,records:entries.length,priced:catalog.pricedRecords,groups:groups.length,categories:Object.fromEntries(PRODUCT_CATEGORIES.map(c=>[c.id,history.categories[c.id]?.available??0]))},null,2));
  }finally{await handle?.close();await fs.unlink(lock).catch(()=>{});}
 }
