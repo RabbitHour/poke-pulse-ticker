@@ -35,7 +35,7 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
     // No supported exact listing/certificate provider is connected for graded images.
     if(e.kind!=='raw' && e.kind!=='sealed' && e.kind!=='digital')continue;
     if(e.kind!=='sealed' && !e.cardId)continue;
-    const key=e.kind==='sealed'?'tcg:'+e.productId:'dex:'+(e.language||'en')+':'+e.cardId;
+    const key=e.kind==='sealed'?'tcg:'+e.productId:'dex:'+(e.language||'en')+':'+e.cardId+':'+(e.productId||'metadata');
     if(!unique.has(key))unique.set(key,[]);unique.get(key).push(e);
   }
   const candidates=[...unique.values()].filter(rows => {
