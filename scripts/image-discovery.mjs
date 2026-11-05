@@ -28,7 +28,7 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
   for (const e of entries) {
     const old=records[e.id];
     if(old?.image) { e.image=old.image; e.imageProvenance=old.provenance; }
-    else if(e.image) e.imageProvenance={provider:'TCGdex',recordId:e.cardId,language:e.language||'en',match:'catalog artwork; exact detail not yet checked'};
+    else if(e.image) {e.imageProvenance=e.imageProvenance||{provider:'TCGdex',recordId:e.cardId,language:e.language||'en',match:'catalog artwork; exact detail not yet checked'};records[e.id]={...old,image:e.image,provenance:e.imageProvenance};}
   }
   const unique=new Map();
   for(const e of entries) {

@@ -72,7 +72,7 @@ async function run(){
   if(JSON.stringify(history)!==historyBefore)history.generatedAt=start;
   await write(histFile,history);await recordHistory(publicDir,entries,sourceUpdated,start);const previousCatalog=await read(path.join(publicDir,'catalog.json'),null);const publishCatalog=imageDiscovery.requests>0||previousCatalog?.version!==catalog.version||previousCatalog?.sourceUpdated!==sourceUpdated||previousCatalog?.catalogRefreshedAt!==dex.at;if(publishCatalog)await writeCatalog(publicDir,catalog);await write(path.join(publicDir,'sealed-indexes.json'),history);
   // Vite preview serves dist; keep its data current when a build already exists.
-  try{await fs.access(path.join(root,'dist','index.html'));const d=path.join(root,'dist','data');await fs.mkdir(d,{recursive:true});if(publishCatalog)await writeCatalog(d,catalog);await write(path.join(d,'sealed-indexes.json'),history);}catch{}
+  try{await fs.access(path.join(root,'dist','index.html'));const d=path.join(root,'dist','data');await fs.mkdir(d,{recursive:true});if(publishCatalog){await fs.cp(path.join(publicDir,'images'),path.join(d,'images'),{recursive:true}).catch(e=>{if(e.code!=='ENOENT')throw e;});await writeCatalog(d,catalog);}await write(path.join(d,'sealed-indexes.json'),history);await fs.cp(path.join(publicDir,'history'),path.join(d,'history'),{recursive:true});await fs.copyFile(path.join(publicDir,'forecasts.json'),path.join(d,'forecasts.json'));}catch{}
   console.log(JSON.stringify({englishCards:englishCards.length,records:entries.length,priced:catalog.pricedRecords,groups:groups.length,categories:Object.fromEntries(PRODUCT_CATEGORIES.map(c=>[c.id,history.categories[c.id]?.available??0]))},null,2));
  }finally{await handle?.close();await fs.unlink(lock).catch(()=>{});}
 }
