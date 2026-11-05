@@ -72,6 +72,12 @@ These commands assume your intended edits have already been committed. If Git re
 
 ## Browser caching
 
+## Cross-host catalog builds
+
+`npm run build` prepares the latest public `RabbitHour/poke-pulse-ticker` **market-data** catalog before Vite copies static assets. `wrangler.jsonc` uses this same build command for Workers; the existing Pages workflow still deploys the prepared `dist`. Lovable builds use the identical Vite preparation hook. The catalog is shipped as `/data/catalog.json` plus content-hashed `/data/catalog/*.json` shards, each below 1 MB. No browser catalog request depends on a Lovable asset URL. A validated bundled release remains available if GitHub cannot be reached; a build without any complete catalog fails instead of shipping zero results. Source timestamps are copied unchanged, and the half-hour updater continues to check for distinct daily TCGCSV releases.
+
+## Browser caching
+
 The public-shell service worker now bypasses authenticated API responses and market JSON, and fetches navigation HTML from the network first. Older Poke Pulse caches are removed during activation. This prevents one signed-in account’s cached API response from being reused for another and allows new deployments to appear on refresh.
 
 ## Known limits
