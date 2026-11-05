@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import catalogAsset from '@/assets/market-catalog.json.asset.json';
 import type { ProductCategory } from "@/lib/productCategories";
 export interface CatalogEntry {id:string;productId?:number;cardId?:string;name:string;set:string;setId:string;number:string;kind:"raw"|"sealed"|"graded"|"digital";category:ProductCategory|null;market:number|null;variant?:string|null;image:string;sourceUrl:string;sourceUpdated:string|null;grade?:string}
 export interface Catalog {version:number;generatedAt:string;sourceUpdated:string;englishCatalogCount:number;digitalCatalogCount?:number;providerGroups:number;pricedRecords:number;languageScope:string;entries:CatalogEntry[]}
