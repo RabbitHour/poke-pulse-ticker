@@ -46,7 +46,7 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
   const candidates=[];for(let i=0;i<Math.max(...queues.map(q=>q.length));i++)for(const queue of queues)if(queue[i])candidates.push(queue[i]);
   // Bound all network requests, including artwork validation, to this run's budget.
   let requests=0, discovered=0;
-  async function request(url){if(requests>=budget)throw Error('Budget exhausted');requests++;const r=await fetcher(url,{signal:AbortSignal.timeout(15000),redirect:'error'});if(!r.ok)throw Error('Provider HTTP '+r.status);return r;}
+  async function request(url){if(requests>=budget)throw Error('Budget exhausted');requests++;const r=await fetcher(url,{signal:AbortSignal.timeout(15000),redirect:'error',headers:{'User-Agent':'PokePulseCatalog/2.0 (+https://poke-pulse-ticker.lovable.app/)'}});if(!r.ok)throw Error('Provider HTTP '+r.status);return r;}
   for(const rows of candidates){const e=rows[0];if(requests+(e.kind==='sealed'?1:2)>budget)break;
     let image,provenance,error;
     try {
