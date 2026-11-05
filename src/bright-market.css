@@ -156,6 +156,10 @@
 .opening-search input {flex:1;min-width:0;background:hsl(var(--card));color:hsl(var(--foreground));padding:.5rem;outline:none;}
 .bright-market .opening-gallery {grid-template-columns:repeat(6,minmax(0,1fr));gap:.6rem;}
 .bright-market .opening-card {border:1px solid hsl(var(--foil-edge));border-radius:6px;background:hsl(var(--foil-surface));box-shadow:var(--shadow-foil);}
+.bright-market .opening-card {position:relative;overflow:hidden;}
+.bright-market .opening-card::after {content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 40%,hsl(var(--card) / .22) 48%,hsl(var(--foil-edge) / .16) 50%,transparent 58%);transform:translateX(-110%);animation:foil-sparkle 12s ease-in-out infinite;}
+@keyframes foil-sparkle {0%,80%{transform:translateX(-110%);}100%{transform:translateX(110%);}}
+@media(prefers-reduced-motion:reduce){.bright-market .opening-card::after{display:none;animation:none;}}
 .bright-market .opening-card img {height:180px;filter:none;}
 .bright-market .terminal-card {border-radius:6px;background:hsl(var(--card));box-shadow:none;}
 .bright-market .market-tape {background:hsl(var(--hero-surface));border-color:hsl(var(--border));}

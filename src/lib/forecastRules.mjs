@@ -1,8 +1,8 @@
 export const DAY = 86400000;
 export const HORIZONS = [1, 2, 7, 14, 30];
 export function direction(baseline, value) {
-  const change = (value / baseline - 1) * 100;
-  return Math.abs(change) <= 1 ? 'flat' : change > 0 ? 'up' : 'down';
+  if (![baseline,value].every(v=>Number.isFinite(v)&&v>0)) return null;
+  return value >= baseline * .99 && value <= baseline * 1.01 ? 'flat' : value > baseline ? 'up' : 'down';
 }
 export function eligibleOutcome(f, o) {
   if (!f || !o || f.id !== o.id) return false;
@@ -12,6 +12,7 @@ export function eligibleOutcome(f, o) {
   return HORIZONS.includes(days) && Number.isFinite(due) && Number.isFinite(evaluated)
     && evaluated >= due && evaluated <= due + (days <= 2 ? 1 : 2) * DAY
     && Date.parse(o.sourceUpdated) > Date.parse(f.sourceUpdated)
+    && Date.parse(o.sourceUpdated) >= due
     && Date.parse(o.sourceUpdated) <= evaluated;
 }
 export function resolvedMetrics(forecasts, outcomes) {

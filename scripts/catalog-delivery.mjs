@@ -68,6 +68,21 @@ export async function prepareCatalog(dataDir, fetcher = fetch) {
       if(entries.length!==candidate.recordCount) throw Error('Incomplete durable catalog');
       candidate={...candidate,entries};
     }
+    // Exact sealed photos are same-origin files and must travel with the manifest.
+    // Stage all required files before replacing the validated bundled catalog.
+    const imagePaths=[...new Set(candidate.entries.map(e=>e.image).filter(u=>typeof u==='string'&&u.startsWith('/data/images/')))];
+    const images=[];
+    for(const url of imagePaths){
+      if(!/^\/data\/images\/[a-f0-9]{24}\.(jpg|png|webp)$/.test(url))throw Error('Invalid stored image path');
+      const relative=url.slice('/data/'.length),dest=path.join(dataDir,relative);
+      try{await fs.access(dest);continue;}catch{}
+      const r=await fetcher(new URL(relative,MARKET_DATA_URL).href,{signal:AbortSignal.timeout(30000)});
+      if(!r.ok)throw Error('Stored product photo unavailable');
+      const body=Buffer.from(await r.arrayBuffer());if(!body.length||body.length>2_000_000)throw Error('Invalid stored image size');
+      if(createHash('sha256').update(body).digest('hex').slice(0,24)!==path.basename(url).split('.')[0])throw Error('Stored photo hash mismatch');
+      images.push({dest,body});
+    }
+    for(const {dest,body} of images){await fs.mkdir(path.dirname(dest),{recursive:true});await fs.writeFile(dest,body);}
   } catch (error) {
     candidate = undefined;
     if (!valid(local)) throw Error('No deployable catalog: ' + error.message);
@@ -76,6 +91,18 @@ export async function prepareCatalog(dataDir, fetcher = fetch) {
   const selected = valid(candidate) && (!valid(local) || newer(candidate,local)) ? candidate : local;
   if (!valid(selected)) throw Error('No deployable catalog');
   const manifest = selected.entries ? await writeCatalog(dataDir,selected) : selected;
+  // Both build hosts ship the same durable ledger, not an older checked-in copy.
+  // A failed companion fetch retains the last good local ledger and history.
+  try {
+    const companion=async file=>{const r=await fetcher(new URL(file,MARKET_DATA_URL).href,{signal:AbortSignal.timeout(30000)});if(!r.ok)throw Error('Ledger unavailable');return r.json();};
+    const [ledger,history,sealed]=await Promise.all(['forecasts.json','history/manifest.json','sealed-indexes.json'].map(companion));
+    if(!Array.isArray(ledger.forecasts)||!Array.isArray(ledger.outcomes)||!Array.isArray(history.days)||!sealed.categories)throw Error('Invalid durable ledger');
+    const snapshots=[];
+    for(const day of history.days){if(!/^\d{4}-\d{2}-\d{2}\.json$/.test(day.file))throw Error('Invalid snapshot path');const snapshot=await companion('history/'+day.file);if(!snapshot.prices||snapshot.sourceUpdated!==day.sourceUpdated)throw Error('Invalid snapshot');snapshots.push([day.file,snapshot]);}
+    await fs.mkdir(path.join(dataDir,'history'),{recursive:true});
+    for(const [file,snapshot] of snapshots)await fs.writeFile(path.join(dataDir,'history',file),JSON.stringify(snapshot));
+    for(const [file,value] of [['forecasts.json',ledger],['history/manifest.json',history],['sealed-indexes.json',sealed]]){await fs.writeFile(path.join(dataDir,file+'.tmp'),JSON.stringify(value));await fs.rename(path.join(dataDir,file+'.tmp'),path.join(dataDir,file));}
+  }catch {console.warn('Durable companion ledger unavailable; retaining bundled history.');}
   console.log(`Deployable catalog: ${manifest.recordCount} records; source ${manifest.sourceUpdated}`);
   return manifest;
 }
