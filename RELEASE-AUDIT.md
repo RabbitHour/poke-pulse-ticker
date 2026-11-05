@@ -1,3 +1,25 @@
+# Collector release update — November 5, 2026
+
+This update supersedes the earlier status below.
+
+- Reconciled current origin/main with the preserved local work on fix/collector-launch-20261105. Kept remote Cloudflare SPA configuration and authentication-storage improvements.
+- Added a Pokémon-focused hero, large search field, card-art fan, brighter surfaces and restrained image enhancement.
+- Replaced “Search full catalog” with “Browse cards & sealed products”; it targets the catalog search field. Hero searches share URL query state with that catalog.
+- Fixed exact-phrase matching: “Mew 30th Anniversary” matches the official 30th Celebration name, accepts reordered words and card numbers, and does not confuse Mew with Mewtwo.
+- Added an explicit value-search form/button. Known cards without prices stay visible and cannot produce a fabricated total.
+- Catalog and sealed-index loading can recover from missing/HTML/stale hosted JSON using the repository's existing public market-data branch.
+- Added .gitattributes for consistent source/script line endings. Generated catalog and old dependency backup directories are locally excluded, preserved on disk.
+- Tests: 40 application tests passed, plus 4 history/cache tests. Production build passed. Large-bundle and Browserslist warnings remain.
+- Read-only backend checks: raw, graded and sealed history each returned HTTP 200 with latest snapshots 2026-11-05 14:10 UTC. Email signup enabled; confirmation required. This does not verify SMTP inbox delivery.
+- Public data branch returned 57,921 records with source release 2026-11-04 20:06 UTC. Four Mew/Mew ex 30th Celebration entries were present; one had a provider price and three had no price. These are provider observations, not every worldwide printing.
+- create-checkout source now requires test-mode keys, server-approved CHECKOUT_TEST_PRICE_IDS and CHECKOUT_TEST_ALLOWED_ORIGINS, a confirmed user and an active recurring test price. Browser-supplied coupons/trials are rejected. This function has not been deployed; live payment behavior is not certified. Other legacy payment endpoints were not exercised or certified.
+
+Service access limitations:
+Lovable connection reports reauthentication required. Computer Use stopped because it could not reliably determine the browser URL. No account credentials were created/rotated, no email sent, and no payment session created. Cloudflare/R2 exposed credentials still require owner rotation and secret-store replacement; never paste replacements into chat. Backend deployment and complete signup/checkout testing require authenticated service access.
+
+Visual layout has been implemented and built, but browser-based visual/interaction acceptance was blocked by Computer Use. Tests exercise form submission and data matching, not a complete hosted browser session.
+
+---
 # Audited PyCharm release workflow — 2026-11-05
 
 ## What changed

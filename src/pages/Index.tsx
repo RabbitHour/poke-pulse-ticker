@@ -1,3 +1,4 @@
+import PokeHelp from "@/components/PokeHelp";
 import ForecastLedger from "@/components/ForecastLedger";
 import SealedCategoryCharts from "@/components/SealedCategoryCharts";
 import MarketOpening from "@/components/MarketOpening";
@@ -182,11 +183,7 @@ const Index = () => {
     <div className="min-h-screen bg-background bright-market">
       {/* StickyUpgradeBanner removed — popups disabled */}
       <TerminalHeader />
-      <TickerBar
-        cards={displayCards}
-        isLive={isLive}
-        lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
-      />
+
 
 
       <main
@@ -194,6 +191,13 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
         <MarketOpening />
+      <TickerBar
+        cards={displayCards}
+        isLive={isLive}
+        lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
+      />
+        <CardValuer id="card-valuer" />
+        <PokeHelp />
 
 
         {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
@@ -225,7 +229,7 @@ const Index = () => {
         <SealedCategoryCharts />
         <ForecastLedger />
         <CatalogExplorer />
-        <CardValuer id="card-valuer" />
+
 
         <LazySection minHeight="280px">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">

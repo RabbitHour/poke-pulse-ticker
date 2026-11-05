@@ -1,3 +1,4 @@
+import { matchesCatalogQuery, catalogSearchText } from "@/lib/catalogSearch";
 import {useObservedProducts} from "@/hooks/useObservedProducts";
 import {useState} from "react";
 import {useCatalog,type CatalogEntry} from "@/hooks/useCatalog";
@@ -14,7 +15,7 @@ const guide=[
 type Message={role:string;text:string;cards?:CatalogEntry[];href?:string;link?:string};
 export default function PokeHelp(){const catalog=useCatalog();const {gradedRecords}=useObservedProducts();const [input,setInput]=useState('');const [messages,setMessages]=useState<Message[]>([]);
 function ask(value:string){const q=value.trim().slice(0,300);if(!q)return;const tokens=q.toLowerCase().replace(/[^a-z0-9 '-]/g,' ').split(/\s+/).filter(t=>t.length>1&&!['what','whats','is','the','price','of','show','me','find','cards','card','pokemon','pok','raw','graded','sealed','worth','tell','about','value','cost','please'].includes(t));
- const matches=tokens.length?[...(catalog.data?.entries??[]),...gradedRecords].filter(e=>tokens.every(t=>`${e.name} ${e.set} ${e.number} ${e.grade??""} ${e.variant??""} ${catalogSymbol(e)}`.toLowerCase().includes(t))):[];
+ const matches=tokens.length?[...(catalog.data?.entries??[]),...gradedRecords].filter(e=>matchesCatalogQuery(catalogSearchText(e), tokens.join(" "))):[];
  let answer:Message;if(/how many|total.*cards|821/.test(q.toLowerCase()))answer={role:'Poke',text:catalog.data?`This build indexes ${catalog.data.englishCatalogCount.toLocaleString()} English TCGdex card entries and ${catalog.data.entries.length.toLocaleString()} combined card, printing and product records. ${catalog.data.pricedRecords.toLocaleString()} records have a source quote. This is provider coverage, not every worldwide edition.`:'821 is only a loaded sample. The full catalog requires the catalog sync.',href:'#catalog',link:'Inspect catalog coverage'};
  else if(matches.length)answer={role:'Poke',text:`Found ${matches.length.toLocaleString()} catalog records. Here are the first six matches; quotes are USD references, not guaranteed sale values. Source release: ${catalog.data?.sourceUpdated}.`,cards:matches.slice(0,6)};
  else{const g=guide.find(g=>g.keys.test(q));answer={role:'Poke',text:g?.text??'I can search this catalog and explain pricing, grading, sets and product indexes. I am not an unlimited AI model or an encyclopedia of every game, anime episode and rule. Try “Pikachu”, “Charizard Base Set”, or “how many cards”.',href:g?.href??'#catalog',link:g?.link??'Search the full catalog'};}
