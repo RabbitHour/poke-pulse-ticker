@@ -1,6 +1,7 @@
 # Live market index completion
 
 ## Production catalog hotfix
+- [ ] Verify pinned Bun frozen install, Radix resolution and preserved generated catalog for Worker build fix
 - [x] Restore latest durable catalog into Worker and Lovable builds using same-origin generated shards
 - [x] Preserve half-hour checks and source-release timestamps
 - [x] Verify production-like catalog lookup, exact record links and visible images (static files with host-specific fallback blocked)
