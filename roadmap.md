@@ -1,6 +1,7 @@
 # Live market index completion
 
 ## Production catalog hotfix
+- [x] Verify Bun 1.2.15 clean frozen install, isolated Vite/Rollup tooltip bundle, automatic full-app build and 57,921 generated catalog records; Cloudflare main deployment not run here
 - [x] Restore latest durable catalog into Worker and Lovable builds using same-origin generated shards
 - [x] Preserve half-hour checks and source-release timestamps
 - [x] Verify production-like catalog lookup, exact record links and visible images (static files with host-specific fallback blocked)

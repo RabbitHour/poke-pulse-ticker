@@ -1,4 +1,5 @@
 # Project rules
+- Keep bun.lock as the sole Bun lockfile and pin Radix primitive directly so cached Worker installs include the runtime dependency; synchronize npm's lock without upgrading unrelated packages.
 - Preserve the React routes and existing Cloud/provider integrations; the refresh is additive rather than a platform migration.
 - Archive source releases and forecast outcomes in the existing public file ledger; repeated checks never manufacture price history.
 - Use shared forecast eligibility/direction rules for generation and display so pending, stale and late results cannot inflate accuracy.
