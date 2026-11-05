@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), { name: 'deployable-catalog', apply: 'build', async buildStart() { await prepareCatalog(path.resolve(__dirname, 'public/data')); } }, mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react(), { name: 'deployable-catalog', apply: 'build' as const, async buildStart() { await prepareCatalog(path.resolve(__dirname, 'public/data')); } }, mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
