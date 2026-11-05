@@ -21,7 +21,7 @@ export function validHistory(d: any): d is HistoryDoc {
 // Distinct source releases only; repeated half-hour checks never count twice.
 export function observationProgress(history: HistoryDoc | null): Progress {
   const releases = [...new Map((history?.days ?? []).map(d => [d.sourceUpdated, d])).values()].sort((a, b) => a.date.localeCompare(b.date));
-  const first = releases[0]?.date ?? null, last = releases.at(-1)?.date ?? null;
+  const first = releases[0]?.date ?? null, last = releases[releases.length - 1]?.date ?? null;
   let earliestIssue: string | null = null;
   if (first) {
     const need = Math.max(0, MIN_OBSERVATIONS - releases.length);
