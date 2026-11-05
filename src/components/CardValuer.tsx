@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useLiveCards, useLiveCardsQuick, useCardSearch } from "@/hooks/usePokemonTcg";
 import { useObservedProducts } from "@/hooks/useObservedProducts";
 import { totalQuote } from "@/lib/valuation";
+import { Button } from "@/components/ui/button";
 import { CardImage } from "./CardImage";
 
 export default function CardValuer({ id, compact = false }: { id:string; compact?:boolean }) {
@@ -14,6 +15,7 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
   const [quantity, setQuantity] = useState("1");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   useEffect(() => { const t=setTimeout(() => setDebounced(query.trim()),400); return () => clearTimeout(t); },[query]);
+  useEffect(() => { const handler = (event: Event) => { const value = (event as CustomEvent).detail; if(typeof value === "string") {setQuery(value);setSelectedKey(null);} }; window.addEventListener("poke-value-search",handler); return () => window.removeEventListener("poke-value-search",handler); }, []);
   const catalog = useCatalog();
   const live = useLiveCards();
   const quick = useLiveCardsQuick();
@@ -26,12 +28,12 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
       image:c._image, href:c._apiId ? `/card/${encodeURIComponent(c._apiId)}` : undefined,
     }));
     const needle = debounced.toLowerCase();
-    const raw = catalog.data ? catalog.data.entries.filter(e => e.kind === "raw" && e.market != null && e.market > 0 && (!needle || `${e.name} ${e.set} ${e.number}`.toLowerCase().includes(needle))).map(e => ({key:e.id,name:e.name,detail:`${e.set} · #${e.number} · ${e.variant || "variant unspecified"}`,price:e.market!,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackRaw;
+    const raw = catalog.data ? catalog.data.entries.filter(e => e.kind === "raw" && e.market != null && e.market > 0 && (!needle || `${e.name} ${e.set} ${e.number}`.toLowerCase().includes(needle))).map(e => ({key:e.id,name:e.name,detail:`${e.set} · #${e.number} · ${e.variant || "variant unspecified"}`,price:e.market,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackRaw;
     const graded = observed.graded.map(c => ({ key:`graded:${c.name}:${c.set}:${c.number}:${c.grade}`, name:c.name,
       detail:`${c.set} · #${c.number} · ${c.grade}`, price:c.market, image:c._image, href:undefined }));
     const fallbackSealed = observed.sealed.map(c => ({key:`sealed:${c.name}:${c.type}`, name:c.name,
       detail:c.type, price:c.market, image:c.image, href:undefined }));
-    const sealed = catalog.data ? catalog.data.entries.filter(e => e.kind === "sealed" && e.market != null && e.market > 0).map(e => ({key:e.id,name:e.name,detail:e.set,price:e.market!,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackSealed;
+    const sealed = catalog.data ? catalog.data.entries.filter(e => e.kind === "sealed" && e.market != null && e.market > 0).map(e => ({key:e.id,name:e.name,detail:e.set,price:e.market,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackSealed;
     const q=debounced.toLowerCase();
     return (category === "raw" ? raw : category === "graded" ? graded : sealed)
       .filter(c => Number.isFinite(c.price) && c.price > 0 && (!q || `${c.name} ${c.detail}`.toLowerCase().includes(q)))
@@ -52,11 +54,11 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
     </div>
     <div className="text-xs muted" aria-live="polite">{busy ? "Checking available quotes…" : failed ? "The source could not be reached. Previously loaded results may still be shown." : `${rows.length} matching results shown.`} {category === "raw" && catalog.data ? `Source release: ${catalog.data.sourceUpdated}` : category === "graded" && observed.gradedAt ? `Snapshot: ${new Date(observed.gradedAt).toLocaleString()}` : category === "sealed" && observed.sealedAt ? `Source update: ${observed.sealedAt}` : "Raw feed checks every 30 minutes; provider price dates may be older."}</div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-      {rows.map(r => <button type="button" key={r.key} onClick={() => setSelectedKey(r.key)} aria-pressed={selectedKey === r.key}
-        className={`flex gap-3 items-center p-3 rounded-lg border text-left ${selectedKey === r.key ? "bg-green-100 border-green-700 ring-2 ring-green-700" : "bg-white"}`}>
+      {rows.map(r => <Button variant="outline" type="button" key={r.key} onClick={() => setSelectedKey(r.key)} aria-pressed={selectedKey === r.key}
+        className={`h-auto whitespace-normal justify-start gap-3 p-3 text-left ${selectedKey === r.key ? "bg-muted border-primary ring-2 ring-primary" : "bg-card"}`}>
         <CardImage src={r.image} alt={r.name} className="w-16 h-24 shrink-0 object-contain" />
         <span className="min-w-0"><strong className="block text-sm">{r.name}</strong><span className="block text-xs muted">{r.detail}</span><strong className="block text-sm mt-1">${r.price.toFixed(2)}</strong></span>
-      </button>)}
+      </Button>)}
     </div>
     {!busy && !rows.length && <p role="status" className="text-sm">No matching source quote is available. Try a name or set, or another category. No price is guessed.</p>}
     {selected && <div className="valuer-result" aria-live="polite"><h3 className="font-semibold">{selected.name} — reference estimate</h3>

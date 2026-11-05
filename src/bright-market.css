@@ -141,3 +141,30 @@
 @media (max-width: 600px) {
   .opening-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* Preview refresh: compact collector terminal, semantic theme roles. */
+.bright-market {
+ --hero-surface: 165 38% 94%; --foil-surface: 48 86% 92%; --foil-edge: 42 78% 60%;
+ --shadow-foil: 0 3px 12px hsl(var(--foreground) / .12);
+ background: hsl(var(--background));
+}
+.bright-market .market-opening { padding:1rem 0; border:0; border-radius:0; box-shadow:none; background:none; gap:1rem; }
+.bright-market .opening-copy { align-items:flex-start; text-align:left; gap:.5rem; }
+.bright-market .opening-copy h1 { font-size:2rem; letter-spacing:0; }
+.bright-market .opening-kicker {color:hsl(var(--primary));font-size:.8rem;letter-spacing:0;}
+.opening-search {display:flex;align-items:center;gap:.6rem;width:100%;padding:.5rem;border:1px solid hsl(var(--border));background:hsl(var(--card));border-radius:6px;}
+.opening-search input {flex:1;min-width:0;background:hsl(var(--card));color:hsl(var(--foreground));padding:.5rem;outline:none;}
+.bright-market .opening-gallery {grid-template-columns:repeat(6,minmax(0,1fr));gap:.6rem;}
+.bright-market .opening-card {border:1px solid hsl(var(--foil-edge));border-radius:6px;background:hsl(var(--foil-surface));box-shadow:var(--shadow-foil);}
+.bright-market .opening-card img {height:180px;filter:none;}
+.bright-market .terminal-card {border-radius:6px;background:hsl(var(--card));box-shadow:none;}
+.bright-market .market-tape {background:hsl(var(--hero-surface));border-color:hsl(var(--border));}
+.bright-market .bright-valuer {background:hsl(var(--card));color:hsl(var(--foreground));border-color:hsl(var(--border));}
+.bright-market .bright-valuer :is(input,select) {background:hsl(var(--card));color:hsl(var(--foreground));border-color:hsl(var(--border));}
+.bright-market .bright-valuer button {color:hsl(var(--foreground));border-color:hsl(var(--border));}
+.bright-market .bright-valuer .muted {color:hsl(var(--muted-foreground));}
+.bright-market .bright-valuer .valuer-result {background:hsl(var(--muted));border-color:hsl(var(--border));border-radius:6px;}
+.market-ticker-track {animation-duration:120s;}
+.ticker-paused {animation-play-state:paused;}
+.bright-market h2 {letter-spacing:0;}
+@media(max-width:640px){.bright-market .opening-gallery{grid-template-columns:repeat(3,minmax(0,1fr));}.bright-market .opening-card img{height:150px;}.opening-search{flex-wrap:wrap;}.opening-search input{width:calc(100% - 3rem);}.opening-search button{width:100%;}.bright-market .opening-copy h1{font-size:1.75rem;}}

@@ -164,7 +164,7 @@ const IndexDayChart = ({ title, variant, accent, index, isLoading, unit = "usd" 
                 minTickGap={40}
               />
               <YAxis
-                domain={[minVal - padding, maxVal + padding]}
+                domain={[Math.max(0, minVal - padding), maxVal + padding]}
                 tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))", fontFamily: "JetBrains Mono" }}
                 tickLine={false}
                 axisLine={false}
