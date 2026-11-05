@@ -197,7 +197,7 @@ const Index = () => {
         <MarketOpening />
         <CardValuer id="card-valuer" compact />
 
-        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="#portal-preview">Free account & reports</a></nav>
+        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="/account">Free account & reports</a></nav>
 
         {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
         <LiveCardStrip
