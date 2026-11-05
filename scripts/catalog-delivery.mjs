@@ -75,7 +75,7 @@ export async function prepareCatalog(dataDir, fetcher = fetch) {
     for(const url of imagePaths){
       if(!/^\/data\/images\/[a-f0-9]{24}\.(jpg|png|webp)$/.test(url))throw Error('Invalid stored image path');
       const relative=url.slice('/data/'.length),dest=path.join(dataDir,relative);
-      try{await fs.access(dest);continue;}catch{}
+      try{const body=await fs.readFile(dest);if(createHash('sha256').update(body).digest('hex').slice(0,24)===path.basename(url).split('.')[0])continue;}catch{}
       const r=await fetcher(new URL(relative,MARKET_DATA_URL).href,{signal:AbortSignal.timeout(30000)});
       if(!r.ok)throw Error('Stored product photo unavailable');
       const body=Buffer.from(await r.arrayBuffer());if(!body.length||body.length>2_000_000)throw Error('Invalid stored image size');
@@ -97,6 +97,8 @@ export async function prepareCatalog(dataDir, fetcher = fetch) {
     const companion=async file=>{const r=await fetcher(new URL(file,MARKET_DATA_URL).href,{signal:AbortSignal.timeout(30000)});if(!r.ok)throw Error('Ledger unavailable');return r.json();};
     const [ledger,history,sealed]=await Promise.all(['forecasts.json','history/manifest.json','sealed-indexes.json'].map(companion));
     if(!Array.isArray(ledger.forecasts)||!Array.isArray(ledger.outcomes)||!Array.isArray(history.days)||!sealed.categories)throw Error('Invalid durable ledger');
+    let localLedger;try{localLedger=JSON.parse(await fs.readFile(path.join(dataDir,'forecasts.json'),'utf8'));}catch{}
+    if(Date.parse(localLedger?.generatedAt)>Date.parse(ledger.generatedAt))throw Error('Bundled ledger is newer');
     const snapshots=[];
     for(const day of history.days){if(!/^\d{4}-\d{2}-\d{2}\.json$/.test(day.file))throw Error('Invalid snapshot path');const snapshot=await companion('history/'+day.file);if(!snapshot.prices||snapshot.sourceUpdated!==day.sourceUpdated)throw Error('Invalid snapshot');snapshots.push([day.file,snapshot]);}
     await fs.mkdir(path.join(dataDir,'history'),{recursive:true});

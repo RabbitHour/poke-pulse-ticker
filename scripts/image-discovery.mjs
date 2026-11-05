@@ -38,9 +38,12 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
     const key=e.kind==='sealed'?'tcg:'+e.productId:'dex:'+(e.language||'en')+':'+e.cardId+':'+(e.productId||'metadata');
     if(!unique.has(key))unique.set(key,[]);unique.get(key).push(e);
   }
-  const candidates=[...unique.values()].filter(rows => {
+  const pending=[...unique.values()].filter(rows => {
     const last=records[rows[0].id];return !last?.checkedAt || Date.parse(now)-Date.parse(last.checkedAt)>=(last.image?30:1)*86400000;
   }).sort((a,b)=>Number(Boolean(a[0].image))-Number(Boolean(b[0].image)) || (Date.parse(records[a[0].id]?.checkedAt)||0)-(Date.parse(records[b[0].id]?.checkedAt)||0) || a[0].id.localeCompare(b[0].id));
+  // Round-robin the priority queues so a large sealed backlog cannot starve raw art.
+  const queues=['raw','sealed','digital'].map(kind=>pending.filter(rows=>rows[0].kind===kind));
+  const candidates=[];for(let i=0;i<Math.max(...queues.map(q=>q.length));i++)for(const queue of queues)if(queue[i])candidates.push(queue[i]);
   // Bound all network requests, including artwork validation, to this run's budget.
   let requests=0, discovered=0;
   async function request(url){if(requests>=budget)throw Error('Budget exhausted');requests++;const r=await fetcher(url,{signal:AbortSignal.timeout(15000),redirect:'error'});if(!r.ok)throw Error('Provider HTTP '+r.status);return r;}
