@@ -1,5 +1,11 @@
 # Live market index completion
 
+## Ticker artwork, centered engine hero and mobile navigation
+- [ ] Enlarge ticker artwork without changing row height or ordering/rotation controls
+- [ ] Center original pulse mark and search, flanked by exact yesterday raw/graded movers or unavailable states
+- [ ] Audit and mobile-click every hamburger destination, including gated pages; fix broken destinations/anchors
+- [ ] Run focused tests, automatic build and desktop/mobile verification; retain managed Git sync
+
 ## Production image coverage and forecast lifecycle
 - [x] Add bounded exact-ID provider discovery with durable last-good images (80 requests/run, existing half-hour updater)
 - [x] Show image provenance, coverage/missing counts and reduced-motion foil sparkle
