@@ -6,7 +6,7 @@ export default function YesterdayMover({ kind, mover, date, loading }: { kind: '
     <h2 className="text-sm font-bold">Yesterday’s {kind} mover</h2>
     <p className="text-xs text-muted-foreground">{date} · UTC source releases</p>
     {mover ? <>
-      <Link to={'/catalog/' + encodeURIComponent(mover.entry.id)} className="mover-art"><CardImage src={mover.entry.image} alt={mover.entry.name} loading="eager" className="w-full h-full object-contain" /></Link>
+      <Link to={'/catalog/' + encodeURIComponent(mover.entry.id)} className="mover-art"><CardImage highResolution src={mover.entry.image} alt={mover.entry.name} loading="eager" className="w-full h-full object-contain" /></Link>
       {!mover.entry.image && <p className="text-xs text-muted-foreground">Exact record photo unavailable</p>}
       <h3 className="font-bold text-sm">{mover.entry.name}</h3>
       <p className="text-xs text-muted-foreground">{mover.entry.set} · {mover.entry.variant || mover.entry.grade}</p>
