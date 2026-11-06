@@ -4,7 +4,6 @@ import {Search,ArrowRight} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {useLiveCardsQuick} from '@/hooks/usePokemonTcg';
 import {useCatalog} from '@/hooks/useCatalog';
-import {useMarketMovers} from '@/hooks/useMarketIndexes';
 import {rotatingWindow,recordLink} from '@/lib/marketRecords';
 import {CardImage} from './CardImage';
 import {useQuery} from '@tanstack/react-query';
@@ -12,16 +11,15 @@ import {loadYesterdayObservations,selectYesterdayMovers} from '@/lib/yesterdayMo
 import PulseEngineMark from './PulseEngineMark';
 import YesterdayMover from './YesterdayMover';
 export default function MarketOpening(){
- const catalog=useCatalog(),quick=useLiveCardsQuick(),movers=useMarketMovers();const [epoch,setEpoch]=useState(0),[search,setSearch]=useState('');
+ const catalog=useCatalog(),quick=useLiveCardsQuick();const [epoch,setEpoch]=useState(0),[search,setSearch]=useState('');
  const observations=useQuery({queryKey:['yesterday-exact-observations'],queryFn:()=>loadYesterdayObservations(),staleTime:1800000,refetchInterval:1800000,retry:1,placeholderData:prev=>prev});
  const yesterday=selectYesterdayMovers(catalog.data?.entries??[],observations.data??[]);
  useEffect(()=>{const t=setInterval(()=>setEpoch(e=>e+1),1800000);return()=>clearInterval(t);},[]);
- const verified=(movers.data?.singles??[]).filter(m=>Number.isFinite(m.prev)&&Number.isFinite(m.market)&&Number.isFinite(m.change)&&m.prev>0&&Math.abs(m.change)>=3&&m.image);
  const cards=useMemo(()=>{const seen=new Set<string>();const pool=(catalog.data?.entries??[]).filter(e=>e.kind==='raw'&&e.image&&e.market>0).filter(e=>{const key=e.cardId||e.id;if(seen.has(key))return false;seen.add(key);return true;});const foil=pool.filter(e=>/holo|foil/i.test(e.variant||''));return rotatingWindow(foil.length>=6?foil:pool,epoch,6);},[catalog.data,epoch]);
  const fallback=rotatingWindow((quick.data??[]).filter(c=>c._apiId&&c._image&&c.market>0),epoch,6);
  function lookup(e:React.FormEvent){e.preventDefault();window.dispatchEvent(new CustomEvent('poke-value-search',{detail:search}));document.getElementById('card-valuer')?.scrollIntoView({behavior:'smooth'});}
  return <section className="market-opening" aria-labelledby="opening-title"><div className="opening-engine-layout"><YesterdayMover kind="raw" mover={yesterday.raw} date={yesterday.date} loading={observations.isLoading||catalog.isLoading}/><div className="opening-copy"><p className="opening-kicker">Source quotes · Collector terminal</p><PulseEngineMark/><h1 id="opening-title">Poké Pulse Engine</h1><p className="text-muted-foreground">Cards. Graded. Sealed. Find the exact printing.</p><form onSubmit={lookup} className="opening-search"><label className="sr-only" htmlFor="opening-search">Poké Search</label><Search aria-hidden="true" className="w-5 h-5"/><input id="opening-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Card name, set or number"/><Button type="submit">Value lookup <ArrowRight/></Button></form><nav className="flex flex-wrap justify-center gap-3" aria-label="Market shortcuts"><Button variant="outline" asChild><a href="#market-charts">Market charts</a></Button><Button variant="outline" asChild><a href="#forecast-results">Forecast history</a></Button><Button variant="ghost" asChild><Link to="/sets">Browse sets</Link></Button></nav></div><YesterdayMover kind="graded" mover={yesterday.graded} date={yesterday.date} loading={observations.isLoading||catalog.isLoading}/></div>
  <div className="opening-gallery">{cards.length?cards.map(c=><Link className="opening-card" key={c.id} to={recordLink(c)||'/#catalog'}><CardImage src={c.image} alt={c.name} loading="eager" className="w-full aspect-[3/4] object-contain"/><div className="p-2"><strong className="block text-xs line-clamp-2">{c.name}</strong><span className="block text-xs text-muted-foreground">{c.set} · {c.variant}</span><span className="text-sm font-bold">${c.market.toFixed(2)}</span></div></Link>):fallback.map(c=><Link className="opening-card" key={c._apiId} to={'/card/'+encodeURIComponent(c._apiId)}><CardImage src={c._image} alt={c.name} loading="eager" className="w-full aspect-[3/4] object-contain"/><div className="p-2"><strong className="block text-xs line-clamp-2">{c.name}</strong><span className="block text-xs">{c.set}</span><span className="font-bold">${c.market.toFixed(2)}</span></div></Link>)}{!cards.length&&!fallback.length&&<p className="text-sm">Card artwork is loading; no stand-in prices.</p>}</div>
  <p className="text-xs text-muted-foreground">Artwork and quote from the same source record · featured selection rotates every 30 minutes. TCGCSV publishes daily, not continuously.</p>
- {verified.length>0&&Date.now()-Date.parse(movers.data?.generatedAt||'')<36*3600000&&<div><h2 className="font-bold text-lg">Verified source-price movers</h2><div className="flex flex-wrap gap-4">{verified.slice(0,3).map(m=><span key={m.id}>{m.name} · ${m.market.toFixed(2)} · {m.change>0?'+':''}{m.change.toFixed(2)}%</span>)}</div><p className="text-xs">Compared source releases: {movers.data?.sourceUpdated}; not completed sales.</p></div>}</section>;
+ <p className="text-xs text-muted-foreground">Yesterday’s movers rank absolute changes between consecutive UTC daily source releases for exact records, not completed sales.</p></section>;
 }

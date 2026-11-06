@@ -7,6 +7,7 @@ export default function YesterdayMover({ kind, mover, date, loading }: { kind: '
     <p className="text-xs text-muted-foreground">{date} · UTC source releases</p>
     {mover ? <>
       <Link to={'/catalog/' + encodeURIComponent(mover.entry.id)} className="mover-art"><CardImage src={mover.entry.image} alt={mover.entry.name} loading="eager" className="w-full h-full object-contain" /></Link>
+      {!mover.entry.image && <p className="text-xs text-muted-foreground">Exact record photo unavailable</p>}
       <h3 className="font-bold text-sm">{mover.entry.name}</h3>
       <p className="text-xs text-muted-foreground">{mover.entry.set} · {mover.entry.variant || mover.entry.grade}</p>
       <strong className={mover.change > 0 ? 'text-primary' : 'text-destructive'}>{mover.change > 0 ? '+' : ''}{mover.change.toFixed(2)}%</strong>
