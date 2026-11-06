@@ -226,8 +226,24 @@ const Index = () => {
 
         <MarketOverview />
         <SealedCategoryCharts />
-        <ForecastLedger />
+        <section id="market-outlook" className="space-y-3" aria-labelledby="market-outlook-title">
+          <h2 id="market-outlook-title" className="market-section-title">Forecasts and market coverage</h2>
+          <ForecastLedger />
+        <LazySection minHeight="100px">
+          <MarketCapSummary liveRawCards={displayCards} />
+        </LazySection>
+          <details className="terminal-card p-4">
+            <summary className="font-semibold">Daily prediction game</summary>
+            <p className="market-note">Simulated predictions. Recorded forecast outcomes appear above.</p>
+        <LazySection minHeight="200px">
+          <PricePredictionGame cards={displayCards} />
+        </LazySection>
+          </details>
+        </section>
         <CatalogExplorer />
+        <LazySection minHeight="200px">
+          <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
+        </LazySection>
         <PokeHelp />
 
         <LazySection minHeight="280px">
@@ -240,10 +256,10 @@ const Index = () => {
         {/* === LIVE CARD STRIP — MIDDLE: interleaved value + momentum, offset so it shows different cards === */}
         <LazySection minHeight="260px">
           <LiveCardStrip
-            title="📈 MOST ACTIVE CARDS — NAMES + PRICES"
-            subtitle="Available raw-card quotes • prices and source age can vary"
+            title="MORE RAW CARD QUOTES"
+            subtitle="Featured quotes by price. See the movers table for available price changes."
             count={18}
-            mode="mix"
+            mode="value"
             offset={6}
           />
         </LazySection>
@@ -252,7 +268,12 @@ const Index = () => {
 
 
 
-        <h2 className="market-section-title">Understand the market <span>Summaries, not guarantees</span></h2>
+        <section className="space-y-3" aria-labelledby="market-guide-title">
+        <h2 id="market-guide-title" className="market-section-title">Understand the market</h2>
+        <details className="terminal-card p-4" open>
+          <summary className="font-semibold">How to read these numbers</summary>
+          <p className="text-sm mt-2">A source quote is a dated price for an exact printing or product. A graded asking median summarizes listed prices. Compare changes only across matching items and dates. A base-100 index shows change relative to its starting value.</p>
+        </details>
         <LazySection minHeight="200px">
           <AIMarketInsights cards={displayCards} />
         </LazySection>
@@ -268,6 +289,9 @@ const Index = () => {
         <LazySection minHeight="180px">
           <MarketIntelWidget cards={displayCards} />
         </LazySection>
+        </section>
+        <section className="space-y-3" aria-labelledby="market-performance-title">
+          <h2 id="market-performance-title" className="market-section-title">Market performance by era, set and sealed product</h2>
 
         <LazySection minHeight="150px">
           <EraIndexCards cards={displayCards} />
@@ -280,17 +304,12 @@ const Index = () => {
         <LazySection minHeight="220px">
           <SealedBoxHeatmap products={displaySealed} />
         </LazySection>
+        </section>
 
-        <LazySection minHeight="200px">
-          <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
-        </LazySection>
 
         <h2 className="market-section-title">Explore cards & sets <span>Find your next card</span></h2>
         <TrendingCards cards={displayCards} isLoading={isLoading} />
 
-        <LazySection minHeight="100px">
-          <MarketCapSummary liveRawCards={displayCards} />
-        </LazySection>
 
         <LazySection minHeight="70px">
           <MarketUpdateBanner cards={displayCards} />
@@ -300,9 +319,6 @@ const Index = () => {
           <a href="#card-valuer" className="market-action">Open the free card and product valuer ↑</a>
         </div>
 
-        <LazySection minHeight="200px">
-          <PricePredictionGame cards={displayCards} />
-        </LazySection>
 
 
 
