@@ -63,14 +63,11 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
   const maxVal = Math.max(...view.map((p) => p.market), 1);
 
   const getColor = (change: number) => {
-    if (change > 4) return "bg-emerald-500/90 text-white";
-    if (change > 2) return "bg-emerald-500/65 text-white";
-    if (change > 0.5) return "bg-emerald-500/35 text-emerald-100";
-    if (change > 0) return "bg-emerald-500/15 text-emerald-300";
-    if (change > -0.5) return "bg-red-500/15 text-red-300";
-    if (change > -2) return "bg-red-500/35 text-red-200";
-    if (change > -4) return "bg-red-500/65 text-white";
-    return "bg-red-500/90 text-white";
+    if (change > 3) return "bg-emerald-800 text-white";
+    if (change > 0) return "bg-emerald-200 text-emerald-950";
+    if (change === 0) return "bg-slate-200 text-slate-950";
+    if (change > -3) return "bg-rose-200 text-rose-950";
+    return "bg-rose-800 text-white";
   };
 
   const fmt = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}K` : `$${v.toFixed(0)}`;
@@ -128,7 +125,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
 
           {/* Heatmap grid */}
           <div
-            className="p-3 grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-8 gap-1"
+            className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
             role="grid"
             aria-label={`${view.length} sealed products shown`}
           >
@@ -142,15 +139,15 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
                   aria-pressed={isSel}
                   aria-label={`${p.era} ${p.type}, ${fmt(p.market)}, ${p.change >= 0 ? "up" : "down"} ${Math.abs(p.change).toFixed(1)} percent`}
                   className={`rounded-md border border-border/40 p-1.5 flex flex-col items-center justify-center text-center transition-all hover:scale-105 hover:shadow-lg hover:z-10 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-20 ${getColor(p.change)} ${isSel ? "ring-1 ring-primary scale-105" : ""}`}
-                  style={{ minHeight: `${48 + sizeRatio * 32}px` }}
+                  style={{ minHeight: `${100 + sizeRatio * 32}px` }}
                 >
-                  <span className="font-mono text-[6px] sm:text-[7px] font-bold leading-tight truncate w-full opacity-90">
-                    {p.era.length > 13 ? p.era.slice(0, 12) + "…" : p.era}
+                  <span className="font-mono text-sm font-bold leading-snug whitespace-normal w-full">
+                    {p.era}
                   </span>
                   <span className="font-mono text-[8px] sm:text-[9px] font-black">
                     {fmt(p.market)}
                   </span>
-                  <span className="font-mono text-[7px] sm:text-[8px] opacity-80">
+                  <span className="font-mono text-sm font-semibold">
                     {p.change >= 0 ? "+" : ""}{p.change.toFixed(1)}%
                   </span>
                 </button>

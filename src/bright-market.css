@@ -229,3 +229,15 @@
 .bright-market .bright-valuer button[aria-pressed="true"] {background:#d3f5e7;color:#17253d;}
 /* Keep artwork vivid throughout routes using the shared image component. */
 :where(main) :is(h1,h2,h3,p,a,button) {text-shadow:none;}
+
+/* Readable discovery refresh — November 6, 2026. Keep semantic gain/loss colors. */
+.bright-market { --foreground:222 55% 12%; --muted-foreground:218 30% 28%; --primary:158 86% 23%; }
+.bright-market main { color:#101c33; }
+.bright-market main :is(p,li,label,summary) { font-weight:500; }
+.bright-market main :is([class*="text-[6px]"],[class*="text-[7px]"]) {font-size:.9rem;line-height:1.5;}
+.bright-market main img:not([alt=""]) {filter:brightness(1.04) saturate(1.38) contrast(1.09) drop-shadow(0 5px 8px #19395235);}
+.bright-market .marketplace-card a:focus-visible {outline:3px solid #087950;outline-offset:3px;}
+.bright-market .marketplace-card > a:hover img {transform:scale(1.035);}
+.bright-market .marketplace-card img {transition:transform .18s ease;}
+@media(prefers-reduced-motion:reduce){.bright-market .marketplace-card img{transition:none;}}
+@media(prefers-contrast:more){.bright-market main img:not([alt=""]){filter:none;}}

@@ -95,14 +95,11 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
   const maxVal = Math.max(...setPerformance.map((s) => s.totalValue), 1);
 
   const getColor = (change: number) => {
-    if (change > 5) return "bg-emerald-500/90 text-white";
-    if (change > 3) return "bg-emerald-500/70 text-white";
-    if (change > 1) return "bg-emerald-500/40 text-emerald-100";
-    if (change > 0) return "bg-emerald-500/20 text-emerald-300";
-    if (change > -1) return "bg-red-500/20 text-red-300";
-    if (change > -3) return "bg-red-500/40 text-red-200";
-    if (change > -5) return "bg-red-500/70 text-white";
-    return "bg-red-500/90 text-white";
+    if (change > 3) return "bg-emerald-800 text-white";
+    if (change > 0) return "bg-emerald-200 text-emerald-950";
+    if (change === 0) return "bg-slate-200 text-slate-950";
+    if (change > -3) return "bg-rose-200 text-rose-950";
+    return "bg-rose-800 text-white";
   };
 
   const getBorderColor = (change: number) => {
@@ -161,7 +158,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
 
         {/* Heatmap grid */}
         <div
-          className="p-3 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-1"
+          className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
           role="grid"
           aria-label={`${setPerformance.length} sets shown, sized by total market value`}
         >
@@ -175,15 +172,15 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
                 aria-pressed={isSelected}
                 aria-label={`${s.set}, ${s.avgChange >= 0 ? "up" : "down"} ${Math.abs(s.avgChange).toFixed(1)} percent, ${formatValue(s.totalValue)} total value, ${s.count} cards`}
                 className={`rounded-md border ${getBorderColor(s.avgChange)} p-1.5 flex flex-col items-center justify-center text-center transition-all hover:scale-105 hover:shadow-lg hover:z-10 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-20 ${getColor(s.avgChange)} ${isSelected ? "ring-1 ring-primary scale-105" : ""}`}
-                style={{ minHeight: `${44 + sizeRatio * 28}px` }}
+                style={{ minHeight: `${100 + sizeRatio * 28}px` }}
               >
-                <span className="font-mono text-[6px] sm:text-[7px] font-bold leading-tight truncate w-full opacity-90">
-                  {s.set.length > 14 ? s.set.slice(0, 13) + "…" : s.set}
+                <span className="font-mono text-sm font-bold leading-snug whitespace-normal w-full">
+                  {s.set}
                 </span>
                 <span className="font-mono text-[9px] sm:text-[10px] font-black">
                   {s.avgChange >= 0 ? "+" : ""}{s.avgChange.toFixed(1)}%
                 </span>
-                <span className="font-mono text-[6px] opacity-70">
+                <span className="font-mono text-sm font-semibold">
                   {formatValue(s.totalValue)}
                 </span>
               </button>
