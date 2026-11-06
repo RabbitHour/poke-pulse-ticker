@@ -1,5 +1,11 @@
 # Live market index completion
 
+## Ticker artwork, centered engine hero and mobile navigation
+- [x] Enlarge ticker artwork: desktop 56→64px and mobile 48→56px; measured row heights unchanged; A–Z, pause and resumed rotation verified
+- [x] Center original pulse mark and search; Nov 4→5 exact raw mover with disclosed missing photo, graded unavailable (no exact history/photo); raw detail link reads back
+- [x] All 19 hamburger destinations match routes and mobile click tests render actual pages/sign-in gates; no broken routes/anchors; make long menu scrollable
+- [x] 42 frontend tests, automatic build and desktop/mobile search/anchor checks pass; managed Git sync retained, deployment settings unchanged
+
 ## Production image coverage and forecast lifecycle
 - [x] Add bounded exact-ID provider discovery with durable last-good images (80 requests/run, existing half-hour updater)
 - [x] Show image provenance, coverage/missing counts and reduced-motion foil sparkle
