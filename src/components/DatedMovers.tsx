@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useCatalog } from "@/hooks/useCatalog";
@@ -10,6 +10,7 @@ const dollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "U
 
 export default function DatedMovers() {
   const catalog = useCatalog();
+  const [unavailable,setUnavailable] = useState<Set<string>>(()=>new Set());
   const observations = useQuery({
     queryKey: ["yesterday-exact-observations"],
     queryFn: () => loadYesterdayObservations(),
@@ -20,8 +21,8 @@ export default function DatedMovers() {
   });
   const movers = useMemo(() =>
     rankYesterdayMovers(catalog.data?.entries ?? [], observations.data ?? [])
-      .filter(mover => mover.entry.kind === "raw").slice(0, 12),
-  [catalog.data, observations.data]);
+      .filter(mover => mover.entry.kind === "raw" && mover.entry.image && !unavailable.has(mover.entry.image)).slice(0, 12),
+  [catalog.data, observations.data, unavailable]);
   return (
     <section className="terminal-card p-4 space-y-3" aria-labelledby="dated-movers-title">
       <h2 id="dated-movers-title" className="text-lg font-bold">Most Active Raw Cards</h2>
@@ -31,11 +32,11 @@ export default function DatedMovers() {
       ) : (
         <>
           <p className="text-xs text-muted-foreground">Source releases (UTC) <time dateTime={movers[0].from}>{movers[0].from.slice(0, 10)}</time> to <time dateTime={movers[0].to}>{movers[0].to.slice(0, 10)}</time></p>
-          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {movers.map(({ entry, change, previous, price }) => (
               <li key={entry.id}>
-                <Link to={"/catalog/" + encodeURIComponent(entry.id)} className="flex h-full items-center gap-3 rounded-lg border border-border p-2 hover:border-primary">
-                  <CardImage src={entry.image} alt={entry.name} highResolution className="h-24 w-16 shrink-0 object-contain drop-shadow-sm" />
+                <Link to={"/catalog/" + encodeURIComponent(entry.id)} className="flex flex-col h-full items-center gap-3 rounded-lg border border-border p-2 hover:border-primary">
+                  <CardImage src={entry.image} alt={entry.name} highResolution onUnavailable={()=>setUnavailable(prev=>new Set(prev).add(entry.image))} className="h-48 w-32 shrink-0 object-contain" />
                   <div className="min-w-0">
                     <p className="font-semibold">{entry.name}</p>
                     <p className="text-xs text-muted-foreground">{[entry.set, entry.number, entry.variant].filter(Boolean).join(" · ")}</p>

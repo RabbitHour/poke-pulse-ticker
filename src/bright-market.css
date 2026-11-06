@@ -193,3 +193,39 @@
 .mover-unavailable{display:flex;flex-direction:column;justify-content:center;gap:.5rem;flex:1;min-height:140px;max-width:230px;}
 @media(max-width:900px){.opening-engine-layout{grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;}.opening-engine-layout .opening-copy{grid-column:1/-1;grid-row:1;}.yesterday-mover{grid-row:2;}}
 @media(max-width:480px){.opening-engine-layout{grid-template-columns:minmax(0,1fr);}.yesterday-mover{grid-row:auto;}.opening-engine-layout .opening-copy{grid-row:1;}.mover-unavailable{min-height:90px;}.pulse-engine-mark{width:96px;height:96px;}}
+
+/* 2026-11-06 — vivid artwork, readable type and balanced collector layout. */
+.vivid-card-art { filter: saturate(1.24) contrast(1.07) drop-shadow(0 5px 7px #18294230); image-rendering:auto; }
+.bright-market { --muted-foreground:218 28% 29%; }
+.bright-market main { max-width:1600px; }
+.bright-market main > * + * { margin-top:1.5rem; }
+.bright-market :is(p,span,a,button,input,select,summary) { text-shadow:none; }
+.bright-market :is(.text-xs,[class*="text-[8px]"],[class*="text-[9px]"],[class*="text-[10px]"],[class*="text-[11px]"]) { font-size:.9rem;line-height:1.55; }
+.bright-market .text-sm { font-size:1rem;line-height:1.6; }
+.bright-market .terminal-card { border:1px solid #98b7cb;background:linear-gradient(135deg,#fff 55%,#e6faf5);box-shadow:inset 0 2px 0 #fff,0 7px 24px #195b7130; }
+.bright-market .terminal-card h2,.bright-market .market-section-title {font-size:clamp(1.4rem,2vw,1.85rem);font-weight:800;}
+.bright-market .market-opening {padding:1.5rem;border-radius:1.25rem;background:linear-gradient(120deg,#e1fff4,#fff 50%,#eae3ff);border:1px solid #7ccdb3;box-shadow:0 8px 30px #166c6230;}
+.opening-engine-layout { grid-template-columns:minmax(0,1fr) minmax(0,1.8fr) minmax(0,1fr);align-items:stretch;gap:1.5rem; }
+.bright-market .opening-engine-layout .opening-copy {justify-content:center;gap:1.1rem;}
+.bright-market .opening-copy h1 {font-size:clamp(2.4rem,4.1vw,4.8rem);line-height:1.05;font-weight:900;letter-spacing:-.04em;}
+.pulse-engine-mark {width:clamp(140px,13vw,210px);height:auto;}
+.yesterday-mover {border:0;padding:1rem .5rem;gap:.55rem;}
+.yesterday-mover > h2 {min-height:3.8rem;display:flex;align-items:center;justify-content:center;}
+.mover-art {width:100%;max-width:270px;height:360px;margin:0 auto .6rem;flex:none;}
+.yesterday-mover .mover-art img {filter:saturate(1.3) contrast(1.07) drop-shadow(0 8px 10px #344c6a55);}
+.opening-search {box-shadow:0 4px 15px #15624624;border:2px solid #178768;padding:.6rem;}
+.marketplace-card {border:1px solid #a6bccc;border-radius:.8rem;background:linear-gradient(135deg,#fff,#edf8ff 65%,#ddfff0);box-shadow:inset 0 2px 0 #fff,0 5px 14px #234a6328;overflow:hidden;}
+.marketplace-card > a {display:block;padding:.7rem;background:linear-gradient(135deg,#dfecff,#f5e6ff 45%,#c9fff0);}
+.marketplace-card img {max-height:300px;}
+.bright-market .catalog-tile img {height:260px;filter:saturate(1.24) contrast(1.07) drop-shadow(0 5px 7px #18294230);}
+.bright-market .market-action {font-size:.95rem;border-color:#44977c;}
+.movers-panel {height:100%;}
+.bright-market .collector-tools {border-top:3px solid #258f74;padding-top:1.5rem;}
+@media(max-width:1000px){.opening-engine-layout{grid-template-columns:repeat(2,minmax(0,1fr));}.opening-engine-layout .opening-copy{grid-column:1/-1;grid-row:1;}.mover-art{height:300px;}.yesterday-mover{grid-row:2;}}
+@media(max-width:600px){.bright-market .market-opening{padding:1rem .6rem;}.opening-engine-layout{gap:.75rem;}.yesterday-mover{padding:.5rem 0;}.yesterday-mover > h2{font-size:1.05rem;min-height:3.4rem;}.mover-art{height:220px;}.bright-market .opening-copy h1{font-size:2.5rem;}.bright-market .catalog-tile img{height:200px;}.movers-panel .w-24{width:4rem;}.movers-panel .h-36{height:6rem;}}
+@media(prefers-contrast:more){.vivid-card-art{filter:none;}.bright-market .terminal-card{background:#fff;border:2px solid #17253d;}}
+.bright-market .bright-valuer button[type="submit"] {color:#fff;background:#08794f;}
+.bright-market .bright-valuer button[aria-pressed]:hover {background:#e1f8ef;color:#17253d;}
+.bright-market .bright-valuer button[aria-pressed="true"] {background:#d3f5e7;color:#17253d;}
+/* Keep artwork vivid throughout routes using the shared image component. */
+:where(main) :is(h1,h2,h3,p,a,button) {text-shadow:none;}

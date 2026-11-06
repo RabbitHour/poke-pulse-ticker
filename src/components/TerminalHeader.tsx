@@ -129,11 +129,11 @@ const TerminalHeader = () => {
         className="sticky top-0 z-50 border-b border-emerald-950 bg-terminal-header [--primary:145_65%_84%] [--primary-foreground:154_74%_13%] [--foreground:142_45%_96%] [--muted-foreground:145_34%_82%] [--border:150_35%_37%]"
         style={{ boxShadow: "var(--shadow-header)", backgroundColor: "#103d2c" }}
       >
-        <div className="flex items-center justify-between px-3 py-2 sm:px-5 sm:py-2.5 lg:px-5 xl:px-8 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between px-3 py-2 sm:px-5 sm:py-2.5 lg:px-5 xl:px-8 max-w-[1600px] mx-auto">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Button variant="ghost" size="icon"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="xl:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+              className="2xl:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
               aria-label="Toggle menu"
               aria-expanded={menuOpen}
               aria-controls="terminal-mobile-menu"
@@ -148,20 +148,20 @@ const TerminalHeader = () => {
               <div className="flex flex-col leading-none select-none">
                 <span
                   className="font-display font-black text-[13px] sm:text-[15px] tracking-tight text-foreground transition-all duration-300 group-hover:brightness-125"
-                  style={{ textShadow: "0 0 8px hsl(210 25% 97% / 0.5)" }}
+
                 >
                   Poke-Pulse-
                 </span>
                 <span
                   className="font-display font-extrabold text-[11px] sm:text-[13px] tracking-[0.06em] text-primary uppercase"
-                  style={{ textShadow: "0 0 10px hsl(158 72% 46% / 0.4)" }}
+
                 >
                   Engine™
                 </span>
               </div>
             </div>
 
-            <nav className="hidden xl:flex items-center gap-0.5 ml-3 lg:ml-4">
+            <nav className="hidden 2xl:flex items-center gap-0.5 ml-3 lg:ml-4">
               {primaryNav.map((item) => (
                 <button
                   key={item.path}
@@ -234,7 +234,7 @@ const TerminalHeader = () => {
               </span>
             )}
 
-            <div className="hidden lg:block xl:hidden font-mono text-[9px] text-primary whitespace-nowrap">
+            <div className="hidden lg:block 2xl:hidden font-mono text-[9px] text-primary whitespace-nowrap">
               {easternTime.compact}
             </div>
             <div className="hidden xl:block font-mono text-[9px] 2xl:text-[10px] text-primary whitespace-nowrap">
@@ -267,7 +267,7 @@ const TerminalHeader = () => {
         </div>
 
         {menuOpen && (
-          <div id="terminal-mobile-menu" className="xl:hidden max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain border-t border-border bg-terminal-header animate-in slide-in-from-top-2 duration-200">
+          <div id="terminal-mobile-menu" className="2xl:hidden max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain border-t border-border bg-terminal-header animate-in slide-in-from-top-2 duration-200">
             <nav aria-label="Mobile terminal navigation" className="flex flex-col py-2">
               {primaryNav.map((item) => {
                 const Icon = item.icon;
@@ -332,7 +332,7 @@ const TerminalHeader = () => {
 
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm xl:hidden"
+          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm 2xl:hidden"
           onClick={() => setMenuOpen(false)}
         />
       )}

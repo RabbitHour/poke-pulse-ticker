@@ -1,3 +1,5 @@
+import CardExamples from "@/components/CardExamples";
+import MarketComparison from "@/components/MarketComparison";
 import PokeHelp from "@/components/PokeHelp";
 import DatedMovers from "@/components/DatedMovers";
 import ForecastLedger from "@/components/ForecastLedger";
@@ -196,63 +198,24 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
         <MarketOpening />
+        <EbayLiveDeals />
         <CardValuer id="card-valuer" compact />
-
-        <nav aria-label="Market page shortcuts" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="#poke-help">Ask Poke</a><a className="market-action" href="/account">Free account & reports</a></nav>
-
-        {/* === LIVE CARD STRIP — TOP: 18 highest-value live cards with names + prices === */}
-        <LiveCardStrip
-          title="FEATURED RAW CARDS"
-          subtitle="Available source quotes • feed checked every 30 minutes"
-          count={18}
-          mode="value"
-        />
-
-        {/* === PULSE ENGINE WALLET — PRO USERS ONLY === */}
-        <div className="market-note">Explore cards and market observations below. Simulated trading is available separately in the navigation.</div>
-
-        {/* === EBAY LIVE DEALS — MOVED UP for buy intent === */}
-        <LazySection minHeight="200px">
-          <EbayLiveDeals />
-        </LazySection>
-
-        {/* === MARKET PULSE + NOTABLE SALES === */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5">
-          <div className="terminal-card p-4"><h2 className="font-bold text-lg">Featured card feed</h2><p className="text-sm text-muted-foreground mt-2">{displayCards.length.toLocaleString()} featured source records loaded. This showcase is a subset; the full indexed catalog is above. Raw quotes refresh every 30 minutes. Price movements are source-derived momentum, not verified transaction volume.</p><a href="#card-valuer" className="market-action mt-3">Value a card</a></div>
-          <RecentNotableSales cards={displayCards} />
-        </div>
 
         {/* === SELL ON EBAY (affiliate, live TCG pricing) === */}
         <SellOnEbaySection />
 
         <MarketOverview />
-        <SealedCategoryCharts />
-        <section id="market-outlook" className="space-y-3" aria-labelledby="market-outlook-title">
-          <h2 id="market-outlook-title" className="market-section-title">Forecasts and market coverage</h2>
-          <ForecastLedger />
-        <LazySection minHeight="100px">
-          <MarketCapSummary liveRawCards={displayCards} />
-        </LazySection>
-          <details className="terminal-card p-4">
-            <summary className="font-semibold">Daily prediction game</summary>
-            <p className="market-note">Simulated predictions. Recorded forecast outcomes appear above.</p>
-        <LazySection minHeight="200px">
-          <PricePredictionGame cards={displayCards} />
-        </LazySection>
-          </details>
-        </section>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TopMoversTable cards={displayCards} title="Top movers — Raw cards" isLoading={isLoading} />
+          <TopMoversTable cards={displayGraded} title="Top movers — Graded cards" isLoading={isLoading} />
+        </div>
+        <MarketCapSummary liveRawCards={displayCards} />
+        <ForecastLedger />
         <CatalogExplorer />
         <LazySection minHeight="200px">
           <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
         </LazySection>
         <PokeHelp />
-
-        <LazySection minHeight="280px">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
-            <TopMoversTable cards={displayCards} title="Top Movers — Raw Cards" isLoading={isLoading} />
-            <TopMoversTable cards={displayGraded} title="Graded asking-price observations" isLoading={isLoading} />
-          </div>
-        </LazySection>
 
         <DatedMovers />
 
@@ -260,18 +223,18 @@ const Index = () => {
 
 
 
-        <section className="space-y-3" aria-labelledby="market-guide-title">
-        <h2 id="market-guide-title" className="market-section-title">Understand the market</h2>
+        <section className="terminal-card p-5 space-y-5" aria-labelledby="market-guide-title">
+        <h2 id="market-guide-title" className="market-section-title">Understand the market &amp; market intelligence</h2>
         <details className="terminal-card p-4" open>
           <summary className="font-semibold">How to read these numbers</summary>
-          <p className="text-sm mt-2">A source quote is a dated price for an exact printing or product. A graded asking median summarizes listed prices. Compare changes only across matching items and dates. A base-100 index shows change relative to its starting value.</p>
+          <CardExamples cards={displayCards} /><p className="text-sm mt-2">Start with the exact set, card number, variant and condition. A higher asking price does not mean a completed sale. Use the source date to check freshness. A source quote is a dated price for an exact printing or product. A graded asking median summarizes listed prices. Compare changes only across matching items and dates. A base-100 index shows change relative to its starting value.</p>
         </details>
         <LazySection minHeight="200px">
           <AIMarketInsights cards={displayCards} />
         </LazySection>
 
         <LazySection minHeight="180px">
-          <section className="terminal-card p-4"><h2>Compare with other markets</h2><p className="text-muted-foreground text-sm">S&amp;P 500, Nasdaq, gold and Bitcoin comparisons need aligned historical observations. Verified comparisons are not connected yet.</p></section>
+          <MarketComparison />
         </LazySection>
 
         <LazySection minHeight="150px">
@@ -282,11 +245,12 @@ const Index = () => {
           <MarketIntelWidget cards={displayCards} />
         </LazySection>
         </section>
-        <section className="space-y-3" aria-labelledby="market-performance-title">
+        <section className="terminal-card p-5 space-y-5" aria-labelledby="market-performance-title">
           <h2 id="market-performance-title" className="market-section-title">Market performance by era, set and sealed product</h2>
 
         <LazySection minHeight="150px">
-          <EraIndexCards cards={displayCards} />
+          <SealedCategoryCharts />
+        <EraIndexCards cards={displayCards} />
         </LazySection>
 
         <LazySection minHeight="200px">
@@ -303,6 +267,7 @@ const Index = () => {
         <TrendingCards cards={displayCards} isLoading={isLoading} />
 
 
+        <section className="collector-tools space-y-5"><TrustSignals /><p className="text-sm">Review the monthly update, value an exact printing, explore grading scenarios and manage your collection. Research previews use modeled estimates.</p>
         <LazySection minHeight="70px">
           <MarketUpdateBanner cards={displayCards} />
         </LazySection>
@@ -314,51 +279,21 @@ const Index = () => {
 
 
 
-        <LazySection minHeight="120px">
-          <div className="terminal-card p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h2 className="font-mono text-sm font-bold text-foreground flex items-center gap-2">
-                  🃏 Poké Ripz™
-                </h2>
-                <p className="font-mono text-[10px] text-muted-foreground mt-0.5">
-                  Digital pack ripping — watch, bet, and rip across every era. Buy in with PokéCoins.
-                </p>
-              </div>
-              <a
-                href="/ripz"
-                className="font-mono text-xs font-semibold bg-primary text-primary-foreground rounded px-4 py-1.5 hover:opacity-90"
-              >
-                RIP NOW →
-              </a>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {["🏆 Vintage", "🔴 EX", "💠 DP/Plat", "⚫ BW/XY", "☀️ S&M/SwSh", "🔮 Modern"].map((era) => (
-                <div key={era} className="terminal-card p-2 text-center">
-                  <p className="text-lg">{era.split(" ")[0]}</p>
-                  <p className="font-mono text-[8px] text-muted-foreground">
-                    {era.split(" ").slice(1).join(" ")}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </LazySection>
-
         {/* === GRADING ROI CALCULATOR — ABOVE GAMES === */}
         <LazySection minHeight="210px">
-          <details className="terminal-card p-4"><summary className="font-bold">Grading scenario calculator — modeled estimates</summary><p className="market-note">This tool uses assumed grade premiums and example service costs. Verify current grading fees directly; the output is not a market quote.</p><details className="terminal-card p-4"><summary className="font-bold">Grading scenario calculator — modeled estimates</summary><p className="market-note">This tool uses assumed grade premiums and example service costs. Verify current grading fees directly; the output is not a market quote.</p><GradingROICalculator cards={displayCards} /></details></details>
+          <details className="terminal-card p-4"><summary className="font-bold">Grading scenario calculator — modeled estimates</summary><p className="market-note">This tool uses assumed grade premiums and example service costs. Verify current grading fees directly; the output is not a market quote.</p><GradingROICalculator cards={displayCards} /></details>
         </LazySection>
 
         <section id="poke-race" className="scroll-mt-20"><p className="market-note">Simulated entertainment — virtual coins, modeled movement, no real trading.</p><PokeRaceSection /></section>
         <GamePromo />
 
-        <LazySection minHeight="70px">
-          <TrustSignals />
+
+
+
+
+        <LazySection minHeight="200px">
+          <div className="terminal-card p-4"><h3>Collector portfolios</h3><p className="text-sm text-muted-foreground">Public verified performance rankings are not connected yet.</p></div>
         </LazySection>
-
-
-
         <details className="terminal-card research-previews p-4"><summary className="font-bold cursor-pointer">Research & simulator previews — experimental estimates</summary><p className="market-note">These older tools include modeled signals and simulated data. They are not verified sale histories, investment predictions, or measured returns.</p>
         <LazySection minHeight="280px">
           <ProGate feature="Historical price charts" blur>
@@ -439,8 +374,38 @@ const Index = () => {
           </ProGate>
         </LazySection>
 
-        <LazySection minHeight="200px">
-          <div className="terminal-card p-4"><h3>Collector portfolios</h3><p className="text-sm text-muted-foreground">Public verified performance rankings are not connected yet.</p></div>
+
+
+        </section>
+        <LazySection minHeight="120px">
+          <div className="terminal-card p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="font-mono text-sm font-bold text-foreground flex items-center gap-2">
+                  🃏 Poké Ripz™
+                </h2>
+                <p className="font-mono text-[10px] text-muted-foreground mt-0.5">
+                  Digital pack ripping — watch, bet, and rip across every era. Buy in with PokéCoins.
+                </p>
+              </div>
+              <a
+                href="/ripz"
+                className="font-mono text-xs font-semibold bg-primary text-primary-foreground rounded px-4 py-1.5 hover:opacity-90"
+              >
+                RIP NOW →
+              </a>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {["🏆 Vintage", "🔴 EX", "💠 DP/Plat", "⚫ BW/XY", "☀️ S&M/SwSh", "🔮 Modern"].map((era) => (
+                <div key={era} className="terminal-card p-2 text-center">
+                  <p className="text-lg">{era.split(" ")[0]}</p>
+                  <p className="font-mono text-[8px] text-muted-foreground">
+                    {era.split(" ").slice(1).join(" ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </LazySection>
 
         <LazySection minHeight="200px">

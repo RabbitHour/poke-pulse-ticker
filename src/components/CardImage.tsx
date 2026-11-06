@@ -19,7 +19,7 @@ function safeSource(value?: string | null): string {
   }
 }
 
-export function CardImage({ src, alt, style, highResolution, ...props }: Props) {
+export function CardImage({ src, alt, style, highResolution = true, ...props }: Props) {
   const source = safeSource(src);
   const enhanced = highResolution && /^https:\/\/assets\.tcgdex\.net\/[^?]+\/low\.(?:webp|png|jpg)$/.test(source)
     ? source.replace(/\/low\.(?:webp|png|jpg)$/, "/high.webp") : source;
@@ -38,7 +38,7 @@ function ImageAttempt({ source, enhanced, alt, style, onUnavailable, ...props }:
       </span>
     );
   }
-  return <img {...props} src={activeSource} alt={alt} style={style}
+  return <img {...props} className={`vivid-card-art ${props.className ?? ""}`} src={activeSource} alt={alt} style={style}
     loading={props.loading ?? "lazy"} decoding="async" onError={() => {
       if (activeSource !== source) setActiveSource(source);
       else {

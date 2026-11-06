@@ -53,7 +53,7 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
       <label className="text-sm">Category<select value={category} onChange={e => changeCategory(e.target.value)}><option value="raw">Raw cards</option><option value="graded">Graded cards</option><option value="sealed">Sealed products</option></select></label>
       <label className="text-sm">Quantity<input type="number" min={1} max={999} step={1} value={quantity} onChange={e => setQuantity(e.target.value)} /></label>
     </div>
-    <Button type="submit" className="mt-3">Search values</Button>
+    <div className="flex flex-wrap items-center gap-3 mt-4"><Button type="submit">Search values</Button><nav aria-label="Free collector tools" className="flex flex-wrap gap-2"><a className="market-action" href="#market-charts">Free market charts</a><a className="market-action" href="#card-valuer">Free card valuer</a><a className="market-action" href="/account">Free account &amp; report</a><a className="market-action" href="#poke-help">Ask Poke</a></nav></div>
     </form>
     {debounced && <div className="text-xs muted" aria-live="polite">{busy ? "Checking available quotes…" : failed ? "The source could not be reached. Previously loaded results may still be shown." : `${rows.length} matching results shown.`} {category === "raw" && catalog.data ? `Source release: ${catalog.data.sourceUpdated}` : category === "graded" && observed.gradedAt ? `Snapshot: ${new Date(observed.gradedAt).toLocaleString()}` : category === "sealed" && observed.sealedAt ? `Source update: ${observed.sealedAt}` : "Raw feed checks every 30 minutes; provider price dates may be older."}</div>}
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
