@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLiveCards, useLiveCardsQuick, useCardSearch } from "@/hooks/usePokemonTcg";
 import { useObservedProducts } from "@/hooks/useObservedProducts";
+import { matchesValueQuery } from "@/lib/valueSearch";
 import { totalQuote } from "@/lib/valuation";
 import { Button } from "@/components/ui/button";
 import { CardImage } from "./CardImage";
@@ -27,16 +28,14 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
       detail:`${c.set} · #${c.number} · ${c._variant || "variant unspecified"}`, price:c.market,
       image:c._image, href:c._apiId ? `/card/${encodeURIComponent(c._apiId)}` : undefined,
     }));
-    const needle = debounced.toLowerCase();
-    const raw = catalog.data ? catalog.data.entries.filter(e => e.kind === "raw" && e.market != null && e.market > 0 && (!needle || `${e.name} ${e.set} ${e.number}`.toLowerCase().includes(needle))).map(e => ({key:e.id,name:e.name,detail:`${e.set} · #${e.number} · ${e.variant || "variant unspecified"}`,price:e.market,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackRaw;
+    const raw = catalog.data ? catalog.data.entries.filter(e => e.kind === "raw" && e.market != null && e.market > 0).map(e => ({key:e.id,name:e.name,detail:`${e.set} · #${e.number} · ${e.variant || "variant unspecified"}`,price:e.market,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackRaw;
     const graded = observed.graded.map(c => ({ key:`graded:${c.name}:${c.set}:${c.number}:${c.grade}`, name:c.name,
       detail:`${c.set} · #${c.number} · ${c.grade}`, price:c.market, image:c._image, href:undefined }));
     const fallbackSealed = observed.sealed.map(c => ({key:`sealed:${c.name}:${c.type}`, name:c.name,
       detail:c.type, price:c.market, image:c.image, href:undefined }));
     const sealed = catalog.data ? catalog.data.entries.filter(e => e.kind === "sealed" && e.market != null && e.market > 0).map(e => ({key:e.id,name:e.name,detail:e.set,price:e.market,image:e.image,href:"/catalog/"+encodeURIComponent(e.id)})) : fallbackSealed;
-    const q=debounced.toLowerCase();
     return (category === "raw" ? raw : category === "graded" ? graded : sealed)
-      .filter(c => Number.isFinite(c.price) && c.price > 0 && (!q || `${c.name} ${c.detail}`.toLowerCase().includes(q)))
+      .filter(c => Number.isFinite(c.price) && c.price > 0 && matchesValueQuery(debounced,c.name,c.detail.split(" · ")[0],c.detail))
       .slice(0,compact ? 6 : 12);
   },[category,debounced,search.data,live.data,quick.data,observed.graded,observed.sealed,compact,catalog.data]);
   const selected = rows.find(r => r.key === selectedKey);
@@ -47,11 +46,14 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
   return <section id={id} aria-labelledby={`${id}-title`} className="terminal-card bright-valuer p-4 sm:p-5 scroll-mt-20 space-y-3">
     <div className="flex items-center justify-between gap-3 flex-wrap"><h2 id={`${id}-title`} className="font-bold text-xl">Check your card or product value</h2><span className="text-xs font-semibold">FREE LOOKUP · USD</span></div>
     <p className="text-sm muted">Choose an exact result. Raw quotes depend on printing and condition; graded quotes are asking-price medians, not authenticated completed sales.</p>
+    <form onSubmit={event => { event.preventDefault(); setDebounced(query.trim()); setSelectedKey(null); }}>
     <div className="grid sm:grid-cols-[1fr_170px_100px] gap-3">
       <label className="text-sm">Card, set or number<input value={query} maxLength={100} onChange={e => {setQuery(e.target.value);setSelectedKey(null);}} placeholder="Try Charizard, 151, or a card number" /></label>
       <label className="text-sm">Category<select value={category} onChange={e => changeCategory(e.target.value)}><option value="raw">Raw cards</option><option value="graded">Graded cards</option><option value="sealed">Sealed products</option></select></label>
       <label className="text-sm">Quantity<input type="number" min={1} max={999} step={1} value={quantity} onChange={e => setQuantity(e.target.value)} /></label>
     </div>
+    <Button type="submit" className="mt-3">Search values</Button>
+    </form>
     <div className="text-xs muted" aria-live="polite">{busy ? "Checking available quotes…" : failed ? "The source could not be reached. Previously loaded results may still be shown." : `${rows.length} matching results shown.`} {category === "raw" && catalog.data ? `Source release: ${catalog.data.sourceUpdated}` : category === "graded" && observed.gradedAt ? `Snapshot: ${new Date(observed.gradedAt).toLocaleString()}` : category === "sealed" && observed.sealedAt ? `Source update: ${observed.sealedAt}` : "Raw feed checks every 30 minutes; provider price dates may be older."}</div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
       {rows.map(r => <Button variant="outline" type="button" key={r.key} onClick={() => setSelectedKey(r.key)} aria-pressed={selectedKey === r.key}
