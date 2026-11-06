@@ -26,6 +26,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import AccessibilityToggle from "@/components/AccessibilityToggle";
+import { Button } from '@/components/ui/button';
 
 const primaryNav = [
   { path: "/", label: "Terminal", icon: LayoutDashboard },
@@ -130,13 +131,15 @@ const TerminalHeader = () => {
       >
         <div className="flex items-center justify-between px-3 py-2 sm:px-5 sm:py-2.5 lg:px-5 xl:px-8 max-w-7xl mx-auto">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <button
+            <Button variant="ghost" size="icon"
               onClick={() => setMenuOpen(!menuOpen)}
               className="xl:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
               aria-label="Toggle menu"
+              aria-expanded={menuOpen}
+              aria-controls="terminal-mobile-menu"
             >
               {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
+            </Button>
 
             <div
               className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
@@ -264,8 +267,8 @@ const TerminalHeader = () => {
         </div>
 
         {menuOpen && (
-          <div className="xl:hidden border-t border-border bg-terminal-header animate-in slide-in-from-top-2 duration-200">
-            <nav className="flex flex-col py-2">
+          <div id="terminal-mobile-menu" className="xl:hidden max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain border-t border-border bg-terminal-header animate-in slide-in-from-top-2 duration-200">
+            <nav aria-label="Mobile terminal navigation" className="flex flex-col py-2">
               {primaryNav.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.path;
