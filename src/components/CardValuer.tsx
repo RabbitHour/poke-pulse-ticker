@@ -23,6 +23,7 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
   const search = useCardSearch(category === "raw" ? debounced : "");
   const observed = useObservedProducts(live.data);
   const rows = useMemo(() => {
+    if (!debounced) return [];
     const fallbackRaw = (debounced.length >= 2 ? search.data ?? [] : (live.data?.length ? live.data : quick.data) ?? []).map(c => ({
       key:`raw:${c._apiId || `${c.name}:${c.set}:${c.number}`}:${c._variant ?? ""}`, name:c.name,
       detail:`${c.set} · #${c.number} · ${c._variant || "variant unspecified"}`, price:c.market,
@@ -54,7 +55,7 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
     </div>
     <Button type="submit" className="mt-3">Search values</Button>
     </form>
-    <div className="text-xs muted" aria-live="polite">{busy ? "Checking available quotes…" : failed ? "The source could not be reached. Previously loaded results may still be shown." : `${rows.length} matching results shown.`} {category === "raw" && catalog.data ? `Source release: ${catalog.data.sourceUpdated}` : category === "graded" && observed.gradedAt ? `Snapshot: ${new Date(observed.gradedAt).toLocaleString()}` : category === "sealed" && observed.sealedAt ? `Source update: ${observed.sealedAt}` : "Raw feed checks every 30 minutes; provider price dates may be older."}</div>
+    {debounced && <div className="text-xs muted" aria-live="polite">{busy ? "Checking available quotes…" : failed ? "The source could not be reached. Previously loaded results may still be shown." : `${rows.length} matching results shown.`} {category === "raw" && catalog.data ? `Source release: ${catalog.data.sourceUpdated}` : category === "graded" && observed.gradedAt ? `Snapshot: ${new Date(observed.gradedAt).toLocaleString()}` : category === "sealed" && observed.sealedAt ? `Source update: ${observed.sealedAt}` : "Raw feed checks every 30 minutes; provider price dates may be older."}</div>}
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
       {rows.map(r => <Button variant="outline" type="button" key={r.key} onClick={() => setSelectedKey(r.key)} aria-pressed={selectedKey === r.key}
         className={`h-auto whitespace-normal justify-start gap-3 p-3 text-left ${selectedKey === r.key ? "bg-muted border-primary ring-2 ring-primary" : "bg-card"}`}>
@@ -62,12 +63,11 @@ export default function CardValuer({ id, compact = false }: { id:string; compact
         <span className="min-w-0"><strong className="block text-sm">{r.name}</strong><span className="block text-xs muted">{r.detail}</span><strong className="block text-sm mt-1">${r.price.toFixed(2)}</strong></span>
       </Button>)}
     </div>
-    {!busy && !rows.length && <p role="status" className="text-sm">No matching source quote is available. Try a name or set, or another category. No price is guessed.</p>}
+    {debounced && !busy && !rows.length && <p role="status" className="text-sm">No matching source quote is available. Try a name or set, or another category. No price is guessed.</p>}
     {selected && <div className="valuer-result" aria-live="polite"><h3 className="font-semibold">{selected.name} — reference estimate</h3>
       <p className="text-3xl font-bold py-2">{total === null ? "Enter a whole quantity from 1 to 999" : `$${total.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`}</p>
       <p className="text-xs muted">{category === "graded" ? "Active listing median; the picture may show raw card artwork, not a slab." : "Available feed quote; this is not an offer to buy or a guaranteed sale value."} Fees, shipping and taxes are excluded.</p>
       <PriceHistory recordId={selected.key} current={selected.price} />
       {selected.href && <Link className="market-action mt-2" to={selected.href}>Open card details</Link>}</div>}
-    <div className="flex flex-wrap gap-3"><Link to="/sets" className="market-action">Browse sets</Link><a href="#market-charts" className="market-action">View market charts</a><a href="#poke-help" className="market-action">Ask Poke</a></div>
   </section>;
 }

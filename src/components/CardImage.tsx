@@ -4,6 +4,7 @@ type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "alt" | "onError"
   src?: string | null;
   alt: string;
   highResolution?: boolean;
+  onUnavailable?: () => void;
 };
 
 // Local paths and HTTPS images only. Identity matching belongs in the data layer.
@@ -26,7 +27,7 @@ export function CardImage({ src, alt, style, highResolution, ...props }: Props) 
   return <ImageAttempt key={enhanced} source={source} enhanced={enhanced} alt={alt} style={style} {...props} />;
 }
 
-function ImageAttempt({ source, enhanced, alt, style, ...props }: Omit<Props, "src"> & { source: string; enhanced: string }) {
+function ImageAttempt({ source, enhanced, alt, style, onUnavailable, ...props }: Omit<Props, "src"> & { source: string; enhanced: string }) {
   const [activeSource, setActiveSource] = useState(enhanced);
   const failed = !activeSource;
   if (!source || failed) {
@@ -38,5 +39,11 @@ function ImageAttempt({ source, enhanced, alt, style, ...props }: Omit<Props, "s
     );
   }
   return <img {...props} src={activeSource} alt={alt} style={style}
-    loading={props.loading ?? "lazy"} decoding="async" onError={() => setActiveSource(activeSource !== source ? source : "")} />;
+    loading={props.loading ?? "lazy"} decoding="async" onError={() => {
+      if (activeSource !== source) setActiveSource(source);
+      else {
+        setActiveSource("");
+        onUnavailable?.();
+      }
+    }} />;
 }
