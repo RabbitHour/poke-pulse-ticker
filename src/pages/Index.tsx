@@ -1,4 +1,5 @@
 import PokeHelp from "@/components/PokeHelp";
+import DatedMovers from "@/components/DatedMovers";
 import ForecastLedger from "@/components/ForecastLedger";
 import SealedCategoryCharts from "@/components/SealedCategoryCharts";
 import MarketOpening from "@/components/MarketOpening";
@@ -253,16 +254,7 @@ const Index = () => {
           </div>
         </LazySection>
 
-        {/* === LIVE CARD STRIP — MIDDLE: interleaved value + momentum, offset so it shows different cards === */}
-        <LazySection minHeight="260px">
-          <LiveCardStrip
-            title="MORE RAW CARD QUOTES"
-            subtitle="Featured quotes by price. See the movers table for available price changes."
-            count={18}
-            mode="value"
-            offset={6}
-          />
-        </LazySection>
+        <DatedMovers />
 
 
 
