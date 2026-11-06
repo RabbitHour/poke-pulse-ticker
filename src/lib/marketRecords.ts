@@ -1,4 +1,15 @@
 import type { CatalogEntry } from '@/hooks/useCatalog';
+import { catalogSymbol } from './catalogSymbols';
+
+/** Order the complete category before slicing; never mutate cached source records. */
+export function sortTickerRecords(pool: CatalogEntry[]): CatalogEntry[] {
+  return pool.map(record => ({ record, symbol: catalogSymbol(record) }))
+    .sort((a, b) => a.symbol.localeCompare(b.symbol, 'en')
+      || a.record.name.localeCompare(b.record.name, 'en')
+      || (a.record.id < b.record.id ? -1 : a.record.id > b.record.id ? 1 : 0))
+    .map(({ record }) => record);
+}
+
 export function rotatingWindow<T>(pool: T[], page: number, size: number): T[] {
   if (!pool.length) return [];
   const start = (page * size) % pool.length;
