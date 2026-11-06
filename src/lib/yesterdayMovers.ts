@@ -16,15 +16,14 @@ export function validObservation(value: unknown): value is QuoteObservation {
     && Object.values(d.prices).every(p => typeof p === 'number' && Number.isFinite(p) && p > 0);
 }
 
-/** Yesterday means UTC source-release day, not today's check time. Never use index baskets. */
-export function selectYesterdayMovers(entries: CatalogEntry[], observations: QuoteObservation[], now = Date.now()): YesterdayMovers {
+export function rankYesterdayMovers(entries: CatalogEntry[], observations: QuoteObservation[], now = Date.now()): YesterdayMover[] {
   const date = day(now - DAY), prior = day(now - 2 * DAY);
   const valid = observations.filter(o => validObservation(o) && Date.parse(o.observedAt) <= now);
   const release = (date: string) => valid.filter(o => day(Date.parse(o.sourceUpdated)) === date)
     .sort((a, b) => Date.parse(b.sourceUpdated) - Date.parse(a.sourceUpdated))[0];
   const before = release(prior), after = release(date);
-  const result: YesterdayMovers = { date, raw: null, graded: null };
-  if (!before || !after || before.sourceUpdated === after.sourceUpdated) return result;
+  const movers: YesterdayMover[] = [];
+  if (!before || !after || before.sourceUpdated === after.sourceUpdated) return movers;
   for (const entry of entries) {
     if (entry.kind !== 'raw' && entry.kind !== 'graded') continue;
     if (entry.id.startsWith('fallback:') || entry.id.startsWith('set:')) continue;
@@ -34,11 +33,18 @@ export function selectYesterdayMovers(entries: CatalogEntry[], observations: Quo
     if (!(previous > 0) || !(price > 0) || !Number.isFinite(previous) || !Number.isFinite(price)) continue;
     const change = (price / previous - 1) * 100;
     if (!Number.isFinite(change) || change === 0) continue;
-    const candidate = { entry, previous, price, change, from: before.sourceUpdated, to: after.sourceUpdated };
-    const current = result[entry.kind];
-    if (!current || Math.abs(change) > Math.abs(current.change) || (Math.abs(change) === Math.abs(current.change) && entry.id < current.entry.id)) result[entry.kind] = candidate;
+    movers.push({ entry, previous, price, change, from: before.sourceUpdated, to: after.sourceUpdated });
   }
-  return result;
+  return movers.sort((a, b) => Math.abs(b.change) - Math.abs(a.change) || (a.entry.id < b.entry.id ? -1 : a.entry.id > b.entry.id ? 1 : 0));
+}
+
+export function selectYesterdayMovers(entries: CatalogEntry[], observations: QuoteObservation[], now = Date.now()): YesterdayMovers {
+  const movers = rankYesterdayMovers(entries, observations, now);
+  return {
+    date: day(now - DAY),
+    raw: movers.find(mover => mover.entry.kind === 'raw') ?? null,
+    graded: movers.find(mover => mover.entry.kind === 'graded') ?? null,
+  };
 }
 
 async function read(url: string, fetcher: typeof fetch): Promise<unknown> {
