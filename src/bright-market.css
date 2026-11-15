@@ -184,3 +184,34 @@
 @media(max-width:420px){.collector-search{gap:.3rem;padding-left:.5rem;}.collector-search>svg{display:none;}.collector-search button{padding:.7rem .6rem;}.collector-hero h1{font-size:2.1rem;}}
 @media(prefers-reduced-motion:reduce){.collector-fan-card{transition:none;}.collector-fan-card:hover{transform:none;}}
 .high-contrast .bright-market img{filter:none;}
+
+/* Landing page artwork and section hierarchy */
+.bright-market .collector-hero {
+  gap: clamp(.75rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 3vw, 2.25rem);
+  background: radial-gradient(ellipse at 88% 20%, #e2d2ff, transparent 55%),
+    linear-gradient(120deg, #f7fbff 28%, #e1f0ff);
+}
+.collector-search-label {
+  display: block;
+  margin: .7rem 0 .35rem;
+  color: #152c4b;
+  font-weight: 800;
+}
+.collector-fan-card img, .market-tape .ticker-card-art {
+  filter: brightness(1.12) saturate(1.12) drop-shadow(0 2px 4px #6242b24d);
+}
+.collector-fan-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border-radius: inherit;
+  background: linear-gradient(125deg, transparent 37%, #ffffff55 49%, transparent 60%);
+  pointer-events: none;
+}
+.bright-market #card-valuer { border-top: 3px solid #137b65; }
+.bright-market .market-tape { border-top: 3px solid #2864b3; }
+.bright-market #forecast-results { border-top: 3px solid #7651b5; }
+@media (prefers-reduced-motion: reduce) {
+  .market-tape .ticker-scroll { animation: none; }
+}

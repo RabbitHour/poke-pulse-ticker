@@ -23,14 +23,14 @@ export default function MarketOpening() {
   const spotlight = cards.length ? cards[epoch % cards.length] : undefined;
   return <section className="market-opening collector-hero" aria-labelledby="opening-title">
     <div className="collector-hero-copy">
-      <p className="collector-eyebrow"><Sparkles size={16} aria-hidden="true" /> FOR THE LOVE OF THE HUNT</p>
+      <p className="collector-eyebrow"><Sparkles size={16} aria-hidden="true" /> POKÉMON TCG MARKET</p>
       <p className="collector-brand">Poké Pulse Ticker</p>
-      <h1 id="opening-title">Find your next<br/><span>favorite Pokémon.</span></h1>
-      <p className="collector-intro">From your first Pikachu to your grail Mew. Explore cards, compare available prices, and get to know your collection.</p>
+      <h1 id="opening-title">Find the card.<br/><span>Track the price.</span></h1>
+      <p className="collector-intro">Explore cards, sets and sealed products. Compare dated market quotes.</p>
+      <label className="collector-search-label" htmlFor="hero-card-search">Poké Search</label>
       <form className="collector-search" onSubmit={e => {e.preventDefault(); navigate("/?q=" + encodeURIComponent(query.trim()) + "#catalog-search");}}>
         <Search aria-hidden="true" size={20}/>
-        <label className="sr-only" htmlFor="hero-card-search">Search Pokémon cards and products</label>
-        <input id="hero-card-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Try Mew 30th Anniversary" maxLength={100}/>
+        <input id="hero-card-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Try Charizard, Base Set or Elite Trainer Box" maxLength={100}/>
         <button type="submit">Search <ArrowRight size={16} aria-hidden="true"/></button>
       </form>
       <nav aria-label="Market shortcuts" className="collector-shortcuts">

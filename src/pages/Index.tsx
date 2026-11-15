@@ -28,7 +28,6 @@ import ProGate from "@/components/ProGate";
 import { useAlphaSignals } from "@/hooks/useAlphaSignals";
 import { useTotalMarketValue } from "@/hooks/useIndexCache";
 import { usePrefetchCards } from "@/hooks/usePrefetch";
-import { usePricingHealth } from "@/hooks/usePricingHealth";
 import { SkeletonIndexCard } from "@/components/SkeletonCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
@@ -85,9 +84,8 @@ import LiveCardStrip from "@/components/LiveCardStrip";
 
 
 const Index = () => {
-  const { data: liveCards, isLoading, dataUpdatedAt } = useLiveCards();
+  const { data: liveCards, isLoading } = useLiveCards();
   const { data: quickCards } = useLiveCardsQuick();
-  const { health } = usePricingHealth();
   const marketOpen = useMarketStatus();
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -132,8 +130,6 @@ const Index = () => {
   const displayGraded = liveGradedCards;
   const liveSealedProducts = observed.sealed;
   const displaySealed = liveSealedProducts;
-  const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
-  const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
   const rawIndex = getIndexValue(displayCards);
   const rawChange = getIndexChange(displayCards);
@@ -191,12 +187,11 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
         <MarketOpening />
-      <TickerBar
-        cards={displayCards}
-        isLive={isLive}
-        lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
-      />
         <CardValuer id="card-valuer" />
+        <TickerBar cards={displayCards} />
+        <LazySection minHeight="200px">
+          <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
+        </LazySection>
         <PokeHelp />
 
 
@@ -218,7 +213,7 @@ const Index = () => {
 
         {/* === MARKET PULSE + NOTABLE SALES === */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5">
-          <div className="terminal-card p-4"><h2 className="font-bold text-lg">Featured card feed</h2><p className="text-sm text-muted-foreground mt-2">{displayCards.length.toLocaleString()} featured source records loaded. This showcase is a subset; the searchable catalog is below. Raw quotes refresh every 30 minutes. Price movements are source-derived momentum, not verified transaction volume.</p><a href="#card-valuer" className="market-action mt-3">Value a card</a></div>
+          <div className="terminal-card p-4"><h2 className="font-bold text-lg">Featured card feed</h2><p className="text-sm text-muted-foreground mt-2">{displayCards.length.toLocaleString()} featured source records loaded. This showcase is a subset; the searchable catalog is below. The updater checks for new source releases every 30 minutes. Price movements are source-derived momentum, not verified transaction volume.</p><a href="#card-valuer" className="market-action mt-3">Value a card</a></div>
           <RecentNotableSales cards={displayCards} />
         </div>
 
@@ -227,7 +222,16 @@ const Index = () => {
 
         <MarketOverview />
         <SealedCategoryCharts />
-        <ForecastLedger />
+        <section id="market-outlook" className="space-y-3" aria-labelledby="market-outlook-title">
+          <h2 id="market-outlook-title" className="market-section-title">Forecasts and market coverage</h2>
+          <ForecastLedger />
+          <MarketCapSummary liveRawCards={displayCards} />
+          <details className="terminal-card p-4">
+            <summary className="font-semibold">Daily prediction game</summary>
+            <p className="market-note">This is a simulation. Scored provider forecasts appear above.</p>
+            <PricePredictionGame cards={displayCards} />
+          </details>
+        </section>
         <CatalogExplorer />
 
 
@@ -241,10 +245,10 @@ const Index = () => {
         {/* === LIVE CARD STRIP — MIDDLE: interleaved value + momentum, offset so it shows different cards === */}
         <LazySection minHeight="260px">
           <LiveCardStrip
-            title="📈 MOST ACTIVE CARDS — NAMES + PRICES"
-            subtitle="Available raw-card quotes • prices and source age can vary"
+            title="MORE RAW CARD QUOTES"
+            subtitle="Featured quotes by price. See the movers table for available price changes."
             count={18}
-            mode="mix"
+            mode="value"
             offset={6}
           />
         </LazySection>
@@ -253,7 +257,16 @@ const Index = () => {
 
 
 
-        <h2 className="market-section-title">Understand the market <span>Summaries, not guarantees</span></h2>
+        <section id="market-guide" className="space-y-3" aria-labelledby="market-guide-title">
+        <h2 id="market-guide-title" className="market-section-title">Understand the market</h2>
+        <details className="terminal-card p-4" open>
+          <summary className="font-semibold">How to read these numbers</summary>
+          <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-3">
+            <div><dt className="font-semibold">Source quote</dt><dd>A dated price for a specific printing or product. Graded asking medians describe listings.</dd></div>
+            <div><dt className="font-semibold">Price change</dt><dd>The percentage difference between two comparable source observations. Check the dates before comparing moves.</dd></div>
+            <div><dt className="font-semibold">Index</dt><dd>A summary of a group of items. A base-100 index shows change relative to its starting value.</dd></div>
+          </dl>
+        </details>
         <LazySection minHeight="200px">
           <AIMarketInsights cards={displayCards} />
         </LazySection>
@@ -269,6 +282,10 @@ const Index = () => {
         <LazySection minHeight="180px">
           <MarketIntelWidget cards={displayCards} />
         </LazySection>
+        </section>
+
+        <section id="market-performance" className="space-y-3" aria-labelledby="market-performance-title">
+          <h2 id="market-performance-title" className="market-section-title">Market performance by era, set and sealed product</h2>
 
         <LazySection minHeight="150px">
           <EraIndexCards cards={displayCards} />
@@ -281,17 +298,10 @@ const Index = () => {
         <LazySection minHeight="220px">
           <SealedBoxHeatmap products={displaySealed} />
         </LazySection>
-
-        <LazySection minHeight="200px">
-          <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
-        </LazySection>
+        </section>
 
         <h2 className="market-section-title">Explore cards & sets <span>Find your next card</span></h2>
         <TrendingCards cards={displayCards} isLoading={isLoading} />
-
-        <LazySection minHeight="100px">
-          <MarketCapSummary liveRawCards={displayCards} />
-        </LazySection>
 
         <LazySection minHeight="70px">
           <MarketUpdateBanner cards={displayCards} />
@@ -300,10 +310,6 @@ const Index = () => {
         <div ref={searchRef}>
           <a href="#card-valuer" className="market-action">Open the free card and product valuer ↑</a>
         </div>
-
-        <LazySection minHeight="200px">
-          <PricePredictionGame cards={displayCards} />
-        </LazySection>
 
 
 
