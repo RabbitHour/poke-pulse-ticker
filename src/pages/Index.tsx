@@ -31,7 +31,6 @@ import ProGate from "@/components/ProGate";
 import { useAlphaSignals } from "@/hooks/useAlphaSignals";
 import { useTotalMarketValue } from "@/hooks/useIndexCache";
 import { usePrefetchCards } from "@/hooks/usePrefetch";
-import { usePricingHealth } from "@/hooks/usePricingHealth";
 import { SkeletonIndexCard } from "@/components/SkeletonCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
@@ -88,9 +87,8 @@ import LiveCardStrip from "@/components/LiveCardStrip";
 
 
 const Index = () => {
-  const { data: liveCards, isLoading, dataUpdatedAt } = useLiveCards();
+  const { data: liveCards, isLoading } = useLiveCards();
   const { data: quickCards } = useLiveCardsQuick();
-  const { health } = usePricingHealth();
   const marketOpen = useMarketStatus();
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -135,8 +133,6 @@ const Index = () => {
   const displayGraded = liveGradedCards;
   const liveSealedProducts = observed.sealed;
   const displaySealed = liveSealedProducts;
-  const hasHealthyLiveCoverage = (health?.signalStrength ?? 0) >= 34;
-  const isLive = !!liveCards && liveCards.length > 0 && hasHealthyLiveCoverage;
 
   const rawIndex = getIndexValue(displayCards);
   const rawChange = getIndexChange(displayCards);
@@ -186,11 +182,7 @@ const Index = () => {
     <div className="min-h-screen bg-background bright-market">
       {/* StickyUpgradeBanner removed — popups disabled */}
       <TerminalHeader />
-      <TickerBar
-        cards={displayCards}
-        isLive={isLive}
-        lastUpdated={isLive ? (dataUpdatedAt || Date.now()) : undefined}
-      />
+
 
 
       <main
@@ -198,8 +190,9 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
       >
         <MarketOpening />
+        <TickerBar cards={displayCards} />
         <EbayLiveDeals />
-        <CardValuer id="card-valuer" compact />
+        <CardValuer id="card-valuer" />
 
         {/* === SELL ON EBAY (affiliate, live TCG pricing) === */}
         <SellOnEbaySection />
@@ -297,7 +290,7 @@ const Index = () => {
         <details className="terminal-card research-previews p-4"><summary className="font-bold cursor-pointer">Research & simulator previews — experimental estimates</summary><p className="market-note">These older tools include modeled signals and simulated data. They are not verified sale histories, investment predictions, or measured returns.</p>
         <LazySection minHeight="280px">
           <ProGate feature="Historical price charts" blur>
-            <div className="terminal-card p-4"><h3>Individual card history</h3><p className="text-sm text-muted-foreground">Verified per-card historical prices are not connected. The market charts above show stored observations; no random curve is substituted.</p></div>
+            <div className="terminal-card p-4"><h3>Individual card history</h3><p className="text-sm text-muted-foreground">Open an exact raw card or sealed product in the catalog to see its recorded quotes. Coverage varies by item and date.</p></div>
           </ProGate>
         </LazySection>
 

@@ -1,22 +1,340 @@
-import {useEffect,useMemo,useState} from 'react';
-import {Link} from 'react-router-dom';
-import type {CardData} from '@/data/marketData';
-import {useCatalog,type CatalogEntry} from '@/hooks/useCatalog';
-import {useObservedProducts} from '@/hooks/useObservedProducts';
-import {catalogSymbol} from '@/lib/catalogSymbols';
-import {rotatingWindow,recordLink,quoteAge,sortTickerRecords} from '@/lib/marketRecords';
-import {PRODUCT_CATEGORIES} from '@/lib/productCategories';
-import {CardImage} from './CardImage';
-import {Button} from '@/components/ui/button';
-import {Pause,Play} from 'lucide-react';
-export default function TickerBar({cards=[]}:{cards?:CardData[];isLive?:boolean;lastUpdated?:number}){
- const q=useCatalog(),observed=useObservedProducts(cards);const [page,setPage]=useState(0),[paused,setPaused]=useState(false),[category,setCategory]=useState('raw');
- useEffect(()=>{if(paused)return;const t=setInterval(()=>setPage(p=>p+1),30000);return()=>clearInterval(t);},[paused]);
- const pool=useMemo(()=>{const fallback:CatalogEntry[]=cards.map(c=>({id:'fallback:'+c._apiId+':'+(c._variant??''),cardId:c._apiId,name:c.name,set:c.set,setId:c.setCode||c.set,number:c.number,kind:'raw',category:null,market:Number.isFinite(c.market)?c.market:null,image:c._image||'',sourceUrl:'',sourceUpdated:null,variant:c._variant}));const graded:CatalogEntry[]=observed.graded.map(c=>({id:c.name+c.grade+c.set,name:c.name,set:c.set,setId:c.setCode||c.set,number:c.number,kind:'graded',grade:c.grade,category:null,market:c.market,image:c._image||'',sourceUrl:'',sourceUpdated:observed.gradedAt||null}));return [...(q.data?.entries??fallback),...graded].filter(e=>category==='all'||(['raw','sealed','graded','digital'].includes(category)?e.kind===category:e.category===category));},[q.data,cards,observed.graded,category,observed.gradedAt]);
- const [unavailable,setUnavailable]=useState<Set<string>>(() => new Set());
- const sortedPool=useMemo(()=>sortTickerRecords(pool.filter(e=>e.image && !unavailable.has(e.image))),[pool,unavailable]);
- const slice=rotatingWindow(sortedPool,page,24),start=sortedPool.length?(page*24)%sortedPool.length:0;
- return <section className="market-tape" aria-label="Indexed market ticker"><div className="flex flex-wrap justify-between gap-2 px-4 py-2"><div className="flex flex-wrap items-center gap-2"><strong className="text-xs">POKÉ MARKET TAPE</strong><label className="sr-only" htmlFor="tape-category">Ticker category</label><select id="tape-category" className="rounded border border-border bg-card p-1 text-xs" value={category} onChange={e=>{setCategory(e.target.value);setPage(0);}}><option value="all">All indexed products</option><option value="raw">Raw cards</option><option value="digital">TCG Pocket · digital</option><option value="graded">Graded quotes</option><option value="sealed">All sealed products</option>{PRODUCT_CATEGORIES.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select><span className="text-xs text-muted-foreground">{sortedPool.length.toLocaleString()} with artwork · batch {sortedPool.length?start+1:0}</span></div><div className="flex items-center gap-3"><Button variant="ghost" size="icon" onClick={()=>setPaused(!paused)} aria-label={paused?'Resume ticker':'Pause ticker'} title={paused?'Resume ticker':'Pause ticker'}>{paused?<Play/>:<Pause/>}</Button><Link to="/#catalog" className="text-xs underline">Poké Search</Link></div></div>
- {slice.length?<div className="overflow-x-auto"><div className={`ticker-scroll market-ticker-track flex w-max py-2 ${paused?'ticker-paused':''}`} key={category+'-'+page}>{[...slice,...slice].map((e,i)=>{const href=recordLink(e);return <div key={e.id+'-'+i} className="inline-flex items-center gap-2 border-r border-border px-4"><span className="ticker-art-slot"><CardImage src={e.image} alt={e.name} onUnavailable={()=>setUnavailable(previous=>new Set(previous).add(e.image))} className="ticker-art w-10 h-14 object-contain"/></span><div className="text-xs max-w-64"><strong className="block text-primary font-mono">{catalogSymbol(e)}</strong>{href?<Link to={href} tabIndex={i>=slice.length?-1:0}>{e.name}</Link>:<span>{e.name}</span>}<span className="block text-muted-foreground">{e.set} · {e.variant||e.grade||e.kind}</span><span className="block text-muted-foreground">{e.market==null?'Missing quote':quoteAge(e.sourceUpdated)}{e.sourceUpdated?' · '+e.sourceUpdated:''}</span></div><strong className="text-sm whitespace-nowrap">{e.kind==='digital'?'DIGITAL':e.market==null?'No quote':'$'+e.market.toFixed(2)}</strong></div>;})}</div></div>:<p className="px-4 py-2 text-sm">{q.isLoading?'Loading source records…':'No records available in this category.'}</p>}
- <p className="px-4 pb-2 text-xs text-muted-foreground">{q.data?`Checked ${new Date(q.dataUpdatedAt).toLocaleString()} · ${quoteAge(q.data.sourceUpdated)} ${q.data.sourceUpdated}`:'Full catalog unavailable; featured quotes only. Source dates unavailable.'} · Half-hour checks; TCGCSV releases daily. Provider-specific coverage, not every worldwide printing.</p></section>;
+// 2026-11-15 — David Noyes — Clock-based alphabetical market ticker.
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { CATALOG_HREF, CATALOG_LABEL } from "@/lib/catalogNavigation";
+import type { CardData } from "@/data/marketData";
+import { useCatalog, type CatalogEntry } from "@/hooks/useCatalog";
+import { useObservedProducts } from "@/hooks/useObservedProducts";
+import { catalogSymbol } from "@/lib/catalogSymbols";
+import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
+import { CardImage } from "./CardImage";
+
+// Fixed widths prevent long names or image loading from changing scroll speed.
+const ITEM_WIDTH = 280;
+const ITEM_TIME_MS = 8000;
+const VISIBLE_ITEMS = 8;
+const EMPTY_CARDS: CardData[] = [];
+const EPOCH = Date.UTC(2026, 0, 1);
+
+const alphabet = new Intl.Collator("en", {
+  sensitivity: "base",
+  numeric: true,
+});
+
+function compareEntries(a: CatalogEntry, b: CatalogEntry) {
+  // Physical products precede digital products in the combined view.
+  return (
+    Number(a.kind === "digital") - Number(b.kind === "digital") ||
+    alphabet.compare(a.name, b.name) ||
+    alphabet.compare(a.set, b.set) ||
+    alphabet.compare(a.number ?? "", b.number ?? "") ||
+    alphabet.compare(a.variant ?? a.grade ?? "", b.variant ?? b.grade ?? "") ||
+    alphabet.compare(a.id, b.id)
+  );
+}
+
+export default function TickerBar({
+  cards = EMPTY_CARDS,
+}: {
+  cards?: CardData[];
+}) {
+  const catalog = useCatalog();
+  const observed = useObservedProducts(cards);
+  const [category, setCategory] = useState("raw");
+  const [paused, setPaused] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [clock, setClock] = useState(() => Date.now());
+  const lastFrame = useRef(0);
+
+  useEffect(() => {
+    const preference = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const update = () => setReducedMotion(preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
+
+  const stopped = paused || focused || reducedMotion;
+
+  useEffect(() => {
+    if (stopped) return;
+
+    let frame = 0;
+
+    const animate = (timestamp: number) => {
+      // Limit React updates to approximately 30 frames per second.
+      if (timestamp - lastFrame.current >= 1000 / 30) {
+        lastFrame.current = timestamp;
+        setClock(Date.now());
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [stopped]);
+
+  const entries = useMemo(() => {
+    const fallback: CatalogEntry[] = cards.map(card => ({
+      id: [
+        "fallback",
+        card._apiId ?? card.name,
+        card.set,
+        card.number,
+        card._variant ?? "",
+      ].join(":"),
+      cardId: card._apiId,
+      name: card.name,
+      set: card.set,
+      setId: card.setCode || card.set,
+      number: card.number,
+      kind: "raw",
+      category: null,
+      market: card.market,
+      image: card._image || "",
+      sourceUrl: "",
+      sourceUpdated: null,
+      variant: card._variant,
+    }));
+
+    const graded: CatalogEntry[] = observed.graded.map(card => ({
+      id: [
+        "graded",
+        card.name,
+        card.set,
+        card.number,
+        card.grade,
+      ].join(":"),
+      name: card.name,
+      set: card.set,
+      setId: card.setCode || card.set,
+      number: card.number,
+      kind: "graded",
+      grade: card.grade,
+      category: null,
+      market: card.market,
+      image: card._image || "",
+      sourceUrl: "",
+      sourceUpdated: observed.gradedAt || null,
+    }));
+
+    const unique = new Map<string, CatalogEntry>();
+
+    for (const entry of [
+      ...(catalog.data?.entries ?? fallback),
+      ...graded,
+    ]) {
+      const matches =
+        category === "all" ||
+        (["raw", "graded", "sealed", "digital"].includes(category)
+          ? entry.kind === category
+          : entry.category === category);
+
+      if (matches && !unique.has(entry.id)) {
+        unique.set(entry.id, entry);
+      }
+    }
+
+    return [...unique.values()].sort(compareEntries);
+  }, [cards, catalog.data, observed.graded, observed.gradedAt, category]);
+
+  // The clock determines the position even when no visitor has the page open.
+  const position = Math.max(0, clock - EPOCH) / ITEM_TIME_MS;
+  const step = Math.floor(position);
+  const fraction = position - step;
+  const start = entries.length ? step % entries.length : 0;
+
+  // Render a small moving window instead of thousands of image elements.
+  const visible = entries.length
+    ? Array.from({ length: VISIBLE_ITEMS }, (_, offset) => ({
+        entry: entries[(start + offset) % entries.length],
+        slot: step + offset,
+        duplicate: offset >= entries.length,
+      }))
+    : [];
+
+  const catalogIds = useMemo(
+    () => new Set(catalog.data?.entries.map(entry => entry.id) ?? []),
+    [catalog.data],
+  );
+
+  function recordHref(entry: CatalogEntry) {
+    if (catalogIds.has(entry.id)) {
+      return "/catalog/" + encodeURIComponent(entry.id);
+    }
+    if (entry.kind === "raw" && entry.cardId) {
+      const variant = entry.variant
+        ? "?variant=" + encodeURIComponent(entry.variant)
+        : "";
+      return "/card/" + encodeURIComponent(entry.cardId) + variant;
+    }
+    return null;
+  }
+
+  return (
+    <section className="market-tape" aria-label="Alphabetical market ticker">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <strong className="text-xs">POKÉ MARKET TAPE</strong>
+          <label htmlFor="tape-category" className="sr-only">
+            Ticker category
+          </label>
+          <select
+            id="tape-category"
+            className="rounded border border-border bg-card p-1 text-xs"
+            value={category}
+            onChange={event => setCategory(event.target.value)}
+          >
+            <option value="all">All indexed products</option>
+            <option value="raw">Raw cards</option>
+            <option value="graded">Graded quotes</option>
+            <option value="sealed">All sealed products</option>
+            {PRODUCT_CATEGORIES.map(
+              item => (
+                <option key={item.id} value={item.id}>
+                  {item.title}
+                </option>
+              ),
+            )}
+            <option value="digital">TCG Pocket · digital</option>
+          </select>
+          <span className="text-xs text-muted-foreground">
+            {entries.length.toLocaleString()} indexed · A–Z
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs">
+          {!reducedMotion && (
+            <button
+              type="button"
+              onClick={() => setPaused(value => !value)}
+              aria-pressed={paused}
+              className="rounded border border-border px-3 py-1"
+            >
+              {paused ? "Resume" : "Pause"}
+            </button>
+          )}
+          {stopped && (
+            <>
+              <button
+                type="button"
+                onClick={() => setClock(value => value - ITEM_TIME_MS)}
+                aria-label="Previous ticker card"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setClock(value => value + ITEM_TIME_MS)}
+                aria-label="Next ticker card"
+              >
+                Next
+              </button>
+            </>
+          )}
+          <a href={CATALOG_HREF} className="underline">
+            {CATALOG_LABEL}
+          </a>
+        </div>
+      </div>
+
+      {visible.length ? (
+        <div
+          className="overflow-hidden"
+          style={{ maxWidth: 1280, marginInline: "auto" }}
+          onFocusCapture={() => setFocused(true)}
+          onBlurCapture={event => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setFocused(false);
+            }
+          }}
+        >
+          <div
+            className="flex w-max py-2"
+            style={{
+              transform: `translate3d(-${fraction * ITEM_WIDTH}px, 0, 0)`,
+              willChange: stopped ? "auto" : "transform",
+            }}
+          >
+            {visible.map(({ entry, slot, duplicate }, offset) => {
+              const href = recordHref(entry);
+              const validPrice =
+                entry.market != null &&
+                Number.isFinite(entry.market) &&
+                entry.market > 0;
+
+              return (
+                <div
+                  key={`${category}:${slot}:${entry.id}`}
+                  className="inline-flex shrink-0 items-center gap-2 border-r border-border px-3"
+                  style={{ width: ITEM_WIDTH, boxSizing: "border-box" }}
+                  aria-hidden={duplicate || undefined}
+                >
+                  <CardImage
+                    src={entry.image}
+                    alt={entry.name}
+                    className="ticker-card-art h-14 w-10 shrink-0 object-contain"
+                  />
+                  <div className="min-w-0 flex-1 text-xs">
+                    <strong
+                      className="block truncate font-mono text-primary"
+                      title={entry.id}
+                    >
+                      {catalogSymbol(entry)}
+                    </strong>
+                    {href ? (
+                      <Link
+                        to={href}
+                        className="block truncate underline"
+                        title={entry.name}
+                        tabIndex={duplicate || offset === 0 || offset > 4 ? -1 : 0}
+                      >
+                        {entry.name}
+                      </Link>
+                    ) : (
+                      <span className="block truncate" title={entry.name}>
+                        {entry.name}
+                      </span>
+                    )}
+                    <span
+                      className="block truncate text-muted-foreground"
+                      title={`${entry.set} ${entry.variant || entry.grade || ""}`}
+                    >
+                      {entry.set} · {entry.variant || entry.grade || entry.kind}
+                    </span>
+                    <strong className="block">
+                      {entry.kind === "digital"
+                        ? "DIGITAL"
+                        : validPrice
+                          ? "$" + entry.market!.toFixed(2)
+                          : "No quote"}
+                    </strong>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <p className="px-4 py-2 text-sm">
+          {catalog.isLoading
+            ? "Loading catalog…"
+            : "No records in this category yet."}
+        </p>
+      )}
+
+      <p className="px-4 pb-2 text-xs text-muted-foreground">
+        {catalog.data?.sourceUpdated
+          ? `Catalog source release: ${catalog.data.sourceUpdated}. `
+          : "Catalog release date unavailable. "}
+        Coverage varies by source. Graded quotes are asking-price observations.
+        {reducedMotion
+          ? " Automatic movement is off for your reduced-motion preference."
+          : " Resume returns to the current clock-based position."}
+      </p>
+    </section>
+  );
 }
