@@ -192,7 +192,7 @@ export default function TickerBar({
             <option value="raw">Raw cards</option>
             <option value="graded">Graded quotes</option>
             <option value="sealed">All sealed products</option>
-            {PRODUCT_CATEGORIES.filter(item => item.id !== "digital").map(
+            {PRODUCT_CATEGORIES.map(
               item => (
                 <option key={item.id} value={item.id}>
                   {item.title}

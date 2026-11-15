@@ -25,6 +25,6 @@ jobs:
     - name: Build
       run: |
         npm ci
-        node --test scripts/record-history.test.mjs scripts/service-worker.test.mjs
+        node --test scripts/record-history.test.mjs scripts/service-worker.test.mjs scripts/catalog-delivery.test.mjs
         npm test
         npm run build

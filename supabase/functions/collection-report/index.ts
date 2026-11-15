@@ -41,6 +41,10 @@ serve(async req=>{
   if(new Set(body.items.map((i:any)=>i.id)).size!==body.items.length)return reply({error:'Duplicate products must be combined.'},400);
   const url=new URL(Deno.env.get('REPORTS_CATALOG_URL')||'');if(url.protocol!=='https:')throw Error('Catalog URL must use HTTPS');
   const r=await fetch(url,{signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error('Catalog unavailable');const catalog=await r.json();
+  if(!Array.isArray(catalog.entries)&&catalog.delivery==='sharded-v1'&&Array.isArray(catalog.shards)){
+   const chunks=await Promise.all(catalog.shards.map(async(s:any)=>{if(!/^\/data\/catalog\/[a-f0-9]+\.json$/.test(s.url))throw Error('Invalid catalog shard');const response=await fetch(new URL(s.url,url),{signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error('Catalog shard unavailable');const entries=await response.json();if(!Array.isArray(entries)||entries.length!==s.count)throw Error('Incomplete catalog shard');return entries;}));catalog.entries=chunks.flat();if(catalog.entries.length!==catalog.recordCount)throw Error('Incomplete catalog');
+  }
+  if(!Array.isArray(catalog.entries))throw Error('Invalid catalog');
   const sourceTime=Date.parse(catalog.sourceUpdated);if(!Number.isFinite(sourceTime)||sourceTime>Date.now()+3600000||Date.now()-sourceTime>48*3600000)return reply({error:'Provider quotes are stale. Export is temporarily unavailable.'},503);
   const quotes=new Map(catalog.entries.map((e:any)=>[e.id,e]));const rows=[];let cents=0;
   for(const item of body.items){const e:any=quotes.get(item.id);if(!e||e.kind==='digital'||!Number.isFinite(e.market)||e.market<=0||!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>999)return reply({error:'Invalid product or quantity.'},400);

@@ -117,23 +117,13 @@ const LiveCardStrip = ({
       <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-9 gap-2">
         {cards.map((c) => {
           const up = (c.change || 0) >= 0;
-          const href = c._apiId ? `/card/${c._apiId}` : "#";
+          const href = c._apiId ? `/card/${encodeURIComponent(c._apiId)}${c._variant ? "?variant="+encodeURIComponent(c._variant) : ""}` : "/#catalog";
           return (
             <Link
               key={c._apiId}
               to={href}
               className="group relative overflow-hidden rounded-md border border-primary/15 bg-muted/30 hover:border-primary/50 transition-colors"
             >
-              <div
-                className={`absolute top-1 right-1 z-10 px-1 py-0.5 rounded font-mono text-[8px] font-bold ${
-                  up
-                    ? "bg-primary/20 text-primary"
-                    : "bg-destructive/20 text-destructive"
-                }`}
-              >
-                {up ? "+" : ""}
-                {(c.change || 0).toFixed(1)}%
-              </div>
               <div className="aspect-[3/4] w-full overflow-hidden bg-muted/40">
                 <CardImage
                   src={c._image}

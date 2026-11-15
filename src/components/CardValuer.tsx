@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLiveCards, useLiveCardsQuick, useCardSearch } from "@/hooks/usePokemonTcg";
 import { useObservedProducts } from "@/hooks/useObservedProducts";
+
 import { totalQuote } from "@/lib/valuation";
 import { matchesCatalogQuery, catalogSearchText } from "@/lib/catalogSearch";
 import { CardImage } from "./CardImage";
@@ -16,6 +17,14 @@ export default function CardValuer({ id, compact = false }: {id:string;compact?:
   const [quantity,setQuantity]=useState("1");
   const [selectedKey,setSelectedKey]=useState<string|null>(null);
   useEffect(()=>{const timer=setTimeout(()=>setSubmitted(query.trim()),400);return()=>clearTimeout(timer);},[query]);
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const value = (event as CustomEvent).detail;
+      if (typeof value === "string") { setQuery(value); setSubmitted(value.trim()); setSelectedKey(null); }
+    };
+    window.addEventListener("poke-value-search", handler);
+    return () => window.removeEventListener("poke-value-search", handler);
+  }, []);
   const catalog=useCatalog();
   const live=useLiveCards();
   const quick=useLiveCardsQuick();
@@ -32,9 +41,9 @@ export default function CardValuer({ id, compact = false }: {id:string;compact?:
     return pool.map(c=>({key:c._apiId||[c.name,c.set,c.number,c.grade,c._variant].join(":"),name:c.name,
       detail:[c.set,"#"+c.number,c.grade||c._variant].filter(Boolean).join(" · "),
       searchText:[c.name,c.set,c.number,c.grade,c._variant].filter(Boolean).join(" "),
-      price:Number.isFinite(c.market)&&c.market>0?c.market:null,image:c._image,href:c._apiId?"/card/"+encodeURIComponent(c._apiId):undefined}));
+      price:Number.isFinite(c.market)&&c.market>0?c.market:null,image:c._image,href:c._apiId?"/card/"+encodeURIComponent(c._apiId)+(c._variant?"?variant="+encodeURIComponent(c._variant):""):undefined}));
   },[catalog.data,category,observed.graded,observed.sealed,submitted,search.data,live.data,quick.data]);
-  const matches=useMemo(()=>allRows.filter(r=>matchesCatalogQuery(r.searchText,submitted)),[allRows,submitted]);
+  const matches=useMemo(()=>submitted ? allRows.filter(r=>matchesCatalogQuery(r.searchText,submitted)) : [],[allRows,submitted]);
   const rows=matches.slice(0,compact?6:12);
   const selected=rows.find(r=>r.key===selectedKey);
   const total=selected?.price!=null?totalQuote(selected.price,Number(quantity)):null;
@@ -60,7 +69,7 @@ export default function CardValuer({ id, compact = false }: {id:string;compact?:
         <span className="min-w-0"><strong className="block text-sm">{r.name}</strong><span className="block text-xs muted">{r.detail}</span><strong className="block text-sm mt-1">{r.price==null?"Price unavailable":"$"+r.price.toFixed(2)}</strong></span>
       </button>)}
     </div>
-    {!busy&&!rows.length&&<p role="status">No exact catalog match for “{submitted}”. Try the Pokémon name and printed card number, then check the set, language and variant. Some languages, promos and new releases are not covered yet. No price is guessed.</p>}
+    {submitted&&!busy&&!rows.length&&<p role="status">No matching source quote or exact catalog match for “{submitted}”. Try the Pokémon name and printed card number, then check the set, language and variant. Some languages, promos and new releases are not covered yet. No price is guessed.</p>}
     {matches.length>rows.length&&<Link className="market-action" to={"/?q="+encodeURIComponent(submitted)+"#catalog-search"}>See all matching catalog records</Link>}
     {selected&&<div className="valuer-result" aria-live="polite"><h3 className="font-semibold">{selected.name} — {selected.detail}</h3>
       <p className="text-3xl font-bold py-2">{selected.price==null?"No provider quote yet":total==null?"Enter a whole quantity from 1 to 999":"$"+total.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</p>

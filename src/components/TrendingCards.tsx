@@ -1,3 +1,4 @@
+import { CardImage } from './CardImage';
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { motion } from "framer-motion";
@@ -110,13 +111,11 @@ const TrendingCards = ({ cards, isLoading }: TrendingCardsProps) => {
               {/* Card image */}
               {card._image ? (
                 <div className="w-full aspect-[2.5/3.5] rounded-lg overflow-hidden mb-2 bg-muted ring-2 ring-border group-hover:ring-primary/40 transition-all duration-300 shadow-md">
-                  <img
+                  <CardImage
                     src={card._image}
                     alt={card.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
-                    style={{ imageRendering: 'auto', filter: 'contrast(1.05) saturate(1.08)' }}
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/icon-192.png'; (e.target as HTMLImageElement).style.objectFit = 'contain'; (e.target as HTMLImageElement).style.padding = '1rem'; }}
                   />
                 </div>
               ) : (

@@ -1,3 +1,4 @@
+import { CardImage } from "./CardImage";
 import { useMemo, useState } from "react";
 import { ExternalLink, TrendingUp, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,7 @@ const SellOnEbaySection = () => {
   if (isLoading) {
     return (
       <section className="rounded-lg border border-primary/20 bg-card/50 p-3">
+        <h2 className="font-bold text-xl mb-3">High value cards to explore</h2>
         <h2 className="font-mono text-xs font-bold text-primary mb-2">
           SELL ON EBAY — Loading live TCG prices…
         </h2>
@@ -94,6 +96,7 @@ const SellOnEbaySection = () => {
 
   return (
     <section className="rounded-lg border border-primary/20 bg-card/50 p-3">
+      <h2 className="font-bold text-xl mb-3">High value cards to explore</h2>
       <header className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <div>
           <h2 className="font-mono text-xs sm:text-sm font-bold text-primary flex items-center gap-1.5">
@@ -129,7 +132,7 @@ const SellOnEbaySection = () => {
               className="group flex flex-col rounded-md border border-border/60 bg-background/50 overflow-hidden hover:border-primary/60 transition-colors"
             >
               <div className="relative aspect-[2.5/3.5] bg-muted/40 overflow-hidden">
-                <img
+                <CardImage
                   src={c._image}
                   alt={`${c.name} — sell on eBay`}
                   loading="lazy"

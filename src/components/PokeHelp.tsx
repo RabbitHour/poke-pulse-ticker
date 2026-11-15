@@ -3,7 +3,7 @@ import {useObservedProducts} from "@/hooks/useObservedProducts";
 import {useState} from "react";
 import {useCatalog,type CatalogEntry} from "@/hooks/useCatalog";
 import {CardImage} from "./CardImage";
-import {catalogSymbol} from "@/lib/catalogSymbols";
+
 import {Link} from "react-router-dom";
 const guide=[
  {keys:/how.*(?:value|price)|condition|printing/i,text:'Select an exact card, set, collector number and printing in the free valuer. The catalog keeps foil variants separate. Raw market quotes, graded asking medians and sealed product prices are different measures.',href:'#card-valuer',link:'Open the valuer'},

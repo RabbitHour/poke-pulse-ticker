@@ -1,61 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Sparkles, ArrowRight } from "lucide-react";
-import { useCatalog } from "@/hooks/useCatalog";
-import { CardImage } from "./CardImage";
-import { CATALOG_HREF, CATALOG_LABEL } from "@/lib/catalogNavigation";
-
-export default function MarketOpening() {
-  const catalog = useCatalog();
-  const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-  const [epoch, setEpoch] = useState(() => Math.floor(Date.now() / 1800000));
-  useEffect(() => { const timer = setInterval(() => setEpoch(Math.floor(Date.now() / 1800000)), 30000); return () => clearInterval(timer); }, []);
-  const cards = useMemo(() => {
-    const seen = new Set<string>();
-    return (catalog.data?.entries ?? []).filter(e => e.kind === "raw" && e.image && e.market != null && Number.isFinite(e.market) && e.market > 0)
-      .sort((a,b) => b.market! - a.market!).filter(e => {const key=e.cardId||e.id; if(seen.has(key)) return false; seen.add(key); return true;});
-  }, [catalog.data]);
-  const featured = useMemo(() => {
-    const picks = ["Pikachu", "Mew", "Charizard"].map(name => cards.find(c => c.name === name));
-    return picks.every(Boolean) ? picks : cards.slice(0,3);
-  }, [cards]);
-  const spotlight = cards.length ? cards[epoch % cards.length] : undefined;
-  return <section className="market-opening collector-hero" aria-labelledby="opening-title">
-    <div className="collector-hero-copy">
-      <p className="collector-eyebrow"><Sparkles size={16} aria-hidden="true" /> POKÉMON TCG MARKET</p>
-      <p className="collector-brand">Poké Pulse Ticker</p>
-      <h1 id="opening-title">Find the card.<br/><span>Track the price.</span></h1>
-      <p className="collector-intro">Explore cards, sets and sealed products. Compare dated market quotes.</p>
-      <label className="collector-search-label" htmlFor="hero-card-search">Poké Search</label>
-      <form className="collector-search" onSubmit={e => {e.preventDefault(); navigate("/?q=" + encodeURIComponent(query.trim()) + "#catalog-search");}}>
-        <Search aria-hidden="true" size={20}/>
-        <input id="hero-card-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Try Charizard, Base Set or Elite Trainer Box" maxLength={100}/>
-        <button type="submit">Search <ArrowRight size={16} aria-hidden="true"/></button>
-      </form>
-      <nav aria-label="Market shortcuts" className="collector-shortcuts">
-        <a href="#card-valuer" className="market-action opening-primary">Check a card value</a>
-        <a href={CATALOG_HREF} className="market-action">{CATALOG_LABEL}</a>
-        <Link to="/account" className="market-action">Free collector account</Link>
-      </nav>
-      <p className="collector-trust">Raw cards · Graded cards · Sealed products<br/>No account needed to search. Quotes show their source date.</p>
-    </div>
-    <div className="collector-showcase" aria-label="Featured Pokémon cards">
-      <div className="collector-orbit" aria-hidden="true"/>
-      <span className="collector-spark spark-one" aria-hidden="true">✦</span>
-      <span className="collector-spark spark-two" aria-hidden="true">✦</span>
-      <div className="collector-card-fan">
-        {featured.map((card,i) => card && <Link key={card.id} className={"collector-fan-card card-"+i} to={"/catalog/"+encodeURIComponent(card.id)}>
-          <CardImage src={card.image} alt={card.name + " — " + card.set} loading="eager" className="w-full"/>
-          <span>{card.name}</span>
-        </Link>)}
-        {!featured.length && <div className="collector-empty"><Sparkles size={40}/><strong>Your next discovery starts here</strong><p>{catalog.isError ? "Card artwork is temporarily unavailable. Retry the catalog below." : "Loading the collector gallery…"}</p></div>}
-      </div>
-      {spotlight && <Link className="collector-spotlight" to={"/catalog/"+encodeURIComponent(spotlight.id)}>
-        <span>ROTATING SPOTLIGHT</span><strong>{spotlight.name}</strong>
-        <span>{spotlight.set} · #{spotlight.number} · {spotlight.variant}</span>
-        <b>Provider quote: ${spotlight.market?.toFixed(2)}</b>
-      </Link>}
-    </div>
-  </section>;
+import {useMemo,useState} from 'react';
+import {Link} from 'react-router-dom';
+import {Search,ArrowRight} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {useCatalog} from '@/hooks/useCatalog';
+import {CardImage} from './CardImage';
+import {useQuery} from '@tanstack/react-query';
+import {loadYesterdayObservations,selectYesterdayMovers} from '@/lib/yesterdayMovers';
+import PulseEngineMark from './PulseEngineMark';
+import YesterdayMover from './YesterdayMover';
+export default function MarketOpening(){
+ const catalog=useCatalog();const [search,setSearch]=useState('');
+ const observations=useQuery({queryKey:['yesterday-exact-observations'],queryFn:()=>loadYesterdayObservations(),staleTime:1800000,refetchInterval:1800000,retry:1,placeholderData:prev=>prev});
+ const [unavailable,setUnavailable]=useState<Set<string>>(() => new Set());
+ const eligible=useMemo(()=>(catalog.data?.entries??[]).filter(e=>e.kind==='raw' && e.image && !unavailable.has(e.image) && e.market!=null && e.market>0),[catalog.data,unavailable]);
+ const yesterday=useMemo(()=>selectYesterdayMovers(eligible,observations.data??[]),[eligible,observations.data]);
+ const leftFallback=yesterday.raw ? undefined : eligible[0];
+ const dailyPool=eligible.filter(e=>e.id!==(yesterday.raw?.entry.id ?? leftFallback?.id)).slice(0,24);
+ const featured=dailyPool.length?dailyPool[Math.floor(Date.now()/86400000)%dailyPool.length]:undefined;
+ const reportImageFailure=(image:string)=>setUnavailable(previous=>new Set(previous).add(image));
+ function lookup(e:React.FormEvent){e.preventDefault();window.dispatchEvent(new CustomEvent('poke-value-search',{detail:search}));document.getElementById('card-valuer')?.scrollIntoView({behavior:'smooth'});}
+ return <section className="market-opening" aria-labelledby="opening-title"><div className="opening-engine-layout">{leftFallback ? <aside className="yesterday-mover" aria-label="Featured raw card">
+ <h2 className="text-sm font-bold">Featured raw card</h2>
+ <Link to={'/catalog/'+encodeURIComponent(leftFallback.id)} className="mover-art"><CardImage highResolution src={leftFallback.image} alt={leftFallback.name} loading="eager" onUnavailable={()=>reportImageFailure(leftFallback.image)} className="w-full h-full object-contain"/></Link>
+ <h3 className="font-bold text-sm">{leftFallback.name}</h3><p className="text-xs text-muted-foreground">{[leftFallback.set,leftFallback.number,leftFallback.variant].filter(Boolean).join(' · ')}</p>
+ <p className="text-sm font-semibold">${leftFallback.market!.toFixed(2)}</p>
+ <p className="text-xs text-muted-foreground">Yesterday’s comparable move is unavailable.</p>
+ </aside> : <YesterdayMover kind="raw" mover={yesterday.raw} date={yesterday.date} loading={observations.isLoading||catalog.isLoading} onUnavailable={()=>{if(yesterday.raw)reportImageFailure(yesterday.raw.entry.image);}}/>}<div className="opening-copy"><p className="opening-kicker">Source quotes · Collector terminal</p><PulseEngineMark/><h1 id="opening-title">Poké Pulse Engine</h1><p className="text-muted-foreground">Cards. Graded. Sealed. Find the exact printing.</p><form onSubmit={lookup} className="opening-search"><label className="font-semibold" htmlFor="opening-search">Poké Search</label><Search aria-hidden="true" className="w-5 h-5"/><input id="opening-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Try Charizard, Base Set or Elite Trainer Box"/><Button type="submit">Value lookup <ArrowRight/></Button></form><nav className="flex flex-wrap justify-center gap-3" aria-label="Market shortcuts"><Button variant="outline" asChild><a href="#market-charts">Market charts</a></Button><Button variant="outline" asChild><a href="#forecast-results">Forecast history</a></Button><Button variant="outline" asChild><Link to="/sets">Browse sets</Link></Button></nav></div><aside className="yesterday-mover" aria-label="Today's Card of the Day">
+ <h2 className="text-sm font-bold">Today’s Card of the Day</h2>
+ {featured ? <><Link to={'/catalog/'+encodeURIComponent(featured.id)} className="mover-art"><CardImage highResolution src={featured.image} alt={featured.name} loading="eager" onUnavailable={()=>reportImageFailure(featured.image)} className="w-full h-full object-contain"/></Link>
+ <h3 className="font-bold text-sm">{featured.name}</h3><p className="text-xs text-muted-foreground">{[featured.set,featured.number,featured.variant].filter(Boolean).join(' · ')}</p>
+ <p className="text-sm font-semibold">{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(featured.market!)}</p>
+ <p className="text-xs text-muted-foreground">Featured raw printing · Source release {featured.sourceUpdated || catalog.data?.sourceUpdated || 'date unavailable'}</p>
+ <Link className="text-sm text-primary underline" to={'/catalog/'+encodeURIComponent(featured.id)}>Exact record details</Link></> : <p className="text-sm">Checking available card artwork…</p>}
+ </aside></div>
+ </section>;
 }
