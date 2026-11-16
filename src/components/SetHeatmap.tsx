@@ -1,3 +1,4 @@
+// 2026-11-16 — Dave: readable heatmaps and complete expanded coverage.
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,7 +26,6 @@ interface SetHeatmapProps {
 
 type FilterMode = "all" | "gainers" | "losers" | "hot";
 const LANDING_LIMIT = 20;
-const EXPANDED_LIMIT = 60;
 
 const FILTER_LABEL: Record<FilterMode, string> = {
   all: "All",
@@ -90,7 +90,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
     }
   }, [allSets, filter]);
 
-  const limit = expanded ? EXPANDED_LIMIT : LANDING_LIMIT;
+  const limit = expanded ? filteredSets.length : LANDING_LIMIT;
   const setPerformance = filteredSets.slice(0, limit);
   const maxVal = Math.max(...setPerformance.map((s) => s.totalValue), 1);
 
@@ -128,10 +128,10 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
             <BarChart3 className="w-3.5 h-3.5" /> Set Performance Heatmap
           </h3>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[8px] text-muted-foreground px-2 py-0.5 rounded bg-muted border border-border">
+            <span className="font-mono text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted border border-border">
               S&P 500 STYLE
             </span>
-            <span className="font-mono text-[8px] text-primary">
+            <span className="font-mono text-xs text-primary">
               {filteredSets.length} / {allSets.length} SETS
             </span>
           </div>
@@ -145,7 +145,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
               key={mode}
               onClick={() => { setFilter(mode); setSelectedSet(null); }}
               aria-pressed={filter === mode}
-              className={`font-mono text-[9px] px-2 py-1 rounded border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              className={`font-mono text-xs px-2 py-1 rounded border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 filter === mode
                   ? "bg-primary/20 border-primary/50 text-primary"
                   : "bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:border-primary/30"
@@ -159,7 +159,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
         {/* Heatmap grid */}
         <div
           className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
-          role="grid"
+
           aria-label={`${setPerformance.length} sets shown, sized by total market value`}
         >
           {setPerformance.map((s) => {
@@ -171,13 +171,13 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
                 onClick={() => setSelectedSet(isSelected ? null : s)}
                 aria-pressed={isSelected}
                 aria-label={`${s.set}, ${s.avgChange >= 0 ? "up" : "down"} ${Math.abs(s.avgChange).toFixed(1)} percent, ${formatValue(s.totalValue)} total value, ${s.count} cards`}
-                className={`rounded-md border ${getBorderColor(s.avgChange)} p-1.5 flex flex-col items-center justify-center text-center transition-all hover:scale-105 hover:shadow-lg hover:z-10 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-20 ${getColor(s.avgChange)} ${isSelected ? "ring-1 ring-primary scale-105" : ""}`}
+                className={`rounded-md border ${getBorderColor(s.avgChange)} p-3 gap-1 flex flex-col items-center justify-center text-center transition-all hover:scale-105 hover:shadow-lg hover:z-10 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-20 ${getColor(s.avgChange)} ${isSelected ? "ring-1 ring-primary scale-105" : ""}`}
                 style={{ minHeight: `${100 + sizeRatio * 28}px` }}
               >
-                <span className="font-mono text-sm font-bold leading-snug whitespace-normal w-full">
+                <span className="font-mono text-base font-bold leading-snug whitespace-normal break-words w-full">
                   {s.set}
                 </span>
-                <span className="font-mono text-[9px] sm:text-[10px] font-black">
+                <span className="font-mono text-xs font-black">
                   {s.avgChange >= 0 ? "+" : ""}{s.avgChange.toFixed(1)}%
                 </span>
                 <span className="font-mono text-sm font-semibold">
@@ -206,7 +206,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
                       <Layers className="w-3 h-3 text-primary" />
                       {selectedSet.set}
                     </h4>
-                    <p className="font-mono text-[9px] text-muted-foreground mt-0.5">
+                    <p className="font-mono text-xs text-muted-foreground mt-0.5">
                       {selectedSet.count} cards tracked · Tap another set to compare
                     </p>
                   </div>
@@ -217,46 +217,46 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase">Total Value</p>
+                    <p className="font-mono text-xs text-muted-foreground uppercase">Total Value</p>
                     <p className="font-mono text-sm font-black text-foreground">{formatValue(selectedSet.totalValue)}</p>
                   </div>
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase">Avg Change</p>
+                    <p className="font-mono text-xs text-muted-foreground uppercase">Avg Change</p>
                     <p className={`font-mono text-sm font-black ${selectedSet.avgChange >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                       {selectedSet.avgChange >= 0 ? "+" : ""}{selectedSet.avgChange.toFixed(2)}%
                     </p>
                   </div>
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase">Median Price</p>
+                    <p className="font-mono text-xs text-muted-foreground uppercase">Median Price</p>
                     <p className="font-mono text-sm font-black text-foreground">${selectedSet.medianPrice.toFixed(2)}</p>
                   </div>
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase">Volatility</p>
+                    <p className="font-mono text-xs text-muted-foreground uppercase">Volatility</p>
                     <p className="font-mono text-sm font-black text-amber-400">{selectedSet.volatility.toFixed(1)}σ</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase flex items-center gap-1">
+                    <p className="font-mono text-xs text-muted-foreground uppercase flex items-center gap-1">
                       <DollarSign className="w-2.5 h-2.5" /> High
                     </p>
                     <p className="font-mono text-xs font-bold text-foreground">{formatValue(selectedSet.highPrice)}</p>
                   </div>
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase flex items-center gap-1">
+                    <p className="font-mono text-xs text-muted-foreground uppercase flex items-center gap-1">
                       <DollarSign className="w-2.5 h-2.5" /> Low
                     </p>
                     <p className="font-mono text-xs font-bold text-foreground">{formatValue(selectedSet.lowPrice)}</p>
                   </div>
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase flex items-center gap-1">
+                    <p className="font-mono text-xs text-muted-foreground uppercase flex items-center gap-1">
                       <TrendingUp className="w-2.5 h-2.5 text-emerald-400" /> Gainers
                     </p>
                     <p className="font-mono text-xs font-bold text-emerald-400">{selectedSet.gainers}</p>
                   </div>
                   <div className="terminal-card p-2">
-                    <p className="font-mono text-[7px] text-muted-foreground uppercase flex items-center gap-1">
+                    <p className="font-mono text-xs text-muted-foreground uppercase flex items-center gap-1">
                       <TrendingDown className="w-2.5 h-2.5 text-red-400" /> Losers
                     </p>
                     <p className="font-mono text-xs font-bold text-red-400">{selectedSet.losers}</p>
@@ -266,8 +266,8 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
                 {selectedSet.topCard && (
                   <div className="mt-2 terminal-card p-2 flex items-center justify-between">
                     <div>
-                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Top Card</p>
-                      <p className="font-mono text-[10px] font-bold text-foreground">{selectedSet.topCard}</p>
+                      <p className="font-mono text-xs text-muted-foreground uppercase">Top Card</p>
+                      <p className="font-mono text-xs font-bold text-foreground">{selectedSet.topCard}</p>
                     </div>
                     <p className="font-mono text-xs font-black text-primary">{formatValue(selectedSet.topCardPrice)}</p>
                   </div>
@@ -275,7 +275,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
 
                 {/* Mini distribution bar */}
                 <div className="mt-2.5">
-                  <p className="font-mono text-[7px] text-muted-foreground uppercase mb-1">Price Distribution</p>
+                  <p className="font-mono text-xs text-muted-foreground uppercase mb-1">Price Distribution</p>
                   <div className="flex gap-0.5 h-3 rounded overflow-hidden">
                     {selectedSet.count > 0 && (
                       <>
@@ -302,7 +302,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
                 {/* Click-through CTA */}
                 <Link
                   to={`/set-browser?set=${setSlug(selectedSet.set)}`}
-                  className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] text-primary hover:text-primary/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                  className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-primary hover:text-primary/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
                 >
                   Explore all {selectedSet.count} cards in {selectedSet.set}
                   <ArrowUpRight className="w-3 h-3" />
@@ -313,15 +313,15 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
         </AnimatePresence>
 
         {/* Footer */}
-        <div className="border-t border-border px-4 py-1.5 flex items-center justify-between">
-          <span className="font-mono text-[8px] text-muted-foreground">
+        <div className="border-t border-border px-4 py-3 flex flex-wrap gap-3 items-center justify-between">
+          <span className="font-mono text-xs text-muted-foreground">
             Size = value · Color = avg Δ% · {setPerformance.length}/{filteredSets.length} sets shown
           </span>
           <div className="flex items-center gap-2">
             {filteredSets.length > LANDING_LIMIT && (
               <button
                 onClick={() => { setExpanded(!expanded); setSelectedSet(null); }}
-                className="font-mono text-[9px] text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                className="font-mono text-xs text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
               >
                 {expanded ? (
                   <>Show Less <ChevronUp className="w-3 h-3" /></>
@@ -330,7 +330,7 @@ const SetHeatmap = ({ cards }: SetHeatmapProps) => {
                 )}
               </button>
             )}
-            <span className="font-mono text-[8px] text-primary">PGVA Verified™</span>
+            <span className="font-mono text-xs text-primary">PGVA Verified™</span>
           </div>
         </div>
       </div>

@@ -14,3 +14,13 @@ describe('discovery selection',()=>{
   expect(discoveryCards([])).toEqual([]);
  });
 });
+
+ it('rotates discovery between shared windows without changing source order', () => {
+  const pool = Array.from({length:120}, (_,i) => ({name:`Pokemon ${i}`,set:`Set ${i % 20}`,number:String(i),market:i+1}));
+  const original = [...pool];
+  const first = discoveryCards(pool,18,100);
+  expect(discoveryCards([...pool].reverse(),18,100)).toEqual(first);
+  expect(discoveryCards(pool,18,101)).not.toEqual(first);
+  expect(pool).toEqual(original);
+  expect(first.every(c => c.market <= 108)).toBe(true);
+ });
