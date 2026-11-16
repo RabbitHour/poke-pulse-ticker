@@ -1,3 +1,4 @@
+// 2026-11-16 — Dave: readable heatmaps and complete expanded coverage.
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Package, ChevronDown, ChevronUp, TrendingUp, TrendingDown, X, Filter, Info } from "lucide-react";
@@ -20,7 +21,6 @@ interface EraPerf {
 
 type FilterMode = "all" | "boxes" | "etbs" | "packs";
 const LANDING_LIMIT = 24;
-const EXPANDED_LIMIT = 80;
 
 const FILTER_LABEL: Record<FilterMode, { label: string; types: string[] }> = {
   all:   { label: "All Sealed", types: [] },
@@ -58,7 +58,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
     return [...base].sort((a, b) => b.market - a.market);
   }, [all, filter]);
 
-  const limit = expanded ? EXPANDED_LIMIT : LANDING_LIMIT;
+  const limit = expanded ? filtered.length : LANDING_LIMIT;
   const view = filtered.slice(0, limit);
   const maxVal = Math.max(...view.map((p) => p.market), 1);
 
@@ -95,10 +95,10 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
               </button>
             </h3>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[8px] text-muted-foreground px-2 py-0.5 rounded bg-muted border border-border">
+              <span className="font-mono text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted border border-border">
                 BOOSTER BOX INDEX
               </span>
-              <span className="font-mono text-[8px] text-primary">
+              <span className="font-mono text-xs text-primary">
                 {filtered.length} / {all.length} SKUs
               </span>
             </div>
@@ -112,7 +112,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
                 key={mode}
                 onClick={() => { setFilter(mode); setSelected(null); }}
                 aria-pressed={filter === mode}
-                className={`font-mono text-[9px] px-2 py-1 rounded border whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                className={`font-mono text-xs px-2 py-1 rounded border whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   filter === mode
                     ? "bg-primary/20 border-primary/50 text-primary"
                     : "bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:border-primary/30"
@@ -126,7 +126,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
           {/* Heatmap grid */}
           <div
             className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
-            role="grid"
+
             aria-label={`${view.length} sealed products shown`}
           >
             {view.map((p) => {
@@ -138,13 +138,14 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
                   onClick={() => setSelected(isSel ? null : p)}
                   aria-pressed={isSel}
                   aria-label={`${p.era} ${p.type}, ${fmt(p.market)}, ${p.change >= 0 ? "up" : "down"} ${Math.abs(p.change).toFixed(1)} percent`}
-                  className={`rounded-md border border-border/40 p-1.5 flex flex-col items-center justify-center text-center transition-all hover:scale-105 hover:shadow-lg hover:z-10 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-20 ${getColor(p.change)} ${isSel ? "ring-1 ring-primary scale-105" : ""}`}
+                  className={`rounded-md border border-border/40 p-3 gap-1 flex flex-col items-center justify-center text-center transition-all hover:scale-105 hover:shadow-lg hover:z-10 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-20 ${getColor(p.change)} ${isSel ? "ring-1 ring-primary scale-105" : ""}`}
                   style={{ minHeight: `${100 + sizeRatio * 32}px` }}
                 >
-                  <span className="font-mono text-sm font-bold leading-snug whitespace-normal w-full">
+                  <span className="font-mono text-base font-bold leading-snug whitespace-normal break-words w-full">
                     {p.era}
                   </span>
-                  <span className="font-mono text-[8px] sm:text-[9px] font-black">
+                  <span className="text-xs font-semibold">{p.type}</span>
+                  <span className="font-mono text-xs font-black">
                     {fmt(p.market)}
                   </span>
                   <span className="font-mono text-sm font-semibold">
@@ -173,8 +174,8 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
                         <Package className="w-3 h-3 text-primary" />
                         {selected.era} · {selected.type}
                       </h4>
-                      <p className="font-mono text-[9px] text-muted-foreground mt-0.5">
-                        Live consensus across TCGPlayer, eBay sealed listings, and PriceCharting
+                      <p className="font-mono text-xs text-muted-foreground mt-0.5">
+                        Values from the available sealed-product observations
                       </p>
                     </div>
                     <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded" aria-label="Close details">
@@ -184,30 +185,28 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div className="terminal-card p-2">
-                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Market</p>
+                      <p className="font-mono text-xs text-muted-foreground uppercase">Market</p>
                       <p className="font-mono text-sm font-black text-foreground">{fmt(selected.market)}</p>
                     </div>
                     <div className="terminal-card p-2">
-                      <p className="font-mono text-[7px] text-muted-foreground uppercase">24h Δ</p>
+                      <p className="font-mono text-xs text-muted-foreground uppercase">24h Δ</p>
                       <p className={`font-mono text-sm font-black ${selected.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                         {selected.change >= 0 ? "+" : ""}{selected.change.toFixed(2)}%
                       </p>
                     </div>
                     <div className="terminal-card p-2">
-                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Best Floor</p>
+                      <p className="font-mono text-xs text-muted-foreground uppercase">Best Floor</p>
                       <p className="font-mono text-sm font-black text-foreground">{fmt(selected.low)}</p>
                     </div>
                     <div className="terminal-card p-2">
-                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Spread</p>
+                      <p className="font-mono text-xs text-muted-foreground uppercase">Spread</p>
                       <p className="font-mono text-sm font-black text-amber-400">{selected.spreadPct.toFixed(1)}%</p>
                     </div>
                   </div>
 
-                  <p className="mt-3 font-mono text-[10px] text-muted-foreground leading-relaxed">
-                    Sealed {selected.type.toLowerCase()}s from <strong className="text-foreground">{selected.era}</strong> are
-                    {selected.change >= 0 ? " trending up " : " cooling off "}
-                    over the past 24 hours. Floor-to-market spread of {selected.spreadPct.toFixed(1)}% indicates
-                    {selected.spreadPct > 15 ? " thin liquidity — opportunistic flips possible." : " healthy market depth."}
+                  <p className="mt-3 font-mono text-xs text-muted-foreground leading-relaxed">
+                    The displayed floor is {selected.spreadPct.toFixed(1)}% below the market reference.
+                    This difference alone does not establish a deal, completed sale, or market liquidity.
                   </p>
                 </div>
               </motion.div>
@@ -215,20 +214,20 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
           </AnimatePresence>
 
           {/* Footer */}
-          <div className="border-t border-border px-4 py-1.5 flex items-center justify-between">
-            <span className="font-mono text-[8px] text-muted-foreground">
+          <div className="border-t border-border px-4 py-3 flex flex-wrap gap-3 items-center justify-between">
+            <span className="font-mono text-xs text-muted-foreground">
               Size = market price · Color = 24h Δ%
             </span>
             <div className="flex items-center gap-2">
               {filtered.length > LANDING_LIMIT && (
                 <button
                   onClick={() => { setExpanded(!expanded); setSelected(null); }}
-                  className="font-mono text-[9px] text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
+                  className="font-mono text-xs text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-1"
                 >
                   {expanded ? (<>Show Less <ChevronUp className="w-3 h-3" /></>) : (<>Show All {filtered.length} <ChevronDown className="w-3 h-3" /></>)}
                 </button>
               )}
-              <span className="font-mono text-[8px] text-primary">SEALED 1000™</span>
+              <span className="font-mono text-xs text-primary">SEALED 1000™</span>
             </div>
           </div>
         </div>
@@ -238,7 +237,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
         open={infoOpen}
         onOpenChange={setInfoOpen}
         title="Sealed Box Heatmap"
-        description="A real-time treemap of every Pokémon TCG sealed product we track — booster boxes, ETBs, blisters, and theme decks across 100+ eras."
+        description="Compare the sealed products available in the current data feed. Select a tile for details."
       >
         <p>
           <strong className="text-foreground">Tile size</strong> = current market price.
@@ -253,8 +252,7 @@ const SealedBoxHeatmap = ({ products }: SealedBoxHeatmapProps) => {
           you actually trade. Default view is Booster Boxes — the cleanest signal for sealed-investing demand.
         </p>
         <p className="text-muted-foreground">
-          Prices are blended from TCGPlayer sealed listings, eBay sold-comp medians (last 30 days),
-          and PriceCharting box-grades — refreshed every 30 minutes via the consensus engine.
+          Coverage and freshness depend on the available source observations. Listed prices are not proof of completed sales.
         </p>
       </InfoDialog>
     </>
