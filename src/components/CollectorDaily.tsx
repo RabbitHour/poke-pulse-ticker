@@ -1,3 +1,4 @@
+import {COLLECTOR_STORAGE,readCollectorSaved,type CollectorSaved} from '@/lib/collectorSaved';
 import {useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
@@ -6,13 +7,13 @@ import {loadYesterdayObservations} from '@/lib/yesterdayMovers';
 import {comparableCatalogEntries} from '@/lib/marketCoverage';
 import {isCollectorCard,collectorCategory} from '@/lib/collectorFocus';
 import {CardImage} from './CardImage';
-const STORAGE='poke-pulse-collector-v1';
-type Saved={id:string;target:string};
+const STORAGE=COLLECTOR_STORAGE;
+type Saved=CollectorSaved;
 const money=(v:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v);
 export default function CollectorDaily(){
  const catalog=useCatalog();
  const observations=useQuery({queryKey:['yesterday-exact-observations'],queryFn:()=>loadYesterdayObservations(),staleTime:1800000,refetchInterval:1800000,retry:1,placeholderData:prev=>prev});
- const [saved,setSaved]=useState<Saved[]>(()=>{try{const v=JSON.parse(localStorage.getItem(STORAGE)||'[]');return Array.isArray(v)?v.filter(x=>typeof x.id==='string'&&typeof x.target==='string').slice(0,50):[];}catch{return [];}});
+ const [saved,setSaved]=useState<Saved[]>(readCollectorSaved);
  const [storageError,setStorageError]=useState(false);
  const [failed,setFailed]=useState<Set<string>>(()=>new Set());
  const [filter,setFilter]=useState('movers');
@@ -53,7 +54,7 @@ export default function CollectorDaily(){
   <div id="my-pulse" className="space-y-3 scroll-mt-20"><h3 className="text-xl font-bold">My saved cards & price targets</h3><p className="text-sm text-muted-foreground">Saved on this browser and domain, up to 50 exact records. Targets are checked when you open this page; no background notifications or cross-device sync.</p>{storageError&&<p role="alert">Browser storage is unavailable. Your changes may not survive closing this page.</p>}
    {!saved.length&&<p>Save a card above to build your daily checklist.</p>}
    {saved.map(item=>{const e=eligible.find(c=>c.id===item.id);const before=previousVisit?.prices?.[item.id];const target=Number(item.target);return <div key={item.id} className="rounded-lg border border-border p-3 flex flex-wrap gap-4 items-center">
-    <div className="flex-1 min-w-40"><Link className="font-semibold underline" to={'/catalog/'+encodeURIComponent(item.id)}>{e?.name??'Saved exact record'}</Link><p className="text-xs">{e?`${e.set} · #${e.number} · ${e.variant}`: 'Current quote or eligible artwork unavailable'}</p></div>
+    <div className="flex-1 min-w-40"><Link className="font-semibold underline" to={'/catalog/'+encodeURIComponent(item.id)}>{e?.name??item.label??'Saved exact record'}</Link><p className="text-xs">{e?`${e.set} · #${e.number} · ${e.variant}`: 'Current quote or eligible artwork unavailable'}</p></div>
     <span>{e?money(e.market!):'Unavailable'}{e&&before>0&&<small className="block">{money(e.market!-before)} since reviewed</small>}</span>
     <label className="text-sm">Buy target ($)<input type="number" min="0.01" step="0.01" value={item.target} onChange={event=>setSaved(prev=>prev.map(x=>x.id===item.id?{...x,target:event.target.value}:x))} className="block w-28 rounded border border-border p-2 bg-background"/></label>
     {e&&target>0&&<strong>{e.market!<=target?'At or below target':'Above target'}</strong>}<button className="underline text-sm" onClick={()=>toggle(item.id)}>Remove</button>
