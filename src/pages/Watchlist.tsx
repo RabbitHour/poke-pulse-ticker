@@ -5,8 +5,6 @@ import TerminalHeader from "@/components/TerminalHeader";
 import TickerBar from "@/components/TickerBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWatchlist, useRemoveFromWatchlist } from "@/hooks/useWatchlist";
-import SignalBadge from "@/components/SignalBadge";
-import { getCardSignal } from "@/hooks/useSignalIndicator";
 import AuthModal from "@/components/AuthModal";
 import FinancialDisclaimer from "@/components/FinancialDisclaimer";
 import { useState } from "react";
@@ -82,22 +80,13 @@ const Watchlist = () => {
                   <tr className="border-b border-border">
                     <th className="px-4 py-2 text-left font-mono text-[10px] tracking-widest text-muted-foreground uppercase">Card</th>
                     <th className="px-4 py-2 text-left font-mono text-[10px] tracking-widest text-muted-foreground uppercase">Set</th>
-                    <th className="px-4 py-2 text-right font-mono text-[10px] tracking-widest text-muted-foreground uppercase">Signal</th>
+                    <th className="px-4 py-2 text-right font-mono text-[10px] tracking-widest text-muted-foreground uppercase">Quote status</th>
                     <th className="px-4 py-2 text-right font-mono text-[10px] tracking-widest text-muted-foreground uppercase">Added</th>
                     <th className="px-4 py-2 text-right font-mono text-[10px] tracking-widest text-muted-foreground uppercase"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item, i) => {
-                    const signal = getCardSignal({
-                      name: item.card_name,
-                      set: item.card_set,
-                      number: item.card_number,
-                      market: 100,
-                      low: 80,
-                      mid: 90,
-                      change: 0,
-                    });
                     return (
                       <motion.tr
                         key={item.id}
@@ -119,7 +108,7 @@ const Watchlist = () => {
                           {item.card_set} #{item.card_number}
                         </td>
                         <td className="px-4 py-2.5 text-right">
-                          <SignalBadge result={signal} />
+                          <span className="text-xs">Open exact printing to compare prices</span>
                         </td>
                         <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground text-right">
                           {new Date(item.added_at).toLocaleDateString()}

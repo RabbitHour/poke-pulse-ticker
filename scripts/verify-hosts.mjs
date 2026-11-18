@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 
-const hosts = ['https://www.pokepulseticker.com','https://pokepulseticker.com','https://poke-pulse-ticker.lovable.app'];
+const hosts = ['https://www.pokepulseticker.com','https://pokepulseticker.com','https://poke-pulse-ticker.lovable.app','https://poke-pulse-ticker.com'];
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 async function get(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(20000), cache: 'no-store' });
@@ -28,12 +28,23 @@ for (const host of hosts) {
     const account = await get(host + '/account');
     if (!(await account.text()).includes('id="root"')) throw Error('/account does not serve application shell');
     const catalog = await (await get(host + '/data/catalog.json')).json();
-    if (!Array.isArray(catalog.entries) || !catalog.entries.length) throw Error('Missing catalog records');
+    let catalogRecords = catalog.entries?.length;
+    if (catalog.delivery === 'sharded-v1' && Array.isArray(catalog.shards) && catalog.shards.length) {
+      catalogRecords = 0;
+      for (const shard of catalog.shards) {
+        if (!/^\/data\/catalog\/[a-f0-9]+\.json$/.test(shard.url)) throw Error('Invalid catalog shard URL');
+        const rows = await (await get(host + shard.url)).json();
+        if (!Array.isArray(rows) || rows.length !== shard.count) throw Error('Incomplete catalog shard: ' + shard.url);
+        catalogRecords += rows.length;
+      }
+      if (catalogRecords !== catalog.recordCount) throw Error('Catalog record count differs from manifest');
+    }
+    if (!catalogRecords) throw Error('Missing catalog records');
     const released = Date.parse(catalog.sourceUpdated);
     if (!Number.isFinite(released)) throw Error('Missing/invalid catalog source date');
     const ageHours = (Date.now() - released) / 3600000;
     if (ageHours < -1 || ageHours > 72) throw Error('Catalog source timestamp is outside the -1 to 72 hour window');
-    console.log(JSON.stringify({host, finalUrl: page.url, result:'matching-entry-assets-and-shell', catalogRecords:catalog.entries.length, sourceUpdated:catalog.sourceUpdated}));
+    console.log(JSON.stringify({host, finalUrl: page.url, result:'matching-entry-assets-and-shell', catalogRecords, sourceUpdated:catalog.sourceUpdated}));
   } catch (error) {
     failed = true;
     console.error(JSON.stringify({host, result:'FAIL', reason:error.message}));

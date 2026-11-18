@@ -8,7 +8,7 @@ import { getCardSignal } from "@/hooks/useSignalIndicator";
 import SignalBadge from "@/components/SignalBadge";
 
 const cardRoute = (card: CardData) =>
-  card._apiId ? `/card/${card._apiId}` : `/card/${encodeURIComponent(`${card.name}-${card.set}-${card.number}`.replace(/\s+/g, "-").toLowerCase())}`;
+  card._catalogId ? `/catalog/${encodeURIComponent(card._catalogId)}` : card._apiId ? `/card/${card._apiId}` : `/card/${encodeURIComponent(`${card.name}-${card.set}-${card.number}`.replace(/\s+/g, "-").toLowerCase())}`;
 
 interface CardBoardTableProps {
   cards: CardData[];
@@ -129,7 +129,7 @@ const CardBoardTable = ({ cards, title, showGrade = false }: CardBoardTableProps
           </thead>
           <tbody>
             {sorted.slice(0, 100).map((card, i) => (
-              <tr key={i} className={`data-row cursor-pointer ${compact ? "h-8" : ""}`} onClick={() => { if (card._apiId) navigate(cardRoute(card)); }}>
+              <tr key={i} className={`data-row cursor-pointer ${compact ? "h-8" : ""}`} onClick={() => { if (card._catalogId || card._apiId) navigate(cardRoute(card)); }}>
                 <td className={compact ? "px-2 py-1" : "px-4 py-2"}>
                   <span className="font-mono text-[10px] text-primary font-bold tracking-wider bg-primary/10 px-1.5 py-0.5 rounded">
                     {getCardToken(card)}
@@ -150,10 +150,10 @@ const CardBoardTable = ({ cards, title, showGrade = false }: CardBoardTableProps
                 {!compact && (
                   <>
                     <td className="px-4 py-2 font-mono text-xs text-muted-foreground text-right">
-                      {showGrade ? "—" : "$" + card.low.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      {showGrade || card._catalogId ? "—" : "$" + card.low.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-4 py-2 font-mono text-xs text-muted-foreground text-right">
-                      {showGrade ? "—" : "$" + card.mid.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      {showGrade || card._catalogId ? "—" : "$" + card.mid.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
                   </>
                 )}
@@ -162,7 +162,7 @@ const CardBoardTable = ({ cards, title, showGrade = false }: CardBoardTableProps
                 </td>
                 {!compact && (
                   <td className="px-4 py-2 text-center">
-                    {showGrade ? "Not measured" : <SignalBadge result={getCardSignal(card)} />}
+                    {showGrade || card._catalogId ? "Not measured" : <SignalBadge result={getCardSignal(card)} />}
                   </td>
                 )}
               </tr>

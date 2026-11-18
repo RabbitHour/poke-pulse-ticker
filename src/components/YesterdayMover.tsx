@@ -14,6 +14,6 @@ export default function YesterdayMover({ kind, mover, date, loading, onUnavailab
       <p className="text-sm">${mover.previous.toFixed(2)} → ${mover.price.toFixed(2)}</p>
       <p className="text-xs text-muted-foreground break-words">{mover.from} → {mover.to}</p>
       <Link className="text-sm text-primary underline" to={'/catalog/' + encodeURIComponent(mover.entry.id)}>Exact record details</Link>
-    </> : <div className="mover-unavailable"><p className="font-semibold text-sm">{loading ? 'Checking dated observations…' : 'Comparable move unavailable'}</p><p className="text-xs text-muted-foreground">{kind === 'graded' ? 'Two exact graded observations and a verified listing or certificate picture are required.' : 'Two consecutive dated source releases for the same exact printing are required.'}</p></div>}
+    </> : <div className="mover-unavailable"><p className="font-semibold text-sm">{loading ? 'Checking dated observations…' : 'Comparable move unavailable'}</p><p className="text-xs text-muted-foreground">{kind === 'graded' ? 'Two dated observations for the same graded listing or certificate are required. Artwork shows the matching raw card.' : 'Two consecutive dated source releases for the same exact printing are required.'}</p></div>}
   </aside>;
 }

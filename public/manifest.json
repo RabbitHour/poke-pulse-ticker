@@ -1,7 +1,7 @@
 {
-  "name": "Poké TCG Market Terminal",
-  "short_name": "PokéTCG Terminal",
-  "description": "Live Poké TCG market data for collectors and traders",
+  "name": "Poke Pulse Ticker",
+  "short_name": "Poke Pulse",
+  "description": "Your daily English Pok\u00e9mon collector check-in: dated prices, chase cards and set indexes.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0e14",
