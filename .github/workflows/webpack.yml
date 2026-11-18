@@ -22,9 +22,15 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Restore durable market data
+      run: |
+        git fetch --depth=1 origin market-data
+        mkdir -p public/data
+        git archive FETCH_HEAD | tar -x -C public/data
+
     - name: Build
       run: |
         npm ci
-        node --test scripts/record-history.test.mjs scripts/service-worker.test.mjs scripts/catalog-delivery.test.mjs
+        node --test scripts/*.test.mjs
         npm test
         npm run build

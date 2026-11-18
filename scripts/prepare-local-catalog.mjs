@@ -2,7 +2,7 @@
 // Repair it before starting Vite, using the same durable release as production.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { prepareCatalog } from './catalog-delivery.mjs';
+import { prepareBuildCatalog } from './prepare-build-catalog.mjs';
 const dir=path.resolve('public/data');
 let complete=false;
 try {
@@ -19,5 +19,5 @@ try {
   complete=count===manifest.recordCount;
  }
 } catch { /* Hydrate below. */ }
-if(!complete) await prepareCatalog(dir);
+if(!complete) await prepareBuildCatalog(dir);
 else console.log('Local catalog is complete.');
