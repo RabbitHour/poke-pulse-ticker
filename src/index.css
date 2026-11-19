@@ -469,3 +469,24 @@ body.demo-mode [data-demo-hide] {
 .bright-market .marketplace-card h3 { min-height:2.5rem; }
 .bright-market .marketplace-card img { margin-inline:auto; }
 .bright-market .movers-panel h2 { text-align:center; }
+
+/* Collector glass: quiet depth around evidence, never over card artwork. */
+.bright-market { background: radial-gradient(ellipse at 8% 8%,#dbf1e9 0,transparent 38%),radial-gradient(ellipse at 92% 28%,#e5edf8 0,transparent 35%),#f3f7f6; color:#172d2a; }
+.bright-market .terminal-card,.bright-market .market-opening,.bright-market .ranking-panel { border:1px solid #d1e2db; border-radius:22px; background:linear-gradient(135deg,#fffffff5,#f7fcfaf2); box-shadow:0 12px 32px #1747350b,inset 0 1px 0 #fff; }
+@supports (backdrop-filter:blur(12px)) { .bright-market .terminal-card { background:linear-gradient(135deg,#ffffffed,#f6fcf9e8); backdrop-filter:blur(12px); } }
+.bright-market .text-muted-foreground { color:#4b625d; }
+.bright-market .marketplace-card,.bright-market .ranking-card,.bright-market .yesterday-mover { border-radius:18px; border-color:#c5dbd1; background:linear-gradient(155deg,#fff,#edf7f2); box-shadow:0 5px 18px #173d2b0a; }
+.bright-market .market-action,.bright-market .browse-sets { border-radius:12px; box-shadow:0 3px 10px #173d2b10; }
+.bright-market a:focus-visible,.bright-market button:focus-visible,.bright-market input:focus-visible,.bright-market select:focus-visible { outline:3px solid #14785b; outline-offset:4px; }
+.opening-sets-stack { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.anniversary-feature { display:flex; gap:8px; align-items:center; max-width:220px; text-align:left; padding:8px 12px; border:1px solid #dccd8b; border-radius:15px; background:linear-gradient(135deg,#fffdf1,#fff7cf); color:#39432b; box-shadow:0 5px 16px #6753110a; }
+.anniversary-feature img { width:58px; height:58px; object-fit:contain; filter:none!important; }
+.anniversary-feature span { font-size:13px; line-height:1.35; }
+.anniversary-feature small { display:block; margin-top:3px; font-size:11px; }
+.collector-paths { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:20px 0; }
+.collector-paths a { display:flex; flex-direction:column; gap:5px; padding:18px 22px; border:1px solid #c8ded4; border-radius:18px; background:linear-gradient(130deg,#ffffffef,#e7f3eeed); box-shadow:0 6px 22px #17473509; }
+.collector-paths span { color:#27654f; font-size:12px; font-weight:700; letter-spacing:.04em; }
+.collector-paths strong { color:#173c30; font-size:17px; }
+.collector-paths small { color:#4b625d; font-size:14px; }
+@media (hover:hover) and (prefers-reduced-motion:no-preference) { .collector-paths a,.anniversary-feature,.bright-market .marketplace-card,.bright-market .ranking-card { transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease; } .collector-paths a:hover,.anniversary-feature:hover,.bright-market .marketplace-card:hover,.bright-market .ranking-card:hover { transform:translateY(-3px); border-color:#7cae97; box-shadow:0 12px 24px #17473516; } }
+@media(max-width:640px) { .collector-paths { grid-template-columns:1fr; gap:9px; } .collector-paths a { padding:14px 18px; } .anniversary-feature { max-width:195px; } }

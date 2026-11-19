@@ -195,6 +195,11 @@ const Index = () => {
         className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-6 sm:space-y-8"
       >
         <MarketOpening />
+        <nav className="collector-paths" aria-label="Choose your collector journey">
+          <a href="#marketplace-title"><span>Explore & enjoy</span><strong>Discover a new favorite</strong><small>Fresh artwork and cards across sets</small></a>
+          <a href="#market-rankings"><span>Research & compare</span><strong>See where your cards stand</strong><small>Dated ranks, movements and evidence</small></a>
+          <a href="#my-pulse"><span>Follow your collection</span><strong>Review saved cards & targets</strong><small>Your browser-local daily checklist</small></a>
+        </nav>
         <TickerBar cards={displayCards} />
         <MarketRankings compact />
         <CollectorDaily />
