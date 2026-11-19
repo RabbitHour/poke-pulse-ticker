@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, TrendingUp, TrendingDown, Minus, Trophy, Info } from "lucide-react";
@@ -72,8 +73,8 @@ const MarketIntelWidget = ({ cards }: MarketIntelWidgetProps) => {
       transition={{ duration: 0.5 }}
       className="terminal-card overflow-hidden"
     >
-      <div className="border-b border-border px-4 py-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold tracking-wide text-secondary uppercase flex items-center gap-2">
+      <div className="border-b border-border px-4 py-3 flex flex-wrap items-center justify-between">
+        <h3 className="text-sm font-bold tracking-wide text-secondary uppercase flex flex-wrap items-center gap-2">
           <Calendar className="w-3.5 h-3.5" /> Market Intelligence
           <button
             onClick={() => setActiveKey("header")}
@@ -82,10 +83,10 @@ const MarketIntelWidget = ({ cards }: MarketIntelWidgetProps) => {
           >
             <Info className="w-3 h-3" />
           </button>
-        </h3>
+        </h3><SectionArtwork context="market intelligence" />
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="font-mono text-[9px] text-primary font-bold uppercase tracking-wider">LIVE</span>
+          <span className="font-mono text-[9px] text-primary font-bold uppercase tracking-wider">DAILY QUOTES</span>
         </div>
       </div>
 
@@ -97,7 +98,7 @@ const MarketIntelWidget = ({ cards }: MarketIntelWidgetProps) => {
           className="p-4 space-y-2 text-left hover:bg-muted/30 transition-colors relative group"
         >
           <Info className="w-3 h-3 text-muted-foreground/40 absolute top-2 right-2 group-hover:text-primary transition-colors" />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <SeasonIcon
               className={`w-4 h-4 ${
                 seasonal.direction === "up"
@@ -135,7 +136,7 @@ const MarketIntelWidget = ({ cards }: MarketIntelWidgetProps) => {
             className="p-4 space-y-2 text-left hover:bg-muted/30 transition-colors relative group"
           >
             <Info className="w-3 h-3 text-muted-foreground/40 absolute top-2 right-2 group-hover:text-primary transition-colors" />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Trophy className="w-4 h-4 text-terminal-amber" />
               <span className="font-mono text-xs font-bold text-foreground">Grade Spread</span>
             </div>
@@ -160,7 +161,7 @@ const MarketIntelWidget = ({ cards }: MarketIntelWidgetProps) => {
           className="p-4 space-y-2 text-left hover:bg-muted/30 transition-colors relative group"
         >
           <Info className="w-3 h-3 text-muted-foreground/40 absolute top-2 right-2 group-hover:text-primary transition-colors" />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
             <span className="font-mono text-xs font-bold text-foreground">Auto-Tracked</span>
           </div>

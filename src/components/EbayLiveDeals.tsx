@@ -1,3 +1,4 @@
+import { useSelectionRotation } from '@/hooks/useSelectionRotation';
 import {isEnglishArtwork} from '@/lib/collectorFocus';
 import { discoveryCards, nextDiscoverySeed } from '@/lib/discoveryCards';
 import { useMemo, useState } from 'react';
@@ -11,14 +12,16 @@ export default function EbayLiveDeals() {
   const [failed,setFailed]=useState<Set<string>>(()=>new Set());
   const [page,setPage] = useState(0);
   const [seed,setSeed] = useState(nextDiscoverySeed);
+  const rotation=useSelectionRotation(()=>{setSeed(nextDiscoverySeed());setPage(0);});
   const quick = useLiveCardsQuick(), catalog = useCatalog();
   const cards = useMemo(() => {
     const source = catalog.data?.entries.filter(c=>c.kind==='raw' && isEnglishArtwork(c) && c.image && c.market != null && c.market>0).map(c=>({id:c.id,name:c.name,set:c.set,number:c.number,variant:c.variant,image:c.image,market:c.market!,href:'/catalog/'+encodeURIComponent(c.id)})) ?? (quick.data??[]).filter(c=>c._image && c._apiId && c.market>0).map(c=>({id:c._apiId!,name:c.name,set:c.set,number:c.number,variant:c._variant,image:c._image,market:c.market,href:'/card/'+encodeURIComponent(c._apiId!)+(c._variant?'?variant='+encodeURIComponent(c._variant):'')}));
     return discoveryCards(source.filter(c=>c.image&&!failed.has(c.image)), 120, seed);
   }, [catalog.data,quick.data,failed,seed]);
-  return <section className="terminal-card marketplace-gallery p-5 space-y-5" aria-labelledby="marketplace-title">
+  return <section {...rotation.bindings} className="terminal-card marketplace-gallery p-5 space-y-5" aria-labelledby="marketplace-title">
     <div className="flex flex-wrap justify-between items-center gap-3"><div><h2 id="marketplace-title" className="font-bold">Discover cards &amp; marketplace listings</h2><p className="text-sm text-muted-foreground">A fresh mix of English cards across sets. Reshuffle to explore more; source prices do not change with the selection.</p></div><Link to="/sets" className="market-action browse-sets">Browse Sets →</Link></div>
     <button className="market-action" onClick={()=>{setSeed(nextDiscoverySeed());setPage(0);}}>Reshuffle cards</button>
+    <button className="market-action ml-2" aria-pressed={rotation.paused} onClick={()=>rotation.setPaused(p=>!p)}>{rotation.paused?"Resume automatic discovery":"Pause automatic discovery"}</button><p className="text-xs text-muted-foreground">Selection rotates every two minutes while this tab is visible and you are not interacting with this section. Daily source quotes remain unchanged.</p>
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">{cards.slice((page % Math.max(1,Math.ceil(cards.length/18)))*18,((page % Math.max(1,Math.ceil(cards.length/18)))+1)*18).map(card=>{
       const query=encodeURIComponent([card.name,card.set,card.number,card.variant].filter(Boolean).join(' '));
       const url='https://www.ebay.com/sch/i.html?_nkw='+query;

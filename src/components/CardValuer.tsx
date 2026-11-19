@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import PriceHistory from "./PriceHistory";
 import { useCatalog } from "@/hooks/useCatalog";
 import { useEffect, useMemo, useState } from "react";
@@ -52,6 +53,7 @@ export default function CardValuer({ id, compact = false }: {id:string;compact?:
   return <section id={id} aria-labelledby={id+"-title"} className="terminal-card bright-valuer p-4 sm:p-5 scroll-mt-20 space-y-3">
     <div className="flex items-center justify-between gap-3 flex-wrap"><h2 id={id+"-title"} className="font-bold text-xl">Check a card value</h2><span className="text-xs font-semibold">FREE LOOKUP · USD</span></div>
     <p className="text-sm muted">Search by Pokémon, set, card number or variant. Select your exact printing before using its quote. Graded prices are asking-price medians.</p>
+    {!submitted&&<SectionArtwork context="exact printing values" />}
     <form aria-label="Card value search" onSubmit={e=>{e.preventDefault();setSubmitted(query.trim());setSelectedKey(null);}}>
       <div className="grid sm:grid-cols-[1fr_170px_100px] gap-3">
         <label className="text-sm" htmlFor={id+"-query"}>Card, set or number<input id={id+"-query"} value={query} maxLength={100} onChange={e=>{setQuery(e.target.value);setSelectedKey(null);}} placeholder="Try Mew 30th Anniversary or Charizard 4/102"/></label>

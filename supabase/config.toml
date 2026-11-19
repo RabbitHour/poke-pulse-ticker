@@ -17,3 +17,7 @@ verify_jwt = false
 
 [functions.stripe-dunning-webhook]
 verify_jwt = false
+
+# Handler validates owner JWT or a separately scoped scheduled-report credential.
+[functions.poke-owner-agent]
+verify_jwt = false

@@ -438,3 +438,16 @@ img {
 body.demo-mode [data-demo-hide] {
   display: none !important;
 }
+/* Image-led research sections, preserving the Poke Pulse green identity. */
+.bright-market .terminal-card { border-radius: 18px; border-color: #b8d5c5; box-shadow: 0 5px 20px #103f2510; }
+.section-artwork { margin: 1rem 0; padding: .9rem 1rem; border-radius: 14px; background: linear-gradient(115deg,#e8f6ed,#f8fcfa); border: 1px solid #cee5d7; }
+.section-artwork-label { font-size: .72rem; color: #355d46; margin-bottom: .6rem; font-weight: 600; }
+.section-artwork-cards { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.section-artwork-card { display: flex; align-items: center; gap: .8rem; max-width: 310px; color: #123e27; }
+.section-artwork-card small { display: block; font-size: .72rem; margin-top: .3rem; }
+.section-artwork-card img { filter: drop-shadow(0 5px 5px #123e2725); transition: transform .2s; }
+.section-artwork-card:hover img { transform: translateY(-3px); }
+.section-artwork-card:focus-visible { outline: 3px solid #238450; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .section-artwork-card img { transition: none; } }
+
+.section-artwork { flex-basis: 100%; order: 10; }
