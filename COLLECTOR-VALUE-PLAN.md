@@ -100,3 +100,13 @@ The customer promise remains: inspect changes to exact saved cards, see target c
 - Next customer-value priorities: cross-device saved cards; reliable target alerts; documented sold transactions with condition/grade/shipping; dated sourced news; forecasts evaluated on unseen dates against unchanged-price and simple trend baselines.
 - Measure first-save conversion, successful exact-record lookups, target usage, seven-day returning collectors, and forecast calibration/error on nonoverlapping held-out periods. Never promise daily visits, profit, prediction superiority or investor funding from a redesign.
 - Artwork discovery now allows up to 160 requests per run (previously 80) with a two-minute start-request deadline and per-request timeout. Exact image validation and incremental caches remain intact. This is a capacity change, not a claim of newly recovered images.
+
+## November 19 ranking release
+
+The collection barometer now separates raw cards, graded asking quotes, sealed products and fixed-basket set indexes. Rank by reference value, daily gains/declines in dollars or percentage, and absolute daily movement. Search retains the overall cohort rank and ties share rank. Set levels are points, not complete-set prices, and different launch dates limit cross-set level comparisons.
+
+Rankings use exact record identities and consecutive UTC source releases. History is checked hourly while the page is open; catalog checks every 30 minutes. These checks do not create hourly prices or history. Existing unattended provider synchronization remains unchanged. Rankings derive from valuations and must not feed back into prices as a circular premium.
+
+Value ranks are linked from ticker cards, discovery, daily movers, exact records and the valuer. The collector ticker remains the default; an optional full priced-English-raw view includes commons. Missing artwork does not remove an otherwise valid record from rankings. Image coverage remains incomplete; never substitute incorrect card artwork to hide that gap.
+
+Next evidence gates: authenticated cross-device saved cards, dependable consented target alerts, exact sold-price evidence with fees/condition/sample counts, and forecast comparisons against unchanged-price baselines on unseen outcomes. Measure saved-card activation and seven-day return rate before claiming improved retention. No competitive prediction advantage is established by this release.

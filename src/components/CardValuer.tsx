@@ -1,3 +1,4 @@
+import {useCatalogValueRanks} from '@/hooks/useCatalogValueRanks';
 import SectionArtwork from './SectionArtwork';
 import PriceHistory from "./PriceHistory";
 import { useCatalog } from "@/hooks/useCatalog";
@@ -12,6 +13,7 @@ import { CardImage } from "./CardImage";
 
 type Row = {key:string;name:string;detail:string;searchText:string;price:number|null;image?:string;href?:string};
 export default function CardValuer({ id, compact = false }: {id:string;compact?:boolean}) {
+  const valueRanks=useCatalogValueRanks();
   const [query,setQuery]=useState("");
   const [submitted,setSubmitted]=useState("");
   const [category,setCategory]=useState("raw");
@@ -74,7 +76,7 @@ export default function CardValuer({ id, compact = false }: {id:string;compact?:
     {submitted&&!busy&&!rows.length&&<p role="status">No matching source quote or exact catalog match for “{submitted}”. Try the Pokémon name and printed card number, then check the set, language and variant. Some languages, promos and new releases are not covered yet. No price is guessed.</p>}
     {matches.length>rows.length&&<Link className="market-action" to={"/?q="+encodeURIComponent(submitted)+"#catalog-search"}>See all matching catalog records</Link>}
     {selected&&<div className="valuer-result" aria-live="polite"><h3 className="font-semibold">{selected.name} — {selected.detail}</h3>
-      <p className="text-3xl font-bold py-2">{selected.price==null?"No provider quote yet":total==null?"Enter a whole quantity from 1 to 999":"$"+total.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+      {valueRanks.has(selected.key)&&<Link className="underline text-sm" to="/rankings">Value rank #{valueRanks.get(selected.key)!.rank.toLocaleString()} of {valueRanks.get(selected.key)!.of.toLocaleString()} available {valueRanks.get(selected.key)!.kind} quotes</Link>}<p className="text-3xl font-bold py-2">{selected.price==null?"No provider quote yet":total==null?"Enter a whole quantity from 1 to 999":"$"+total.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</p>
       <p className="text-xs muted">Available feed quote, not an offer to buy or a guaranteed sale value. Fees, shipping and taxes are excluded.</p>
       {selected.price!=null&&<PriceHistory recordId={selected.key} current={selected.price}/>}
       {selected.href&&<Link className="market-action mt-2" to={selected.href}>Open card details</Link>}

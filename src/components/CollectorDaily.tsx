@@ -1,3 +1,4 @@
+import {useCatalogValueRanks} from '@/hooks/useCatalogValueRanks';
 import {useSelectionRotation} from '@/hooks/useSelectionRotation';
 import SectionArtwork from './SectionArtwork';
 import {COLLECTOR_STORAGE,readCollectorSaved,type CollectorSaved} from '@/lib/collectorSaved';
@@ -14,6 +15,7 @@ type Saved=CollectorSaved;
 const money=(v:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v);
 export default function CollectorDaily(){
  const catalog=useCatalog();
+ const valueRanks=useCatalogValueRanks();
  const observations=useQuery({queryKey:['yesterday-exact-observations'],queryFn:()=>loadYesterdayObservations(),staleTime:1800000,refetchInterval:1800000,retry:1,placeholderData:prev=>prev});
  const [saved,setSaved]=useState<Saved[]>(readCollectorSaved);
  const [storageError,setStorageError]=useState(false);
@@ -53,7 +55,7 @@ export default function CollectorDaily(){
   <div className="flex flex-wrap gap-2" aria-label="Collector movement filters">{[['movers','Largest dollar moves'],['gainers','Gainers'],['decliners','Decliners']].map(([value,label])=><button key={value} aria-pressed={filter===value} className="browse-sets" onClick={()=>{setFilter(value);setMovePage(0);}}>{label}</button>)}<button className="browse-sets" onClick={markReviewed} disabled={!source||marked}>{marked?'Release marked reviewed':'Mark this release reviewed'}</button></div>
   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">{rows.slice((movePage%Math.max(1,Math.ceil(rows.length/6)))*6,((movePage%Math.max(1,Math.ceil(rows.length/6)))+1)*6).map(({entry:e,change})=><article key={e.id} className="rounded-xl border border-border p-3 space-y-2">
    <Link to={'/catalog/'+encodeURIComponent(e.id)}><CardImage src={e.image} alt={e.name} className="w-full h-44 object-contain" onUnavailable={()=>setFailed(prev=>new Set(prev).add(e.image))}/><h3 className="font-bold mt-2">{e.name}</h3></Link>
-   <p className="text-xs">{e.set} · #{e.number} · {e.variant}</p><p className="text-xs text-muted-foreground">{collectorCategory(e)}</p><p className="font-bold">{money(e.market!)}</p><p className={change>=0?'text-emerald-800 font-semibold':'text-rose-800 font-semibold'}>{change>=0?'+':''}{change.toFixed(2)}% · {money(e.market!-e.market!/(1+change/100))}</p>
+   <p className="text-xs">{e.set} · #{e.number} · {e.variant}</p><p className="text-xs text-muted-foreground">{collectorCategory(e)}</p><p className="font-bold">{money(e.market!)}</p>{valueRanks.has(e.id)&&<Link className="text-xs underline" to="/rankings">Raw value rank #{valueRanks.get(e.id)!.rank.toLocaleString()}</Link>}<p className={change>=0?'text-emerald-800 font-semibold':'text-rose-800 font-semibold'}>{change>=0?'+':''}{change.toFixed(2)}% · {money(e.market!-e.market!/(1+change/100))}</p>
    <button className="browse-sets text-sm" onClick={()=>toggle(e.id)}>{saved.some(x=>x.id===e.id)?'Remove saved card':'Save card'}</button>
   </article>)}</div>
   {rows.length>6&&<div className="flex gap-3 items-center"><button className="browse-sets" onClick={()=>setMovePage(p=>(p+1)%Math.ceil(rows.length/6))}>Explore next ranked movers →</button><button className="browse-sets" aria-pressed={rotation.paused} onClick={()=>rotation.setPaused(p=>!p)}>{rotation.paused?"Resume mover rotation":"Pause mover rotation"}</button><button className="browse-sets" onClick={()=>setMovePage(0)}>Return to leaders</button><span className="text-sm">Ranked page {movePage%Math.ceil(rows.length/6)+1} of {Math.ceil(rows.length/6)} · same dated release. Pages rotate every two minutes when not interacting.</span></div>}

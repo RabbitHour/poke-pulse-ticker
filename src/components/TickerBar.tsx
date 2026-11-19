@@ -1,3 +1,4 @@
+import {useCatalogValueRanks} from '@/hooks/useCatalogValueRanks';
 import {nextDiscoverySeed} from '@/lib/discoveryCards';
 import {tickerSelection,tickerOpeningIndex} from '@/lib/tickerSelection';
 // 2026-11-15 — David Noyes — Clock-based alphabetical market ticker.
@@ -8,7 +9,7 @@ import type { CardData } from "@/data/marketData";
 import { useCatalog, type CatalogEntry } from "@/hooks/useCatalog";
 import { useObservedProducts } from "@/hooks/useObservedProducts";
 import { catalogSymbol } from "@/lib/catalogSymbols";
-import { collectorCategory, isCollectorCard } from "@/lib/collectorFocus";
+import { collectorCategory, isCollectorCard, isEnglishArtwork } from "@/lib/collectorFocus";
 import { CardImage } from "./CardImage";
 
 // Fixed widths prevent long names or image loading from changing scroll speed.
@@ -24,6 +25,7 @@ export default function TickerBar({
   cards?: CardData[];
 }) {
   const catalog = useCatalog();
+  const valueRanks=useCatalogValueRanks();
   const [visitSeed] = useState(nextDiscoverySeed);
   const opening = useRef<{offset:number}|null>(null);
   const observed = useObservedProducts(cards);
@@ -98,8 +100,7 @@ export default function TickerBar({
       ...(catalog.data?.entries ?? fallback),
       ...graded,
     ]) {
-      const matches = isCollectorCard(entry) && !unavailable.has(entry.image) &&
-        (category === 'all' || collectorCategory(entry) === category);
+      const matches = !unavailable.has(entry.image) && (category==='all-raw' ? entry.kind==='raw'&&entry.market!=null&&entry.market>0&&isEnglishArtwork(entry) : isCollectorCard(entry)&&(category==='all'||collectorCategory(entry)===category));
 
       if (matches && !unique.has(entry.id)) {
         unique.set(entry.id, entry);
@@ -192,7 +193,7 @@ export default function TickerBar({
             value={category}
             onChange={event => setCategory(event.target.value)}
           >
-            <option value="all">English collector cards</option>
+            <option value="all">English collector cards</option><option value="all-raw">All priced English raw cards</option>
             {['Special illustration rare','Illustration rare','Ultra rare','Promo','Full art / special rarity','Full art / illustration','Trainer / Galarian Gallery'].map(label=><option key={label} value={label}>{label}</option>)}
           </select>
           <span className="text-xs text-muted-foreground">
@@ -309,7 +310,7 @@ export default function TickerBar({
                         : validPrice
                           ? "$" + entry.market!.toFixed(2)
                           : "No quote"}
-                    </strong>
+                    </strong>{valueRanks.has(entry.id)&&<Link to="/rankings" className="text-xs underline">Raw value rank #{valueRanks.get(entry.id)!.rank.toLocaleString()}</Link>}
                   </div>
                 </div>
               );
@@ -328,7 +329,7 @@ export default function TickerBar({
         {catalog.data?.sourceUpdated
           ? `Catalog source release: ${catalog.data.sourceUpdated}. `
           : "Catalog release date unavailable. "}
-        Illustration rares, ultra rares, promos and documented full-art types with priced English artwork. Unknown rarities and failed images are excluded; coverage grows as source metadata arrives.
+        {category === "all-raw" ? "All priced English raw cards with available artwork, including commons and uncommons." : "Illustration rares, ultra rares, promos and documented full-art types with priced English artwork. Unknown rarities are excluded; coverage grows as source metadata arrives."} Failed images are removed.
         {reducedMotion
           ? " Automatic movement is off for your reduced-motion preference."
           : " Resume returns to the current clock-based position."}

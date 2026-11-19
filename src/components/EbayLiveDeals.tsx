@@ -1,3 +1,4 @@
+import {useCatalogValueRanks} from '@/hooks/useCatalogValueRanks';
 import { useSelectionRotation } from '@/hooks/useSelectionRotation';
 import {isEnglishArtwork} from '@/lib/collectorFocus';
 import { discoveryCards, nextDiscoverySeed } from '@/lib/discoveryCards';
@@ -9,6 +10,7 @@ import { CardImage } from './CardImage';
 
 const dollars = new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'});
 export default function EbayLiveDeals() {
+  const valueRanks=useCatalogValueRanks();
   const [failed,setFailed]=useState<Set<string>>(()=>new Set());
   const [page,setPage] = useState(0);
   const [seed,setSeed] = useState(nextDiscoverySeed);
@@ -25,7 +27,7 @@ export default function EbayLiveDeals() {
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">{cards.slice((page % Math.max(1,Math.ceil(cards.length/18)))*18,((page % Math.max(1,Math.ceil(cards.length/18)))+1)*18).map(card=>{
       const query=encodeURIComponent([card.name,card.set,card.number,card.variant].filter(Boolean).join(' '));
       const url='https://www.ebay.com/sch/i.html?_nkw='+query;
-      return <article key={card.id} className="marketplace-card min-w-0"><Link to={card.href}><CardImage src={card.image} onUnavailable={()=>setFailed(prev=>new Set(prev).add(card.image!))} alt={card.name} className="w-full aspect-[3/4] object-contain"/></Link><div className="p-3 space-y-2"><h3 className="font-bold">{card.name}</h3><p className="text-sm">{[card.set,card.number,card.variant].filter(Boolean).join(' · ')}</p><strong className="block text-primary">{dollars.format(card.market)}</strong><div className="flex flex-wrap gap-2 text-sm"><a href={url} target="_blank" rel="noopener noreferrer" className="underline">Active listings ↗</a><a href={url+'&LH_Complete=1&LH_Sold=1'} target="_blank" rel="noopener noreferrer" className="underline">Sold listings ↗</a></div></div></article>;
+      return <article key={card.id} className="marketplace-card min-w-0"><Link to={card.href}><CardImage src={card.image} onUnavailable={()=>setFailed(prev=>new Set(prev).add(card.image!))} alt={card.name} className="w-full aspect-[3/4] object-contain"/></Link><div className="p-3 space-y-2"><h3 className="font-bold">{card.name}</h3><p className="text-sm">{[card.set,card.number,card.variant].filter(Boolean).join(' · ')}</p><strong className="block text-primary">{dollars.format(card.market)}</strong>{valueRanks.has(card.id)&&<Link className="text-xs underline" to="/rankings">Raw value rank #{valueRanks.get(card.id)!.rank.toLocaleString()}</Link>}<div className="flex flex-wrap gap-2 text-sm"><a href={url} target="_blank" rel="noopener noreferrer" className="underline">Active listings ↗</a><a href={url+'&LH_Complete=1&LH_Sold=1'} target="_blank" rel="noopener noreferrer" className="underline">Sold listings ↗</a></div></div></article>;
     })}</div>
     {cards.length>18 && <div className="flex justify-center items-center gap-3"><button className="market-action" onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}>Previous cards</button><span className="text-sm">{page % Math.ceil(cards.length/18)+1} / {Math.ceil(cards.length/18)}</span><button className="market-action" onClick={()=>setPage(p=>(p+1)%Math.ceil(cards.length/18))}>Discover more cards →</button></div>}
     {!cards.length && <p role="status">{quick.isLoading || catalog.isLoading ? 'Loading featured cards…' : 'Featured quotes are temporarily unavailable. Use the card valuer below.'}</p>}
