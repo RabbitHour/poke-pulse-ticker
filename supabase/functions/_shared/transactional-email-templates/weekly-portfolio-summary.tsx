@@ -24,8 +24,8 @@ const WeeklyPortfolioSummaryEmail = ({
   weeklyChangePercent = "0.00",
   isPositive = true,
   cardCount = 0,
-  topMover = "N/A",
-  topMoverChange = "0.00%",
+  topMover,
+  topMoverChange,
 }: WeeklyPortfolioSummaryProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -60,9 +60,9 @@ const WeeklyPortfolioSummaryEmail = ({
           <Text style={detailRow}>
             <span style={detailLabel}>Cards tracked:</span> {cardCount}
           </Text>
-          <Text style={detailRow}>
+          {topMover && topMoverChange && <Text style={detailRow}>
             <span style={detailLabel}>Top mover:</span> {topMover} ({topMoverChange})
-          </Text>
+          </Text>}
         </Section>
 
         <Section style={ctaSection}>

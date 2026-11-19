@@ -12,6 +12,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Fail closed: this privileged bulk-email operation is not a customer API.
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  const scheduleSecret = Deno.env.get("POKE_EMAIL_SCHEDULE_SECRET");
+  if (!scheduleSecret || req.headers.get("x-poke-email-schedule") !== scheduleSecret) {
+    return new Response("Scheduled email authorization required", { status: 403 });
+  }
+  // This legacy report does not yet meet the dated-evidence/delivery standard.
+  // Keep it off until the replacement digest and production delivery are verified.
+  if (Deno.env.get("POKE_WEEKLY_EMAIL_ENABLED") !== "true") {
+    return new Response("Portfolio email delivery is not activated", { status: 503 });
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -37,7 +49,7 @@ serve(async (req) => {
 
       // Get user email from auth
       const { data: { user } } = await adminClient.auth.admin.getUserById(userId);
-      if (!user?.email) continue;
+      if (!user?.email || !user.email_confirmed_at) continue;
 
       // Get portfolio cards
       const { data: cards } = await adminClient
@@ -81,8 +93,6 @@ serve(async (req) => {
             weeklyChangePercent: Math.abs(weeklyChangePercent).toFixed(2),
             isPositive: weeklyChange >= 0,
             cardCount: cards.length,
-            topMover: cards[0]?.card_name || "N/A",
-            topMoverChange: "+0.00%",
           },
         },
       });
