@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, TrendingDown, Activity, Zap, Info } from "lucide-react";
@@ -83,8 +84,8 @@ const MarketTrendSummary = ({ cards }: MarketTrendSummaryProps) => {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="terminal-card overflow-hidden"
     >
-      <div className="border-b border-border px-4 py-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold tracking-wide text-secondary uppercase flex items-center gap-2">
+      <div className="border-b border-border px-4 py-3 flex flex-wrap items-center justify-between">
+        <h2 className="text-sm font-bold tracking-wide text-secondary uppercase flex flex-wrap items-center gap-2">
           <BarChart3 className="w-3.5 h-3.5" /> Market Trend Summary
           <button
             onClick={() => setHeaderInfoOpen(true)}
@@ -93,8 +94,8 @@ const MarketTrendSummary = ({ cards }: MarketTrendSummaryProps) => {
           >
             <Info className="w-3 h-3" />
           </button>
-        </h2>
-        <div className="flex items-center gap-2">
+        </h2><SectionArtwork context="market trends" />
+        <div className="flex flex-wrap items-center gap-2">
           <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-full ${
             overallSentiment === "BULLISH" ? "bg-terminal-green/15 text-terminal-green" :
             overallSentiment === "BEARISH" ? "bg-terminal-red/15 text-terminal-red" :
@@ -135,7 +136,7 @@ const MarketTrendSummary = ({ cards }: MarketTrendSummaryProps) => {
 
       {/* Signal distribution */}
       <div className="border-t border-border px-4 py-3">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-wrap items-center justify-between mb-2">
           <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
             AI Signal Distribution
           </span>

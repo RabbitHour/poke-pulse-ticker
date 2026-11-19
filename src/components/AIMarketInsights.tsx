@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles, TrendingUp, TrendingDown, AlertTriangle, Eye, ChevronRight, RefreshCw } from "lucide-react";
@@ -175,14 +176,14 @@ const AIMarketInsights = ({ cards }: { cards: CardData[] }) => {
       transition={{ duration: 0.5 }}
       className="terminal-card overflow-hidden"
     >
-      <div className="border-b border-border/60 px-4 py-3 flex items-center gap-2">
+      <div className="border-b border-border/60 px-4 py-3 flex flex-wrap items-center gap-2">
         <div className="relative">
           <Brain className="w-4 h-4 text-purple-400" />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
         </div>
         <h2 className="text-sm font-bold tracking-wide text-secondary uppercase">
           AI Market Insights
-        </h2>
+        </h2><SectionArtwork context="market insights" />
         <span className="font-mono text-[9px] bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full font-bold">
           EXPERIMENTAL SUMMARY
         </span>
@@ -208,7 +209,7 @@ const AIMarketInsights = ({ cards }: { cards: CardData[] }) => {
             <div className="px-4 py-3 flex items-start gap-3">
               <div className="mt-0.5 shrink-0">{INSIGHT_ICONS[insight.type]}</div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex flex-wrap items-center gap-2 mb-0.5">
                   <p className="font-mono text-xs font-bold text-foreground">{insight.title}</p>
                   <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded font-bold ${
                     insight.confidence >= 80 ? "bg-primary/15 text-primary" :

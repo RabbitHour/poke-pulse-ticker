@@ -1,3 +1,4 @@
+import OwnerAgent from './pages/OwnerAgent';
 import RouteScroll from './components/RouteScroll';
 import MarketPageHeader from "./components/MarketPageHeader";
 import Memberships from "./pages/Memberships";
@@ -95,6 +96,7 @@ const AnimatedRoutes = () => {
           <Route path="/sets" element={<SetBrowser />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/owner-agent" element={<OwnerAgent />} />
           <Route path="/command-center" element={<CommandCenter />} />
           <Route path="/releases" element={<ReleaseCalendar />} />
           <Route path="/watchlist" element={<Watchlist />} />

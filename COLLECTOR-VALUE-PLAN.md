@@ -86,3 +86,17 @@ A collector can identify a printing, inspect its dated quote/history, save a tar
 
 ## Navigation and seeding policy
 Smoke checks cover route rendering, public data paths and representative exact-card/set/search/save journeys. Signed-in account workflows, checkout, delivery and external listings require separate authorized end-to-end checks. An empty account is legitimate; seed only real public catalog data or clearly labeled simulations. A rendered heading alone does not prove the feature's backend works. See RELEASE-SMOKE-2026-11-19.md for tested scope and remaining gaps.
+
+## November 19 — image-led research and owner controls
+
+The customer promise remains: inspect changes to exact saved cards, see target crossings and review dated evidence. Visual polish supports this promise but does not establish investment performance or daily retention.
+
+- Named English card artwork now accompanies research sections; set tiles select artwork within that set, saved rows use the exact record, and general artwork is explicitly representative.
+- Discovery selections and ranked daily mover pages rotate every two minutes while visible and not interacting, with pause/manual controls. Quote timestamps do not change on rotation; leaders can be restored immediately.
+- Retain the green identity, use consistent rounded research panels, more breathing room and named image links. Rare Candy's homepage was visually reviewed: one clear hero action, spacious category navigation, large product artwork and consistent product rails. Apply these general principles with Poke Pulse's own green research identity, not copied assets or commercial claims.
+- Rare Candy pricing integration is pending a documented authorized API/feed/license. Do not copy its proprietary estimated values into sold-price evidence. Public terms: https://rarecandy.com/terms . No Rare Candy data was imported.
+- Existing updater already traverses every current provider group and adds unmatched English catalog identities. Comprehensive coverage is not established. Next additions require provider reconciliation, source rights, exact-printing mappings, and artwork verification; never duplicate records to increase sample counts.
+- Added `/owner-agent` with server-verified UUID authorization, private report tables, pause/resume and audit controls, and a daily workflow that is inert without secrets. Activation is blocked by access to the actual backend. See OWNER-AGENT-SETUP.md. No running autonomous builder or traffic analytics is claimed.
+- Next customer-value priorities: cross-device saved cards; reliable target alerts; documented sold transactions with condition/grade/shipping; dated sourced news; forecasts evaluated on unseen dates against unchanged-price and simple trend baselines.
+- Measure first-save conversion, successful exact-record lookups, target usage, seven-day returning collectors, and forecast calibration/error on nonoverlapping held-out periods. Never promise daily visits, profit, prediction superiority or investor funding from a redesign.
+- Artwork discovery now allows up to 160 requests per run (previously 80) with a two-minute start-request deadline and per-request timeout. Exact image validation and incremental caches remain intact. This is a capacity change, not a claim of newly recovered images.

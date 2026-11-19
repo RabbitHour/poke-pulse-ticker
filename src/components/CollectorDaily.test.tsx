@@ -1,4 +1,4 @@
-import {act,cleanup,fireEvent,render,screen} from '@testing-library/react';
+import {act,cleanup,fireEvent,render,screen,within} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import CollectorDaily from './CollectorDaily';
@@ -20,13 +20,13 @@ it('saves exact cards, persists targets and compares reviewed quotes on the next
  expect(screen.getByText('Save a card above to build your daily checklist.')).toBeTruthy();
 });
 it('removes a card with failed artwork from the highlights',()=>{
- mount();const img=screen.getByRole('img',{name:'Pikachu'});
+ mount();const img=within(screen.getByRole('button',{name:/^(Save card|Remove saved card)$/}).closest('article')!).getByRole('img',{name:'Pikachu'});
  act(()=>fireEvent.error(img));
  expect(screen.queryByRole('button',{name:'Save card'})).toBeNull();
 });
 it('retains saved quote and target when artwork fails in highlights',()=>{
  mount();fireEvent.click(screen.getByRole('button',{name:'Save card'}));
- act(()=>fireEvent.error(screen.getByRole('img',{name:'Pikachu'})));
+ act(()=>fireEvent.error(within(screen.getByRole('button',{name:/^(Save card|Remove saved card)$/}).closest('article')!).getByRole('img',{name:'Pikachu'})));
  expect(screen.getByRole('spinbutton',{name:'Buy target ($)'})).toBeTruthy();
  expect(screen.getByText('$12.00')).toBeTruthy();
 });

@@ -1,0 +1,23 @@
+name: Owner research audit
+on:
+  schedule:
+    - cron: '20 13 * * *'
+  workflow_dispatch:
+permissions: {}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request private report (no report contents in logs)
+        env:
+          AGENT_URL: ${{ secrets.POKE_AGENT_URL }}
+          AGENT_SECRET: ${{ secrets.POKE_AGENT_SCHEDULE_SECRET }}
+        shell: bash
+        run: |
+          if [ -z "$AGENT_URL" ] || [ -z "$AGENT_SECRET" ]; then
+            echo 'Owner agent is not provisioned; no audit requested.'
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 60 --output /dev/null \
+            -H "x-poke-schedule: $AGENT_SECRET" -H 'Content-Type: application/json' \
+            --data '{"action":"run"}' "$AGENT_URL"

@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-export const IMAGE_BUDGET = 80;
+export const IMAGE_BUDGET = 160;
 const MAX_BYTES = 2_000_000;
 export function exactDexImage(entry, card) {
   const setId = entry.cardId?.slice(0, entry.cardId.lastIndexOf('-'));
@@ -21,7 +21,8 @@ export function imageCoverage(entries) {
     return [kind, {total:rows.length,available,verified:rows.filter(e=>e.image && e.imageProvenance?.verifiedAt).length,missing:rows.length-available}];
   }));
 }
-export async function discoverImages(entries, products, dataDir, {fetcher=fetch, budget=IMAGE_BUDGET, now=new Date().toISOString()}={}) {
+export async function discoverImages(entries, products, dataDir, {fetcher=fetch, budget=IMAGE_BUDGET, now=new Date().toISOString(), maxDurationMs=120000}={}) {
+  const deadline=Date.now()+maxDurationMs;
   const stateFile = path.join(dataDir,'image-discovery.json');
   let state; try { state=JSON.parse(await fs.readFile(stateFile,'utf8')); } catch(e) { if(e.code!=='ENOENT')throw e; state={version:1,records:{}}; }
   const records=state.records;
@@ -46,8 +47,8 @@ export async function discoverImages(entries, products, dataDir, {fetcher=fetch,
   const candidates=[];for(let i=0;i<Math.max(...queues.map(q=>q.length));i++)for(const queue of queues)if(queue[i])candidates.push(queue[i]);
   // Bound all network requests, including artwork validation, to this run's budget.
   let requests=0, discovered=0;
-  async function request(url){if(requests>=budget)throw Error('Budget exhausted');requests++;const r=await fetcher(url,{signal:AbortSignal.timeout(15000),redirect:'error',headers:{'User-Agent':'PokePulseCatalog/2.0 (+https://poke-pulse-ticker.lovable.app/)'}});if(!r.ok)throw Error('Provider HTTP '+r.status);return r;}
-  for(const rows of candidates){const e=rows[0];if(requests+(e.kind==='sealed'?1:2)>budget)break;
+  async function request(url){if(requests>=budget||Date.now()>=deadline)throw Error('Discovery budget exhausted');requests++;const r=await fetcher(url,{signal:AbortSignal.timeout(15000),redirect:'error',headers:{'User-Agent':'PokePulseCatalog/2.0 (+https://poke-pulse-ticker.lovable.app/)'}});if(!r.ok)throw Error('Provider HTTP '+r.status);return r;}
+  for(const rows of candidates){const e=rows[0];if(Date.now()>=deadline||requests+(e.kind==='sealed'?1:2)>budget)break;
     let image,provenance,error;
     try {
       const cardId=e.cardId||e.imageCandidateId;

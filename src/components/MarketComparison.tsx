@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useEffect, useRef, useState } from 'react';
 
 // Provider-hosted quotes remain separate from our daily collectible observations.
@@ -17,5 +18,5 @@ export default function MarketComparison() {
     host.replaceChildren(slot, script);
     return () => { script.onerror = null; host.replaceChildren(); };
   }, []);
-  return <section className="space-y-3" aria-labelledby="other-markets-title"><h3 id="other-markets-title" className="font-bold text-xl">Compare with other markets</h3><p className="text-sm">Explore provider-updated stocks, gold and Bitcoin alongside the Pokémon indexes above. Compare the same date range and percentage change, not dollar prices. Index and gold instruments below are clearly labeled CFD references.</p><div ref={container} className={`tradingview-widget-container ${failed ? "hidden" : "min-h-[500px]"}`}/><p className="text-sm">{failed ? 'The market widget could not load. ' : ''}<a href="https://www.tradingview.com/markets/" target="_blank" rel="noopener noreferrer" className="underline">World markets by TradingView ↗</a>. Availability and delays depend on the instrument and provider. Pokémon quotes are daily releases; this is not a synchronized return or correlation calculation.</p></section>;
+  return <section className="space-y-3" aria-labelledby="other-markets-title"><h3 id="other-markets-title" className="font-bold text-xl">Compare with other markets</h3><SectionArtwork context="Pokémon alongside other markets" /><p className="text-sm">Explore provider-updated stocks, gold and Bitcoin alongside the Pokémon indexes above. Compare the same date range and percentage change, not dollar prices. Index and gold instruments below are clearly labeled CFD references.</p><div ref={container} className={`tradingview-widget-container ${failed ? "hidden" : "min-h-[500px]"}`}/><p className="text-sm">{failed ? 'The market widget could not load. ' : ''}<a href="https://www.tradingview.com/markets/" target="_blank" rel="noopener noreferrer" className="underline">World markets by TradingView ↗</a>. Availability and delays depend on the instrument and provider. Pokémon quotes are daily releases; this is not a synchronized return or correlation calculation.</p></section>;
 }

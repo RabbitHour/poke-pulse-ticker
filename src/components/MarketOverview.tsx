@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useMarketIndexes } from "@/hooks/useMarketIndexes";
 import IndexDayChart from "./IndexDayChart";
 
@@ -11,7 +12,7 @@ export default function MarketOverview() {
   const { indexes, isLoading, isError, refetch } = useMarketIndexes();
   return <section id="market-charts" aria-labelledby="market-charts-title" className="space-y-3 scroll-mt-20">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div><h2 id="market-charts-title" className="market-section-title">Core market indexes</h2>
+      <div><h2 id="market-charts-title" className="market-section-title">Core market indexes</h2><SectionArtwork context="core market indexes" />
         <p className="text-sm text-muted-foreground">Stored basket-average prices in USD. The chart checks for new records every five minutes; provider updates may be daily.</p></div>
       <button className="market-action" onClick={() => void refetch()} disabled={isLoading}>Refresh charts</button>
     </div>

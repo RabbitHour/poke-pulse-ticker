@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Layers, TrendingUp, TrendingDown, Calendar, Info } from "lucide-react";
@@ -152,12 +153,12 @@ const EraIndexCards = ({ cards }: EraIndexCardsProps) => {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="terminal-card overflow-hidden"
     >
-      <div className="border-b border-border px-4 py-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold tracking-wide text-secondary uppercase flex items-center gap-2">
+      <div className="border-b border-border px-4 py-3 flex flex-wrap items-center justify-between">
+        <h2 className="text-sm font-bold tracking-wide text-secondary uppercase flex flex-wrap items-center gap-2">
           <Calendar className="w-3.5 h-3.5" /> Era-Based Market Indexes
-        </h2>
+        </h2><SectionArtwork context="Pokémon eras" />
         <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
-          Tap an era for details • Live Data
+          Tap an era for details • Dated quotes
         </span>
       </div>
 
@@ -192,7 +193,7 @@ const EraIndexCards = ({ cards }: EraIndexCardsProps) => {
                 ${avgPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="font-mono text-[8px] text-muted-foreground mb-1.5">Avg card value</p>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between">
                 <span className={`font-mono text-[9px] font-semibold flex items-center gap-0.5 ${isUp ? "text-terminal-green" : "text-terminal-red"}`}>
                   {isUp ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                   {isUp ? "+" : ""}{avgChange.toFixed(2)}%

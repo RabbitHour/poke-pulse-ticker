@@ -1,3 +1,4 @@
+import SectionArtwork from '@/components/SectionArtwork';
 import CollectorDaily from "@/components/CollectorDaily";
 import { useCatalogMarketCards } from '@/hooks/useCatalogMarketCards';
 import MarketCoverage from '@/components/MarketCoverage';
@@ -190,7 +191,7 @@ const Index = () => {
 
       <main
         id="main-content"
-        className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3"
+        className="max-w-7xl mx-auto px-4 lg:px-6 py-2 sm:py-4 space-y-6 sm:space-y-8"
       >
         <MarketOpening />
         <TickerBar cards={displayCards} />
@@ -243,7 +244,7 @@ const Index = () => {
         </LazySection>
         </section>
         <section className="terminal-card p-5 space-y-5" aria-labelledby="market-performance-title">
-          <h2 id="market-performance-title" className="market-section-title">Market performance by era, set and sealed product</h2>
+          <h2 id="market-performance-title" className="market-section-title">Market performance by era, set and sealed product</h2><SectionArtwork context="era, set and product research" />
 
         <LazySection minHeight="150px">
           <SealedCategoryCharts />
