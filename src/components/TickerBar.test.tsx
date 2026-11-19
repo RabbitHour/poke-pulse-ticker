@@ -10,6 +10,7 @@ const epoch=Date.UTC(2026,0,1);
 const tick=(ms:number)=>act(()=>{vi.setSystemTime(ms);frame(ms);});
 const mount=()=>render(<MemoryRouter><TickerBar/></MemoryRouter>);
 beforeEach(()=>{
+ sessionStorage.clear();
  vi.useFakeTimers();vi.setSystemTime(epoch+5*8000+1000);
  vi.stubGlobal('requestAnimationFrame',vi.fn((cb)=>{frame=cb;return 1;}));
  vi.stubGlobal('cancelAnimationFrame',vi.fn());
@@ -19,21 +20,23 @@ afterEach(()=>{cleanup();vi.useRealTimers();vi.unstubAllGlobals();});
 it('starts at elapsed clock position, advances smoothly and wraps without starting over',()=>{
  const {container}=mount();
  const names=()=>Array.from(container.querySelectorAll('.ticker-card-art')).map(e=>e.getAttribute('alt'));
- expect(names()[0]).toBe('Foxtrot');
+ const first=entries.findIndex(e=>e.name===names()[0]);
  const track=container.querySelector('.w-max') as HTMLElement;
  tick(epoch+5*8000+4000);
  expect(track.style.transform).toBe('translate3d(-140px,0,0)');
  tick(epoch+6*8000);
- expect(names()[0]).toBe('Golf');
+ expect(names()[0]).toBe(entries[(first+1)%entries.length].name);
  tick(epoch+10*8000);
- expect(names()[0]).toBe('Alpha');
+ expect(names()[0]).toBe(entries[(first+5)%entries.length].name);
 });
 it('reopening resumes at elapsed time and explicit pause can resume',()=>{
- const view=mount();view.unmount();vi.setSystemTime(epoch+8*8000);const {container}=mount();
- expect(container.querySelector('.ticker-card-art')?.getAttribute('alt')).toBe('India');
+ const view=mount();const previous=view.container.querySelector('.ticker-card-art')?.getAttribute('alt');view.unmount();vi.setSystemTime(epoch+8*8000);const {container}=mount();
+ const reopened=container.querySelector('.ticker-card-art')?.getAttribute('alt');
+ expect(reopened).not.toBe(previous);
+ const first=entries.findIndex(e=>e.name===reopened);
  fireEvent.click(screen.getByRole('button',{name:'Pause'}));
  expect(screen.getByRole('button',{name:'Resume'})).toBeTruthy();
  vi.setSystemTime(epoch+12*8000);
  fireEvent.click(screen.getByRole('button',{name:'Resume'}));
- expect(container.querySelector('.ticker-card-art')?.getAttribute('alt')).toBe('Charlie');
+ expect(container.querySelector('.ticker-card-art')?.getAttribute('alt')).toBe(entries[(first+4)%entries.length].name);
 });

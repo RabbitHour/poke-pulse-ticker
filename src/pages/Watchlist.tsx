@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, Trash2, ArrowLeft, Star } from "lucide-react";
 import TerminalHeader from "@/components/TerminalHeader";
@@ -24,8 +24,9 @@ const Watchlist = () => {
         <main className="max-w-4xl mx-auto px-4 py-12 text-center space-y-4">
           <Star className="w-10 h-10 text-terminal-amber mx-auto" />
           <h1 className="font-mono text-xl font-bold text-foreground">Your Watchlist</h1>
+          <Link to="/#my-pulse" className="market-action inline-block">Open browser-saved cards &amp; price targets</Link>
           <p className="font-mono text-sm text-muted-foreground">
-            Sign in to save cards and track their prices.
+            Account watchlists require sign-in. Your browser-saved daily checklist is available without an account.
           </p>
           <button
             onClick={() => setShowAuth(true)}

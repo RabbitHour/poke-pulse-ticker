@@ -1,3 +1,5 @@
+import {nextDiscoverySeed} from '@/lib/discoveryCards';
+import {tickerSelection,tickerOpeningIndex} from '@/lib/tickerSelection';
 // 2026-11-15 — David Noyes — Clock-based alphabetical market ticker.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -16,29 +18,14 @@ const VISIBLE_ITEMS = 8;
 const EMPTY_CARDS: CardData[] = [];
 const EPOCH = Date.UTC(2026, 0, 1);
 
-const alphabet = new Intl.Collator("en", {
-  sensitivity: "base",
-  numeric: true,
-});
-
-function compareEntries(a: CatalogEntry, b: CatalogEntry) {
-  // Physical products precede digital products in the combined view.
-  return (
-    Number(a.kind === "digital") - Number(b.kind === "digital") ||
-    alphabet.compare(a.name, b.name) ||
-    alphabet.compare(a.set, b.set) ||
-    alphabet.compare(a.number ?? "", b.number ?? "") ||
-    alphabet.compare(a.variant ?? a.grade ?? "", b.variant ?? b.grade ?? "") ||
-    alphabet.compare(a.id, b.id)
-  );
-}
-
 export default function TickerBar({
   cards = EMPTY_CARDS,
 }: {
   cards?: CardData[];
 }) {
   const catalog = useCatalog();
+  const [visitSeed] = useState(nextDiscoverySeed);
+  const opening = useRef<{offset:number}|null>(null);
   const observed = useObservedProducts(cards);
   const [category, setCategory] = useState("all");
   const [unavailable,setUnavailable]=useState<Set<string>>(()=>new Set());
@@ -119,14 +106,23 @@ export default function TickerBar({
       }
     }
 
-    return [...unique.values()].sort(compareEntries);
-  }, [cards, catalog.data, observed.graded, observed.gradedAt, category, unavailable]);
+    return tickerSelection([...unique.values()],visitSeed);
+  }, [cards, catalog.data, observed.graded, observed.gradedAt, category, unavailable, visitSeed]);
 
-  // The clock determines the position even when no visitor has the page open.
+  // Each opening starts on a different available letter; elapsed time drives uninterrupted A–Z movement.
   const position = Math.max(0, clock - EPOCH) / ITEM_TIME_MS;
   const step = Math.floor(position);
   const fraction = position - step;
-  const start = entries.length ? step % entries.length : 0;
+  if(entries.length && !opening.current) {
+    let previous:string|null=null;
+    try { previous=sessionStorage.getItem('poke-ticker-letter'); } catch { /* storage optional */ }
+    const index=tickerOpeningIndex(entries,previous,visitSeed);
+    opening.current={offset:index-step};
+  }
+  const start = entries.length ? ((step+(opening.current?.offset??0)) % entries.length+entries.length)%entries.length : 0;
+  useEffect(()=>{
+    if(entries[start])try {sessionStorage.setItem('poke-ticker-letter',entries[start].name.charAt(0).toUpperCase());}catch { /* storage optional */ }
+  },[entries,start]);
 
   // Animate only the transform each frame. React updates once per card boundary,
   // avoiding dozens of full ticker/data-hook renders every second.
