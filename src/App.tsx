@@ -1,3 +1,4 @@
+import RouteScroll from './components/RouteScroll';
 import MarketPageHeader from "./components/MarketPageHeader";
 import Memberships from "./pages/Memberships";
 import CatalogRecord from "./pages/CatalogRecord";
@@ -158,6 +159,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <RouteScroll />
         <AuthProvider>
           <AccessibilityProvider>
             <AnimatedRoutes />

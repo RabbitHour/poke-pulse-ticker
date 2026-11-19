@@ -24,3 +24,9 @@ it('removes a card with failed artwork from the highlights',()=>{
  act(()=>fireEvent.error(img));
  expect(screen.queryByRole('button',{name:'Save card'})).toBeNull();
 });
+it('retains saved quote and target when artwork fails in highlights',()=>{
+ mount();fireEvent.click(screen.getByRole('button',{name:'Save card'}));
+ act(()=>fireEvent.error(screen.getByRole('img',{name:'Pikachu'})));
+ expect(screen.getByRole('spinbutton',{name:'Buy target ($)'})).toBeTruthy();
+ expect(screen.getByText('$12.00')).toBeTruthy();
+});

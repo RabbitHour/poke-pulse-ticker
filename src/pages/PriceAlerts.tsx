@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePriceAlerts, useDeletePriceAlert, type PriceAlert } from "@/hooks/usePriceAlerts";
 import { useQuery } from "@tanstack/react-query";
@@ -49,6 +49,7 @@ const PriceAlerts = () => {
         <TickerBar />
         <main className="max-w-7xl mx-auto px-4 py-12 text-center space-y-4">
           <h1 className="font-mono text-lg font-bold text-foreground">Price Alerts</h1>
+          <Link to="/#my-pulse" className="market-action inline-block">Open browser-saved cards &amp; price targets</Link>
           <p className="font-mono text-sm text-muted-foreground">Sign in to manage your price alerts.</p>
           <button onClick={() => setShowAuth(true)} className="font-mono text-sm font-semibold bg-primary text-primary-foreground rounded px-6 py-2.5 hover:opacity-90">Sign In</button>
           {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

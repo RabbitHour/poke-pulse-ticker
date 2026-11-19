@@ -1,3 +1,4 @@
+import {dailyCollectorCard} from '@/lib/discoveryCards';
 import {isCollectorCard} from '@/lib/collectorFocus';
 import {useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
@@ -15,9 +16,9 @@ export default function MarketOpening(){
  const [unavailable,setUnavailable]=useState<Set<string>>(() => new Set());
  const eligible=useMemo(()=>(catalog.data?.entries??[]).filter(e=>isCollectorCard(e) && e.image && !unavailable.has(e.image) && e.market!=null && e.market>0),[catalog.data,unavailable]);
  const yesterday=useMemo(()=>selectYesterdayMovers(eligible,observations.data??[]),[eligible,observations.data]);
- const leftFallback=yesterday.raw ? undefined : eligible[0];
- const dailyPool=eligible.filter(e=>e.id!==(yesterday.raw?.entry.id ?? leftFallback?.id)).slice(0,24);
- const featured=dailyPool.length?dailyPool[Math.floor(Date.now()/86400000)%dailyPool.length]:undefined;
+ const day=Math.floor(Date.now()/86400000);
+ const leftFallback=yesterday.raw ? undefined : dailyCollectorCard(eligible,day+1);
+ const featured=dailyCollectorCard(eligible.filter(e=>e.id!==(yesterday.raw?.entry.id??leftFallback?.id)),day,yesterday.raw?.entry.set??leftFallback?.set);
  const reportImageFailure=(image:string)=>setUnavailable(previous=>new Set(previous).add(image));
  function lookup(e:React.FormEvent){e.preventDefault();window.dispatchEvent(new CustomEvent('poke-value-search',{detail:search}));document.getElementById('card-valuer')?.scrollIntoView({behavior:'smooth'});}
  return <section className="market-opening" aria-labelledby="opening-title"><div className="opening-engine-layout">{leftFallback ? <aside className="yesterday-mover" aria-label="Featured raw card">
@@ -31,7 +32,7 @@ export default function MarketOpening(){
  {featured ? <><Link to={'/catalog/'+encodeURIComponent(featured.id)} className="mover-art"><CardImage highResolution src={featured.image} alt={featured.name} loading="eager" onUnavailable={()=>reportImageFailure(featured.image)} className="w-full h-full object-contain"/></Link>
  <h3 className="font-bold text-sm">{featured.name}</h3><p className="text-xs text-muted-foreground">{[featured.set,featured.number,featured.variant].filter(Boolean).join(' · ')}</p>
  <p className="text-sm font-semibold">{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(featured.market!)}</p>
- <p className="text-xs text-muted-foreground">Featured raw printing · Source release {featured.sourceUpdated || catalog.data?.sourceUpdated || 'date unavailable'}</p>
+ <p className="text-xs text-muted-foreground">Daily discovery across sets, not a buy recommendation · Source release {featured.sourceUpdated || catalog.data?.sourceUpdated || 'date unavailable'}</p>
  <Link className="text-sm text-primary underline" to={'/catalog/'+encodeURIComponent(featured.id)}>Exact record details</Link></> : <p className="text-sm">Checking available card artwork…</p>}
  </aside></div>
  </section>;

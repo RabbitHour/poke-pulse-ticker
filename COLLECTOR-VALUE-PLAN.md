@@ -1,5 +1,5 @@
 # Poke Pulse: collector value and daily return plan
-Updated November 18, 2026. Applies to pokepulseticker.com, www.pokepulseticker.com, configured alternate domains, and the installable web app.
+Updated November 19, 2026. Applies to pokepulseticker.com, www.pokepulseticker.com, configured alternate domains, and the installable web app.
 
 ## The reason to use Poke Pulse
 See what changed, understand the evidence, and decide which exact cards or sets deserve a closer look. Help a collector research purchases and follow a collection with less searching. Help a market-focused collector compare dated observations without presenting asking prices, estimated values, or model output as realized returns.
@@ -65,3 +65,24 @@ Publish through the existing RabbitHour repository and Cloudflare/Lovable integr
 
 ## Validate value with collectors
 Run a small pilot before making commercial claims. Ask collectors to find an exact card, save a target, identify a dated change and explain a set index. Record task success and misunderstandings. With consent and a documented privacy approach, measure first saved card, repeat visits after a new release, exact-detail engagement, target use, broken-image rate and stale-data rate. Interview returning and non-returning users. Define retention targets from an observed baseline rather than inventing success figures.
+
+## November 19: discovery, navigation and engine quality
+- Discovery now changes on visits and on an explicit Reshuffle action. Sets are visited in rounds before repeating and names are deduplicated; prices remain untouched.
+- Card of the Day selects from the full eligible pool, rotates sets by UTC day and avoids the hero mover's set where another set is available. Yesterday's mover remains the measured leader rather than a randomized claim.
+- The ticker selects one printing per name, balances set exposure, preserves A–Z and elapsed-time animation, and starts a new opening on a different available letter. Keyboard pause and reduced-motion preferences remain respected.
+- Catalog delivery checks the durable published manifest and uses the newest complete version, retaining the bundled release if fresh shards are incomplete. Same-date rarity metadata upgrades can be used without a host rebuild.
+- Browse Sets and trade search use catalog records; set-index links deep-link to constituent-set browsing. The methodology page now describes actual calculations rather than old sample targets or unimplemented provider weighting.
+- Removed unsupported hardcoded release-calendar entries. Official news is linked; automatic news ingestion is not yet active.
+
+## What value we can defend now
+A collector can identify a printing, inspect its dated quote/history, save a target, and return after a new release to see what changed. Discovery adds breadth; it is not the core evidence of investment value. Pricing research should take fewer steps and expose uncertainty rather than conceal it. No claim of being ahead of competitors is justified without a comparative evaluation.
+
+## Engine improvement order and acceptance criteria
+1. **Valuator reliability:** measure exact-match success on an independently reviewed collection of printing/variant queries; log missing coverage, timestamp age and artwork failures without storing personal collections. Never infer condition from artwork. Expand permitted sold-price sources only with provenance, condition and sample counts; distinguish quotes, asking prices and sales. Pass identical-card/alternate-printing rejection tests before adding a provider.
+2. **Tracker continuity:** make browser-saved cards useful across all priced physical catalog records. Next implement authenticated exact-ID syncing with row-level access tests, quantities and cost basis; migrate ambiguous old records explicitly. Add notifications only after verified delivery, consent and deduplication. Do not seed a user's account with pretend holdings.
+3. **Predictor evidence:** retain immutable issued forecasts and honest out-of-time outcomes. Compare average absolute percentage error, dollar error, direction and coverage against unchanged-price and simple historical baselines on identical records and horizons. Split evaluation by set/era, price tier and liquidity only when observed transaction data supports it. Overlapping horizons and repeated cards are not independent samples.
+4. **Promotion gate:** a candidate model must improve on the frozen baseline across successive held-out windows, keep or improve coverage and calibration, and survive regression tests before replacing the production model. Keep a versioned rollback. Do not tune on the final holdout or delete losing predictions. Publish results even when the unchanged-price baseline wins.
+5. **Daily usefulness pilot:** ask collectors to find a printing, save a target and identify a dated change. Measure task completion and returns after genuinely new data, with consent. Add a curated original-source news digest only when freshness, sourcing and ongoing maintenance are established. Multiple intraday visits need actual new events, not reshuffling prices.
+
+## Navigation and seeding policy
+Smoke checks cover route rendering, public data paths and representative exact-card/set/search/save journeys. Signed-in account workflows, checkout, delivery and external listings require separate authorized end-to-end checks. An empty account is legitimate; seed only real public catalog data or clearly labeled simulations. A rendered heading alone does not prove the feature's backend works. See RELEASE-SMOKE-2026-11-19.md for tested scope and remaining gaps.

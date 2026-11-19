@@ -1,3 +1,5 @@
+import {useCatalog} from '@/hooks/useCatalog';
+import {catalogSearchText,matchesCatalogQuery} from '@/lib/catalogSearch';
 import { useState, useMemo } from "react";
 import { useCardSearch } from "@/hooks/usePokemonTcg";
 import TerminalHeader from "@/components/TerminalHeader";
@@ -31,7 +33,10 @@ const TradeSide = ({
 }) => {
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
-  const { data: results, isLoading } = useCardSearch(query.length >= 3 ? query : "");
+  const catalog=useCatalog();
+  const fallback=useCardSearch(!catalog.data&&query.length>=3?query:"");
+  const isLoading=catalog.isLoading||(!catalog.data&&fallback.isLoading);
+  const results=useMemo(()=>catalog.data ? (query.length>=3?catalog.data.entries.filter(e=>e.kind==='raw'&&e.market!=null&&e.market>0&&e.image&&matchesCatalogQuery(catalogSearchText(e),query)).slice(0,8).map(e=>({_apiId:e.id,name:e.name,set:[e.set,'#'+e.number,e.variant].filter(Boolean).join(' · '),number:e.number,_image:e.image,market:e.market!})):[]) : fallback.data,[catalog.data,query,fallback.data]);
 
   return (
     <div className="terminal-card flex-1 min-w-0 overflow-hidden">
@@ -43,7 +48,7 @@ const TradeSide = ({
         {/* Search */}
         <div className="relative">
           <div className="flex items-center gap-2">
-            <button onClick={() => setSearching(!searching)} className="p-1.5 rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors">
+            <button aria-label={"Add card to "+label} onClick={() => setSearching(!searching)} className="p-1.5 rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors">
               <Plus className="w-3.5 h-3.5" />
             </button>
             <span className="font-mono text-[10px] text-muted-foreground">{cards.length} card{cards.length !== 1 ? "s" : ""}</span>
@@ -62,6 +67,7 @@ const TradeSide = ({
                 />
               </div>
               {isLoading && <Loader2 className="w-4 h-4 animate-spin text-primary mx-auto" />}
+              {query.length>=3&&!isLoading&&!results?.length&&<p className="text-sm">No exact catalog match. Try a name, set and printed number.</p>}
               {results && results.length > 0 && (
                 <div className="max-h-48 overflow-y-auto space-y-1">
                   {results.slice(0, 8).map((card) => (
