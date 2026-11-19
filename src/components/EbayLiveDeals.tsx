@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import {useCatalogValueRanks} from '@/hooks/useCatalogValueRanks';
 import { useSelectionRotation } from '@/hooks/useSelectionRotation';
 import {isEnglishArtwork} from '@/lib/collectorFocus';
@@ -21,7 +22,7 @@ export default function EbayLiveDeals() {
     return discoveryCards(source.filter(c=>c.image&&!failed.has(c.image)), 120, seed);
   }, [catalog.data,quick.data,failed,seed]);
   return <section {...rotation.bindings} className="terminal-card marketplace-gallery p-5 space-y-5" aria-labelledby="marketplace-title">
-    <div className="flex flex-wrap justify-between items-center gap-3"><div><h2 id="marketplace-title" className="font-bold">Discover cards &amp; marketplace listings</h2><p className="text-sm text-muted-foreground">A fresh mix of English cards across sets. Reshuffle to explore more; source prices do not change with the selection.</p></div><Link to="/sets" className="market-action browse-sets">Browse Sets →</Link></div>
+<SectionArtwork context="marketplace discovery" />    <div className="flex flex-wrap justify-between items-center gap-3"><div><h2 id="marketplace-title" className="font-bold">Discover cards &amp; marketplace listings</h2><p className="text-sm text-muted-foreground">A fresh mix of English cards across sets. Reshuffle to explore more; source prices do not change with the selection.</p></div><Link to="/sets" className="market-action browse-sets">Browse Sets →</Link></div>
     <button className="market-action" onClick={()=>{setSeed(nextDiscoverySeed());setPage(0);}}>Reshuffle cards</button>
     <button className="market-action ml-2" aria-pressed={rotation.paused} onClick={()=>rotation.setPaused(p=>!p)}>{rotation.paused?"Resume automatic discovery":"Pause automatic discovery"}</button><p className="text-xs text-muted-foreground">Selection rotates every two minutes while this tab is visible and you are not interacting with this section. Daily source quotes remain unchanged.</p>
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">{cards.slice((page % Math.max(1,Math.ceil(cards.length/18)))*18,((page % Math.max(1,Math.ceil(cards.length/18)))+1)*18).map(card=>{

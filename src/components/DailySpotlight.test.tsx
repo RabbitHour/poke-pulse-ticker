@@ -2,6 +2,7 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DailySpotlight from "./DailySpotlight";
 import type { CardData } from "@/data/marketData";
+vi.mock('./SectionArtwork',()=>({default:()=>null}));
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const card = (name: string, market = 10): CardData => ({ name, market, set: "Base", number: "1", low: market, mid: market, change: 1 });
 describe("observed spotlight", () => {
