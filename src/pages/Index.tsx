@@ -1,3 +1,4 @@
+import MarketRankings from '@/components/MarketRankings';
 import SectionArtwork from '@/components/SectionArtwork';
 import CollectorDaily from "@/components/CollectorDaily";
 import { useCatalogMarketCards } from '@/hooks/useCatalogMarketCards';
@@ -195,6 +196,7 @@ const Index = () => {
       >
         <MarketOpening />
         <TickerBar cards={displayCards} />
+        <MarketRankings compact />
         <CollectorDaily />
         <CardValuer id="card-valuer" />
         <EbayLiveDeals />
@@ -477,7 +479,7 @@ const Index = () => {
                 poke-pulse-ticker.lovable.app
               </a>
               <span className="text-border/50 hidden sm:inline">|</span>
-              <span className="text-[10px] text-muted-foreground">Live Poké TCG Market Data</span>
+              <span className="text-[10px] text-muted-foreground">Dated Pokémon Market Research</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
               {[
@@ -488,6 +490,8 @@ const Index = () => {
                 { href: "/terms", label: "Terms" },
                 { href: "/privacy", label: "Privacy" },
                 { href: "/legal-protection", label: "Legal & IP" },
+                { href: "/rankings", label: "Market rankings" },
+                { href: "/owner-agent", label: "Owner login" },
                 { href: "/methodology", label: "Methodology" },
                 { href: "mailto:contact@poke-pulse-ticker.com", label: "Contact" },
               ].map((link) => (

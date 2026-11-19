@@ -15,3 +15,13 @@ Activation requires administrator access to the site's actual backend:
 The first agent is a bounded research auditor: it checks the published catalog date/counts and saves recommendations. It does not alter source, merge, deploy, contact customers or spend money. It is not yet an autonomous building agent. Next phase: private analytics ingestion, consent-aware conversion/retention metrics, issue proposals with evidence, isolated patches, tests and David approval before release. Do not give a model unrestricted service-role or GitHub write credentials.
 
 Visitor analytics are explicitly unconnected. Add a validated analytics adapter before showing traffic, conversion or retention claims. Report conclusions must be tied to measured data, not generated estimates.
+
+## Ranking release security follow-up
+
+The footer now links to owner sign-in. The owner page has no signup action; the legacy `/command-center` route uses the same owner gate. Existing account authentication is reused. No password has been generated or retrieved, and the active owner account still requires backend verification.
+
+After the original owner-agent migration, apply `20261119152008_owner_audit_hardening.sql`. It adds an atomic five-minute report cooldown and removes public/anon/authenticated direct grants on legacy site-audit tables. Deploy the updated `poke-owner-agent`, `site-audit`, and `ai-sales-agent` functions. Manual legacy audit and sales-agent access now requires the verified owner UUID, not merely a signed-in user or matching email. Existing sales scheduler service authentication is preserved. Do not invoke outreach while testing permissions.
+
+The report scheduler cannot read report history, pause/resume, or receive private report contents. Responses are no-store; malformed/oversize owner requests and unsupported methods are rejected. Test these controls against the actual backend before enabling scheduling. Source regression tests are not a penetration test or production RLS verification.
+
+Backend activation remains blocked by database access. Hosting WAF/rate limits, owner MFA, Auth redirect allowlists, backups, credential rotation, live RLS checks and monitoring require administrator verification in the configured backend/hosting accounts. No claim of complete security or zero vulnerabilities is made.

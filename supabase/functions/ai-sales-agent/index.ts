@@ -1,3 +1,4 @@
+import {isOwnerIdentity} from '../../../src/lib/ownerAgentPolicy.ts';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
@@ -188,7 +189,7 @@ async function flushLeadsToDb(
   return { inserted, skipped };
 }
 
-const OWNER_EMAIL = "noyes.dave@gmail.com";
+// Owner authorization uses a server-configured verified Auth UUID.
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -210,7 +211,7 @@ serve(async (req) => {
       authorized = true;
     } else if (token) {
       const { data: { user } } = await supabase.auth.getUser(token);
-      if (user?.email === OWNER_EMAIL) authorized = true;
+      if (isOwnerIdentity(user?.id, Deno.env.get("POKE_OWNER_USER_ID"))) authorized = true;
     }
     if (!authorized) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -218,6 +219,7 @@ serve(async (req) => {
       });
     }
 
+    if(req.method!=="POST")return new Response(null,{status:405,headers:corsHeaders});
     const { action, customQueries } = await req.json();
 
     // ========== REAL LEAD DISCOVERY via web search (replaces AI-hallucinated leads) ==========

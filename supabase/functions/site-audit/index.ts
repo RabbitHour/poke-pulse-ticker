@@ -1,3 +1,4 @@
+import {isOwnerIdentity} from '../../../src/lib/ownerAgentPolicy.ts';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import * as React from 'npm:react@18.3.1'
@@ -211,6 +212,10 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (!isOwnerIdentity(user.id, Deno.env.get("POKE_OWNER_USER_ID"))) {
+      return new Response(JSON.stringify({error:"Owner access required"}), {status:403,headers:{...corsHeaders,"Content-Type":"application/json","Cache-Control":"no-store"}});
+    }
+    if(req.method!=="POST")return new Response(null,{status:405,headers:corsHeaders});
     const userId = user.id;
 
     const body = await req.json().catch(() => ({}));
