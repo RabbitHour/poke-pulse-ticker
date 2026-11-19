@@ -12,6 +12,9 @@ export interface CardData {
   _apiId?: string;
   _image?: string;
   _variant?: string;
+  _catalogId?: string;
+  _sampleSize?: number;
+  _sourceUpdated?: string;
 }
 
 export interface SealedProduct {

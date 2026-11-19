@@ -1,12 +1,12 @@
 // 2026-11-15 — David Noyes — Clock-based alphabetical market ticker.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CATALOG_HREF, CATALOG_LABEL } from "@/lib/catalogNavigation";
 import type { CardData } from "@/data/marketData";
 import { useCatalog, type CatalogEntry } from "@/hooks/useCatalog";
 import { useObservedProducts } from "@/hooks/useObservedProducts";
 import { catalogSymbol } from "@/lib/catalogSymbols";
-import { PRODUCT_CATEGORIES } from "@/lib/productCategories";
+import { collectorCategory, isCollectorCard } from "@/lib/collectorFocus";
 import { CardImage } from "./CardImage";
 
 // Fixed widths prevent long names or image loading from changing scroll speed.
@@ -40,12 +40,14 @@ export default function TickerBar({
 }) {
   const catalog = useCatalog();
   const observed = useObservedProducts(cards);
-  const [category, setCategory] = useState("raw");
+  const [category, setCategory] = useState("all");
+  const [unavailable,setUnavailable]=useState<Set<string>>(()=>new Set());
   const [paused, setPaused] = useState(false);
   const [focused, setFocused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [clock, setClock] = useState(() => Date.now());
-  const lastFrame = useRef(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const clockRef = useRef(clock);
 
   useEffect(() => {
     const preference = window.matchMedia(
@@ -58,24 +60,6 @@ export default function TickerBar({
   }, []);
 
   const stopped = paused || focused || reducedMotion;
-
-  useEffect(() => {
-    if (stopped) return;
-
-    let frame = 0;
-
-    const animate = (timestamp: number) => {
-      // Limit React updates to approximately 30 frames per second.
-      if (timestamp - lastFrame.current >= 1000 / 30) {
-        lastFrame.current = timestamp;
-        setClock(Date.now());
-      }
-      frame = window.requestAnimationFrame(animate);
-    };
-
-    frame = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(frame);
-  }, [stopped]);
 
   const entries = useMemo(() => {
     const fallback: CatalogEntry[] = cards.map(card => ({
@@ -127,11 +111,8 @@ export default function TickerBar({
       ...(catalog.data?.entries ?? fallback),
       ...graded,
     ]) {
-      const matches =
-        category === "all" ||
-        (["raw", "graded", "sealed", "digital"].includes(category)
-          ? entry.kind === category
-          : entry.category === category);
+      const matches = isCollectorCard(entry) && !unavailable.has(entry.image) &&
+        (category === 'all' || collectorCategory(entry) === category);
 
       if (matches && !unique.has(entry.id)) {
         unique.set(entry.id, entry);
@@ -139,13 +120,40 @@ export default function TickerBar({
     }
 
     return [...unique.values()].sort(compareEntries);
-  }, [cards, catalog.data, observed.graded, observed.gradedAt, category]);
+  }, [cards, catalog.data, observed.graded, observed.gradedAt, category, unavailable]);
 
   // The clock determines the position even when no visitor has the page open.
   const position = Math.max(0, clock - EPOCH) / ITEM_TIME_MS;
   const step = Math.floor(position);
   const fraction = position - step;
   const start = entries.length ? step % entries.length : 0;
+
+  // Animate only the transform each frame. React updates once per card boundary,
+  // avoiding dozens of full ticker/data-hook renders every second.
+  useLayoutEffect(() => {
+    clockRef.current = clock;
+    if (trackRef.current) trackRef.current.style.transform = `translate3d(-${fraction * ITEM_WIDTH}px,0,0)`;
+  }, [clock, fraction, category]);
+
+  useEffect(() => {
+    if (stopped) return;
+    let frame = 0;
+    const animate = () => {
+      const now = Date.now();
+      const next = Math.max(0, now - EPOCH) / ITEM_TIME_MS;
+      if (Math.floor(next) !== Math.floor(Math.max(0, clockRef.current - EPOCH) / ITEM_TIME_MS)) {
+        clockRef.current = now;
+        setClock(now);
+      } else if (trackRef.current) {
+        trackRef.current.style.transform = `translate3d(-${(next % 1) * ITEM_WIDTH}px,0,0)`;
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+    // Reopening a background tab resumes at the shared wall-clock position.
+    setClock(Date.now());
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [stopped, category, entries.length]);
 
   // Render a small moving window instead of thousands of image elements.
   const visible = entries.length
@@ -178,7 +186,7 @@ export default function TickerBar({
     <section className="market-tape" aria-label="Alphabetical market ticker">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2">
         <div className="flex flex-wrap items-center gap-2">
-          <strong className="text-xs">POKÉ MARKET TAPE</strong>
+          <strong className="text-xs">ENGLISH COLLECTOR TAPE</strong>
           <label htmlFor="tape-category" className="sr-only">
             Ticker category
           </label>
@@ -188,18 +196,8 @@ export default function TickerBar({
             value={category}
             onChange={event => setCategory(event.target.value)}
           >
-            <option value="all">All indexed products</option>
-            <option value="raw">Raw cards</option>
-            <option value="graded">Graded quotes</option>
-            <option value="sealed">All sealed products</option>
-            {PRODUCT_CATEGORIES.map(
-              item => (
-                <option key={item.id} value={item.id}>
-                  {item.title}
-                </option>
-              ),
-            )}
-            <option value="digital">TCG Pocket · digital</option>
+            <option value="all">English collector cards</option>
+            {['Special illustration rare','Illustration rare','Ultra rare','Promo','Full art / special rarity','Full art / illustration','Trainer / Galarian Gallery'].map(label=><option key={label} value={label}>{label}</option>)}
           </select>
           <span className="text-xs text-muted-foreground">
             {entries.length.toLocaleString()} indexed · A–Z
@@ -245,7 +243,7 @@ export default function TickerBar({
         <div
           className="overflow-hidden"
           style={{ maxWidth: 1280, marginInline: "auto" }}
-          onFocusCapture={() => setFocused(true)}
+          onFocusCapture={event => setFocused(event.target.matches(":focus-visible"))}
           onBlurCapture={event => {
             if (!event.currentTarget.contains(event.relatedTarget)) {
               setFocused(false);
@@ -253,6 +251,7 @@ export default function TickerBar({
           }}
         >
           <div
+            ref={trackRef}
             className="flex w-max py-2"
             style={{
               transform: `translate3d(-${fraction * ITEM_WIDTH}px, 0, 0)`,
@@ -275,7 +274,10 @@ export default function TickerBar({
                 >
                   <CardImage
                     src={entry.image}
-                    alt={entry.name}
+                    onUnavailable={()=>setUnavailable(previous=>new Set(previous).add(entry.image))}
+                    loading="eager"
+                    highResolution={false}
+                    alt={entry.kind === "graded" ? `${entry.name} — raw card artwork; quote for ${entry.grade}` : entry.name}
                     className="ticker-card-art h-14 w-10 shrink-0 object-contain"
                   />
                   <div className="min-w-0 flex-1 text-xs">
@@ -330,7 +332,7 @@ export default function TickerBar({
         {catalog.data?.sourceUpdated
           ? `Catalog source release: ${catalog.data.sourceUpdated}. `
           : "Catalog release date unavailable. "}
-        Coverage varies by source. Graded quotes are asking-price observations.
+        Illustration rares, ultra rares, promos and documented full-art types with priced English artwork. Unknown rarities and failed images are excluded; coverage grows as source metadata arrives.
         {reducedMotion
           ? " Automatic movement is off for your reduced-motion preference."
           : " Resume returns to the current clock-based position."}

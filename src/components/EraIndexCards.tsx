@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Layers, TrendingUp, TrendingDown, Calendar, Info } from "lucide-react";
 import type { CardData } from "@/data/marketData";
 import InfoDialog from "@/components/InfoDialog";
-import { useEbayPrices, ebayPriceMap } from "@/hooks/useEbayPrices";
 
 const ERA_DESCRIPTIONS: Record<string, { description: string; details: string[] }> = {
   "VINTAGE (WOTC)": {
@@ -144,19 +143,6 @@ const EraIndexCards = ({ cards }: EraIndexCardsProps) => {
   const eras = categorizeCards(cards);
   const [activeEra, setActiveEra] = useState<{ era: Era; cards: CardData[] } | null>(null);
 
-  // eBay Browse API: pull median prices for the top-3 cards in each era as the
-  // index price source. Avg is computed from eBay medians, falling back to
-  // the per-card .market value when eBay returns no listings.
-  const ebayQueries = useMemo(() => {
-    const qs: string[] = [];
-    for (const { cards: ec } of eras) {
-      for (const c of ec.slice(0, 3)) qs.push(`${c.name} ${c.set}`);
-    }
-    return Array.from(new Set(qs));
-  }, [eras]);
-  const { data: ebayData } = useEbayPrices(ebayQueries);
-  const priceMap = useMemo(() => ebayPriceMap(ebayData?.results), [ebayData]);
-  const priceFor = (c: CardData) => priceMap[`${c.name} ${c.set}`.toLowerCase()] || c.market;
 
   return (
     <motion.div
@@ -177,12 +163,11 @@ const EraIndexCards = ({ cards }: EraIndexCardsProps) => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 divide-border">
         {eras.map(({ era, cards: eraCards }, idx) => {
-          // Use eBay-sampled top 3 for the headline avg; fall back to all-cards .market avg
-          const sampled = eraCards.slice(0, 3);
-          const avgPrice = sampled.length > 0 ? sampled.reduce((s, c) => s + priceFor(c), 0) / sampled.length : 0;
+          // The headline and count use the same complete era sample.
+          const avgPrice = eraCards.reduce((s, c) => s + c.market, 0) / eraCards.length;
           const avgChange = eraCards.length > 0 ? eraCards.reduce((s, c) => s + c.change, 0) / eraCards.length : 0;
           const isUp = avgChange >= 0;
-          const totalCap = eraCards.reduce((s, c) => s + priceFor(c), 0);
+          const totalCap = eraCards.reduce((s, c) => s + c.market, 0);
 
           return (
             <motion.button

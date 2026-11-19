@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "market:sync": "node scripts/sync-market.mjs",
-    "market:watch": "node scripts/sync-market.mjs --watch"
+    "market:watch": "node scripts/sync-market.mjs --watch",
+    "predev": "node scripts/prepare-local-catalog.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

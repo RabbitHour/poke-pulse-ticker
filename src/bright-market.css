@@ -272,3 +272,20 @@
 @media (prefers-reduced-motion: reduce) {
   .market-tape .ticker-scroll { animation: none; }
 }
+
+/* 2026-11-18 — Equal hero slots, clear browsing actions and readable surfaces. */
+.bright-market .opening-engine-layout { grid-template-columns:minmax(0,1fr) minmax(0,1.65fr) minmax(0,1fr); align-items:stretch; }
+.bright-market .yesterday-mover { display:grid; grid-template-rows:4rem 360px; grid-auto-rows:min-content; align-content:start; justify-items:center; padding:1rem .5rem; }
+.bright-market .yesterday-mover > h2 {margin:0;min-height:0;font-size:clamp(1.1rem,1.6vw,1.5rem);}
+.bright-market .yesterday-mover .mover-art {width:100%;height:360px;max-width:290px;margin:0;}
+.bright-market .opening-copy {min-width:0;}
+.bright-market .browse-sets {border:2px solid #08794f;background:#e0fff0;color:#064c36;box-shadow:0 3px 10px #08794f22;border-radius:.6rem;font-weight:800;}
+.bright-market .marketplace-gallery {background:linear-gradient(135deg,#fff,#edfff8 60%,#eef1ff);}
+.bright-market .opening-card {background:#f0fbff;border-color:#87b9c4;}
+.bright-market .opening-card::after {display:none;}
+.bright-market .vivid-card-art {filter:saturate(1.24) contrast(1.07) brightness(1.03) drop-shadow(0 5px 7px #18294230);}
+.bright-market [role="grid"] button {text-shadow:none;line-height:1.5;padding:.8rem;}
+.bright-market [role="grid"] button .text-sm {font-weight:750;}
+@media(max-width:1000px){.bright-market .opening-engine-layout{grid-template-columns:repeat(2,minmax(0,1fr));}.bright-market .yesterday-mover{grid-template-rows:4rem 300px;}.bright-market .yesterday-mover .mover-art{height:300px;}}
+@media(max-width:600px){.bright-market .market-opening{padding:1rem .65rem;}.bright-market .opening-engine-layout{gap:.6rem;}.bright-market .yesterday-mover{grid-template-rows:4rem 220px;padding:.5rem 0;}.bright-market .yesterday-mover .mover-art{height:220px;}.bright-market .yesterday-mover > h2{font-size:1rem;}.bright-market .opening-copy h1{font-size:2.6rem;}}
+@media(max-width:380px){.bright-market .opening-engine-layout{grid-template-columns:1fr;}.bright-market .yesterday-mover{grid-row:auto;}}

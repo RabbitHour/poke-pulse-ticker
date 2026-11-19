@@ -19,10 +19,12 @@ describe('yesterday exact-variant movers', () => {
     const only = observation('2026-11-05', { 'tcg:1:Holo': 20 });
     expect(selectYesterdayMovers(entries, [only, only], now).raw).toBeNull();
   });
-  it('requires an exact graded listing or certificate image, not raw artwork or aggregate baskets', () => {
+  it('requires exact graded listing or certificate identity, independent of display artwork', () => {
     const graded = { ...entry('cert:123:PSA10', 'graded'), grade: 'PSA 10' };
     const observations = [observation('2026-11-04', { [graded.id]: 100 }), observation('2026-11-05', { [graded.id]: 125 })];
-    expect(selectYesterdayMovers([graded], observations, now).graded).toBeNull();
+    expect(selectYesterdayMovers([graded], observations, now).graded?.change).toBe(25);
+    const aggregate = {...graded, id:'graded:basket'};
+    expect(selectYesterdayMovers([aggregate], observations, now).graded).toBeNull();
     const verified = { ...graded, imageProvenance: { provider: 'Existing provider', recordId: '123', match: 'Exact certificate image' } };
     expect(selectYesterdayMovers([verified], observations, now).graded?.change).toBe(25);
   });

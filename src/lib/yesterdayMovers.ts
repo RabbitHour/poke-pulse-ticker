@@ -27,8 +27,8 @@ export function rankYesterdayMovers(entries: CatalogEntry[], observations: Quote
   for (const entry of entries) {
     if (entry.kind !== 'raw' && entry.kind !== 'graded') continue;
     if (entry.id.startsWith('fallback:') || entry.id.startsWith('set:')) continue;
-    // A raw picture is never evidence of a graded copy.
-    if (entry.kind === 'graded' && (!entry.grade || !entry.image || !entry.imageProvenance || !/listing|cert/i.test(entry.imageProvenance.match))) continue;
+    // Grade and exact archived quote identity establish comparability, not the display artwork.
+    if (entry.kind === 'graded' && (!entry.grade || !/^(?:cert|listing):/.test(entry.id))) continue;
     const previous = before.prices[entry.id], price = after.prices[entry.id];
     if (!(previous > 0) || !(price > 0) || !Number.isFinite(previous) || !Number.isFinite(price)) continue;
     const change = (price / previous - 1) * 100;

@@ -224,7 +224,7 @@ const TerminalHeader = () => {
             <div className="flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 sm:px-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary pulse-live" />
               <span className="text-[9px] sm:text-[10px] font-bold text-primary tracking-wide">
-                LIVE
+                DAILY QUOTES
               </span>
             </div>
 
@@ -315,7 +315,7 @@ const TerminalHeader = () => {
             <div className="border-t border-border px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full bg-primary pulse-live" />
-                <span className="text-[10px] font-bold text-primary tracking-wide">LIVE</span>
+                <span className="text-[10px] font-bold text-primary tracking-wide">DAILY QUOTES</span>
               </div>
 
               {tier && (

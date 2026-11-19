@@ -1,3 +1,6 @@
+import CollectorDaily from "@/components/CollectorDaily";
+import { useCatalogMarketCards } from '@/hooks/useCatalogMarketCards';
+import MarketCoverage from '@/components/MarketCoverage';
 import CardExamples from "@/components/CardExamples";
 import MarketComparison from "@/components/MarketComparison";
 import PokeHelp from "@/components/PokeHelp";
@@ -53,7 +56,6 @@ import GradingArbitrage from "@/components/GradingArbitrage";
 import GradeRatioArbitrageBot from "@/components/GradeRatioArbitrageBot";
 import AlphaAccuracy from "@/components/AlphaAccuracy";
 import RecentNotableSales from "@/components/RecentNotableSales";
-import SellOnEbaySection from "@/components/SellOnEbaySection";
 import CardSearch from "@/components/CardSearch";
 import PriceChart from "@/components/PriceChart";
 import SignalSummary from "@/components/SignalSummary";
@@ -127,8 +129,9 @@ const Index = () => {
     }
   }, [searchParams, checkSubscription, setSearchParams, toast]);
 
-  const displayCards = (liveCards?.length ? liveCards : quickCards) ?? [];
-  const observed = useObservedProducts(liveCards);
+  const catalogCards = useCatalogMarketCards();
+  const displayCards = catalogCards.length ? catalogCards : (liveCards?.length ? liveCards : quickCards) ?? [];
+  const observed = useObservedProducts(displayCards);
   const liveGradedCards = observed.graded;
   const displayGraded = liveGradedCards;
   const liveSealedProducts = observed.sealed;
@@ -191,24 +194,25 @@ const Index = () => {
       >
         <MarketOpening />
         <TickerBar cards={displayCards} />
-        <EbayLiveDeals />
+        <CollectorDaily />
         <CardValuer id="card-valuer" />
+        <EbayLiveDeals />
+        <MarketCoverage />
 
         {/* === SELL ON EBAY (affiliate, live TCG pricing) === */}
-        <SellOnEbaySection />
 
         <MarketOverview />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TopMoversTable cards={displayCards} title="Top movers — Raw cards" isLoading={isLoading} />
           <TopMoversTable cards={displayGraded} title="Top movers — Graded cards" isLoading={isLoading} />
         </div>
-        <MarketCapSummary liveRawCards={displayCards} />
-        <ForecastLedger />
+
         <CatalogExplorer />
         <LazySection minHeight="200px">
           <DailySpotlight cards={cardsWithImages.length > 0 ? cardsWithImages : displayCards} />
         </LazySection>
         <PokeHelp />
+        <ForecastLedger />
 
         <DatedMovers />
 
@@ -256,8 +260,7 @@ const Index = () => {
         </section>
 
 
-        <h2 className="market-section-title">Explore cards & sets <span>Find your next card</span></h2>
-        <TrendingCards cards={displayCards} isLoading={isLoading} />
+
 
 
         <section className="collector-tools space-y-5"><TrustSignals /><p className="text-sm">Review the monthly update, value an exact printing, explore grading scenarios and manage your collection. Research previews use modeled estimates.</p>
