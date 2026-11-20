@@ -517,3 +517,26 @@ body.demo-mode [data-demo-hide] {
 .bright-market .terminal-card,.bright-market .ranking-panel { border-color:#92b3a4; background:linear-gradient(118deg,#fff 0%,#eff6f2 42%,#dbeae2 42.2%,#f7fbf9 42.7%,#edf5f1 80%,#dcebe4); box-shadow:inset 0 2px 0 #fff,0 12px 28px #163b2b16; }
 @media(max-width:900px){.collector-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bright-market .collector-card-grid article{padding:14px}}
 @media(max-width:480px){.collector-card-grid{grid-template-columns:minmax(0,1fr)}.featured-set-link{gap:12px;padding:14px}.featured-set-link>img{width:76px;height:96px}}
+
+/* Consistent emerald marble surfaces and six-card discovery banners. */
+.bright-market { background:radial-gradient(ellipse at 15% 10%,#bad3cc,transparent 48%),linear-gradient(125deg,#a9c4bd,#e1ece7 35%,#9bbab0 72%,#c6d9d1); }
+.bright-market .terminal-card,.bright-market .collector-tools { background:linear-gradient(118deg,transparent 28%,#ffffff70 29%,transparent 30%,transparent 65%,#436a5920 66%,transparent 68%),linear-gradient(145deg,#c2d9cf,#f2f7f4 43%,#a8c8ba); border:1px solid #719b88; border-radius:20px; box-shadow:inset 0 2px 1px #ffffffd0,0 12px 28px #103d2d22; }
+.bright-market .section-artwork { width:100%; container-type:inline-size; background:linear-gradient(125deg,#8faf9f,#e5efe9 45%,#8cac9c); border-color:#5c8973; padding:18px; box-shadow:inset 0 2px 1px #ffffffb0,0 8px 22px #133c2826; }
+.bright-market .section-artwork-cards { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:14px; }
+.bright-market .section-artwork-card { width:100%; min-width:0; padding:10px 6px; border-radius:12px; background:linear-gradient(150deg,#ffffffa8,#d0e2d8a0); border:1px solid #ffffffa0; }
+.bright-market .section-artwork-card img { width:100%; height:220px; object-fit:contain; filter:drop-shadow(0 8px 7px #163d3545); }
+.bright-market .section-artwork-card strong { font-size:1rem; }
+.bright-market .section-artwork-card small { font-size:.85rem; line-height:1.45; }
+.bright-market #my-pulse .section-artwork { max-width:none; }
+.artwork-controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; color:#123e27; }
+.artwork-controls button { border:1px solid #3a7459; border-radius:9px; padding:6px 12px; background:#e5f3eb; font-weight:600; }
+.artwork-controls small { font-size:.85rem; }
+@container(max-width:850px){.bright-market .section-artwork-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@container(max-width:420px){.bright-market .section-artwork-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.bright-market .section-artwork-card img{height:190px}}
+.featured-set-link { flex-direction:column; min-height:300px; background:linear-gradient(135deg,#aec9b9,#f5f8ec 48%,#8eb4a1); }
+.featured-set-link>img { width:280px; max-width:100%; height:180px; object-fit:contain; filter:drop-shadow(0 8px 8px #10362635); }
+.featured-set-link>span { text-align:center; }
+.bright-market .catalog-art { height:250px; }
+.bright-market .catalog-tile { padding:14px; }
+.bright-market .marketplace-card img { min-height:260px; }
+@media(max-width:480px){.featured-set-link>img{width:240px;height:160px}.bright-market .catalog-art{height:200px}}

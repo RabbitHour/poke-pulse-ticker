@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useEffect, useMemo, useState } from "react";
 import type { CardData } from "@/data/marketData";
 import { CardImage } from "./CardImage";
@@ -12,7 +13,7 @@ export default function DailySpotlight({ cards }: { cards: CardData[] }) {
   const eligible = useMemo(() => cards.filter(c => Number.isFinite(c.market) && c.market > 0), [cards]);
   const card = eligible.length ? eligible[hour % eligible.length] : undefined;
   return <section className="terminal-card p-4" aria-label="Hourly card spotlight">
-    <h2 className="font-bold">Hourly card spotlight</h2>
+<SectionArtwork context="hourly card discovery" />    <h2 className="font-bold">Hourly card spotlight</h2>
     {card ? <div className="flex flex-wrap gap-4 mt-3">
       <CardImage src={card._image || ""} alt={card.name} className="w-36 h-48 object-contain" />
       <div className="space-y-2">

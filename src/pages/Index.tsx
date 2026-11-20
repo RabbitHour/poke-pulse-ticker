@@ -232,7 +232,7 @@ const Index = () => {
         <h2 id="market-guide-title" className="market-section-title">Understand the market &amp; market intelligence</h2>
         <details className="terminal-card p-4" open>
           <summary className="font-semibold">How to read these numbers</summary>
-          <CardExamples cards={displayCards} /><p className="text-sm mt-2">Start with the exact set, card number, variant and condition. A higher asking price does not mean a completed sale. Use the source date to check freshness. A source quote is a dated price for an exact printing or product. A graded asking median summarizes listed prices. Compare changes only across matching items and dates. A base-100 index shows change relative to its starting value.</p>
+          <SectionArtwork context="understanding market evidence" /><p className="text-sm mt-2">Start with the exact set, card number, variant and condition. A higher asking price does not mean a completed sale. Use the source date to check freshness. A source quote is a dated price for an exact printing or product. A graded asking median summarizes listed prices. Compare changes only across matching items and dates. A base-100 index shows change relative to its starting value.</p>
         </details>
         <LazySection minHeight="200px">
           <AIMarketInsights cards={displayCards} />
@@ -271,7 +271,7 @@ const Index = () => {
 
 
 
-        <section className="collector-tools space-y-5"><TrustSignals /><p className="text-sm">Review the monthly update, value an exact printing, explore grading scenarios and manage your collection. Research previews use modeled estimates.</p>
+        <section className="collector-tools space-y-5"><SectionArtwork context="collector tools" /><TrustSignals /><p className="text-sm">Review the monthly update, value an exact printing, explore grading scenarios and manage your collection. Research previews use modeled estimates.</p>
         <LazySection minHeight="70px">
           <MarketUpdateBanner cards={displayCards} />
         </LazySection>

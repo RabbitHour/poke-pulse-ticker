@@ -1,3 +1,4 @@
+import SectionArtwork from './SectionArtwork';
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -25,7 +26,7 @@ export default function DatedMovers() {
   [catalog.data, observations.data, unavailable]);
   return (
     <section className="terminal-card p-4 space-y-3" aria-labelledby="dated-movers-title">
-      <h2 id="dated-movers-title" className="text-lg font-bold">Most Active Raw Cards</h2>
+<SectionArtwork context="dated market movement" />      <h2 id="dated-movers-title" className="text-lg font-bold">Most Active Raw Cards</h2>
       <p className="text-sm text-muted-foreground">Ranked by absolute price change for the same printing between yesterday’s UTC source release and the preceding day. Prices are provider quotes in USD.</p>
       {movers.length === 0 ? (
         <p role="status" className="text-sm">{observations.isPending || catalog.isPending ? "Checking recorded quotes…" : "No comparable raw card moves for this window yet."}</p>
