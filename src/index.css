@@ -540,3 +540,13 @@ body.demo-mode [data-demo-hide] {
 .bright-market .catalog-tile { padding:14px; }
 .bright-market .marketplace-card img { min-height:260px; }
 @media(max-width:480px){.featured-set-link>img{width:240px;height:160px}.bright-market .catalog-art{height:200px}}
+/* Deeper emerald marble; lighter reading surfaces preserve quote contrast. */
+.bright-market { background:linear-gradient(125deg,#244e40,#739b87 38%,#365f4e 70%,#1f4639)!important; }
+.bright-market .terminal-card,.bright-market .ranking-panel,.bright-market .collector-tools,.bright-market .market-opening { background:linear-gradient(118deg,transparent 28%,#ffffff65 29%,transparent 30%,transparent 65%,#173d2830 66%,transparent 68%),linear-gradient(145deg,#98b8a5,#d9e8dd 43%,#87ab97)!important; border-color:#416c55; box-shadow:inset 0 2px 1px #ffffffe0,0 12px 28px #071e1545; }
+.bright-market .section-artwork { background:linear-gradient(125deg,#507b63,#bad2bf 45%,#527b64); border-color:#365b45; }
+.bright-market .section-artwork-card { background:linear-gradient(145deg,#edf5ef,#bed5c6); color:#102e20; }
+.bright-market .section-artwork-label,.bright-market .artwork-controls { color:#102e20; }
+.artwork-price { display:block; margin-top:.6rem; font-size:1.1rem; }
+.section-artwork-card small { overflow-wrap:anywhere; }
+.featured-set-link { background:linear-gradient(135deg,#50765f,#c4dbc5 48%,#72967e); }
+.featured-set-link>img { width:100%; max-width:360px; height:210px; object-fit:contain; border-radius:12px; }

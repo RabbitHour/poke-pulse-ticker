@@ -28,5 +28,5 @@ it('retains saved quote and target when artwork fails in highlights',()=>{
  mount();fireEvent.click(screen.getByRole('button',{name:'Save card'}));
  act(()=>fireEvent.error(within(screen.getByRole('button',{name:/^(Save card|Remove saved card)$/}).closest('article')!).getByRole('img',{name:'Pikachu'})));
  expect(screen.getByRole('spinbutton',{name:'Buy target ($)'})).toBeTruthy();
- expect(screen.getByText('$12.00')).toBeTruthy();
+ expect(within(screen.getByRole('spinbutton',{name:'Buy target ($)'}).closest('.saved-card')||screen.getByRole('spinbutton',{name:'Buy target ($)'}).parentElement!.parentElement!).getByText('$12.00')).toBeTruthy();
 });
