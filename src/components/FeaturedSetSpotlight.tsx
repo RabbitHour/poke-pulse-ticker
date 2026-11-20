@@ -14,7 +14,7 @@ export default function FeaturedSetSpotlight(){
  const anniversary=index===0;
  return <section className="featured-set-spotlight" aria-label="Featured Pokémon sets" {...rotation.bindings}>
   <Link className="featured-set-link" to={anniversary?'/sets?set=30th':delta?'/sets?set='+encodeURIComponent(delta.setId):'/sets?set=DLR'}>
-   <img src={anniversary?'/images/pokemon-30th-mark.svg':'/images/delta-reign-logo.png'} width="280" height="180" alt={anniversary?'Pokémon 30th anniversary Pikachu mark':'Official Pokémon TCG Mega Evolution—Delta Reign logo'}/>
+   <img src={anniversary?'/images/pokemon-30th-mark.svg':'/images/delta-reign-rayquaza.jpg'} width="280" height="180" alt={anniversary?'Pokémon 30th anniversary Pikachu mark':'Mega Rayquaza — official Delta Reign expansion illustration'}/>
 
    <span><small>Explore the collection</small><strong>{anniversary?'Pokémon 30th Anniversary':'Delta Reign'}</strong><span>Browse available cards →</span></span>
   </Link>
